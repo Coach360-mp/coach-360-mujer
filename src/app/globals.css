@@ -1,0 +1,139 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap');
+
+:root {
+  --gold: #b8860b;
+  --gold-light: #d4a843;
+  --dark: #1a1a1a;
+  --warm: #f9f6f1;
+  --warm-dark: #f0ebe3;
+  --text: #2d2d2d;
+  --text-light: #6b6b6b;
+  --accent: #8b5e3c;
+  --success: #4a7c59;
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-body: 'DM Sans', -apple-system, sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--warm);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+}
+
+button {
+  font-family: var(--font-body);
+  cursor: pointer;
+}
+
+input {
+  font-family: var(--font-body);
+}
+
+/* Primary button */
+.btn-primary {
+  padding: 14px 32px;
+  border-radius: 12px;
+  border: none;
+  background: var(--dark);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+}
+
+.btn-primary:hover {
+  background: #333;
+  transform: translateY(-1px);
+}
+
+/* Secondary button */
+.btn-secondary {
+  padding: 14px 32px;
+  border-radius: 12px;
+  border: 2px solid var(--dark);
+  background: transparent;
+  color: var(--dark);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+}
+
+.btn-secondary:hover {
+  background: var(--dark);
+  color: #fff;
+}
+
+/* Input fields */
+.input-field {
+  width: 100%;
+  padding: 14px 18px;
+  border: 2px solid #e0dbd4;
+  border-radius: 12px;
+  font-size: 15px;
+  background: #fff;
+  transition: border-color 0.3s;
+  outline: none;
+}
+
+.input-field:focus {
+  border-color: var(--gold);
+}
+
+/* Card */
+.card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+
+/* Bottom navigation */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border-top: 1px solid #eee;
+  display: flex;
+  justify-content: space-around;
+  padding: 8px 0 24px;
+  z-index: 100;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--text-light);
+  background: none;
+  border: none;
+  padding: 4px 12px;
+  transition: color 0.2s;
+}
+
+.nav-item.active {
+  color: var(--gold);
+}
+
+.nav-icon {
+  font-size: 22px;
+}
