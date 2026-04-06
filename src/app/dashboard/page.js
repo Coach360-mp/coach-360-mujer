@@ -248,6 +248,22 @@ export default function Dashboard() {
   const nombre = perfil?.nombre || user?.user_metadata?.full_name || 'Bienvenida'
   const canAccess = (required) => required === 'free' || plan === 'premium' || (plan === 'esencial' && required !== 'premium')
 
+  const handleCheckout = async (planId) => {
+    try {
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ planId, userId: user.id, userEmail: user.email }),
+      })
+      const data = await res.json()
+      if (data.url) {
+        window.location.href = data.url
+      }
+    } catch (err) {
+      console.error('Checkout error:', err)
+    }
+  }
+
   const Header = ({ title, subtitle, showBack = true }) => (
     <div style={{ padding: '48px 20px 16px', background: '#fff', borderBottom: '1px solid #eee', display: 'flex', alignItems: 'center', gap: 12 }}>
       {showBack && <button onClick={goBack} style={{ background: 'none', border: 'none', fontSize: 24, cursor: 'pointer', color: 'var(--text)', padding: '4px 8px' }}>←</button>}
@@ -390,9 +406,12 @@ export default function Dashboard() {
                     </div>
                     {isCurrentPlan ? (
                       <span style={{ fontSize: 13, color: 'var(--gold)', fontWeight: 600 }}>Plan actual</span>
+                    ) : p.id === 'free' ? (
+                      <span style={{ fontSize: 13, color: 'var(--text-light)' }}>Gratis</span>
                     ) : (
-                      <button className="btn-primary" style={{ width: 'auto', padding: '10px 24px' }}>
-                        {p.id === 'free' ? 'Actual' : 'Elegir plan'}
+                      <button className="btn-primary" style={{ width: 'auto', padding: '10px 24px' }}
+                        onClick={() => handleCheckout(p.id)}>
+                        Elegir plan
                       </button>
                     )}
                   </div>
@@ -406,9 +425,20 @@ export default function Dashboard() {
               <p style={{ fontSize: 13, color: 'var(--text-light)', lineHeight: 1.5, marginBottom: 12 }}>
                 Complementa tu proceso con una sesión 1:1 con una coach profesional certificada.
               </p>
-              <p style={{ fontSize: 13, color: 'var(--text)' }}>1 sesión: <strong>$49.990</strong></p>
-              <p style={{ fontSize: 13, color: 'var(--text)' }}>Pack 4: <strong>$159.990</strong></p>
-              <p style={{ fontSize: 13, color: 'var(--text)' }}>Pack 8: <strong>$279.990</strong></p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <p style={{ fontSize: 13 }}>1 sesión: <strong>$49.990</strong></p>
+                  <button onClick={() => handleCheckout('sesion_1')} style={{ fontSize: 12, padding: '6px 14px', borderRadius: 8, border: '1px solid var(--dark)', background: 'transparent', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Comprar</button>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <p style={{ fontSize: 13 }}>Pack 4: <strong>$159.990</strong></p>
+                  <button onClick={() => handleCheckout('sesion_4')} style={{ fontSize: 12, padding: '6px 14px', borderRadius: 8, border: '1px solid var(--dark)', background: 'transparent', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Comprar</button>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <p style={{ fontSize: 13 }}>Pack 8: <strong>$279.990</strong></p>
+                  <button onClick={() => handleCheckout('sesion_8')} style={{ fontSize: 12, padding: '6px 14px', borderRadius: 8, border: '1px solid var(--dark)', background: 'transparent', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Comprar</button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
