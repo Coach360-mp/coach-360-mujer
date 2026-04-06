@@ -17,7 +17,7 @@ export default function Home() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/dashboard`,
+        redirectTo: `${window.location.origin}/onboarding`,
       },
     })
     if (error) setError(error.message)
@@ -44,7 +44,7 @@ export default function Home() {
     }
 
     setLoading(false)
-    router.push('/dashboard')
+    router.push('/onboarding')
   }
 
   const handleLogin = async (e) => {
