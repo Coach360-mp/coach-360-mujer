@@ -4,6 +4,28 @@ import { useState, useEffect, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 
+const coaches = {
+  free: { name: 'Clara', photo: '/clara.jpg', credential: 'Coach certificada', desc: 'Tu compañera de crecimiento. Te escucha, te hace preguntas poderosas y te ayuda a ver con más claridad.' },
+  esencial: { name: 'Sofía', photo: '/sofia.jpg', credential: 'Coach + Especialista en autodesarrollo', desc: 'Te recomienda herramientas, tests y módulos según lo que necesitas. Integra estrategias de bienestar integral.' },
+  premium: { name: 'Victoria', photo: '/victoria.jpg', credential: 'Coach + Neurobiología + Mentora', desc: 'Te da seguimiento personalizado, recuerda tus conversaciones y usa neurociencia aplicada para guiarte.' },
+}
+
+const planes = [
+  {
+    id: 'free', nombre: 'Gratis', precio: '$0', periodo: '',
+    features: ['Clara como tu coach', '3 conversaciones por semana', '2 tests básicos', 'Check-in diario', 'Mi Equilibrio'],
+  },
+  {
+    id: 'esencial', nombre: 'Esencial', precio: '$6.990', periodo: '/mes',
+    features: ['Sofía como tu coach', 'Conversaciones ilimitadas', 'Todos los tests', 'Todos los módulos', 'Herramientas guiadas', 'Mi Equilibrio completo'],
+    popular: true,
+  },
+  {
+    id: 'premium', nombre: 'Premium', precio: '$19.990', periodo: '/mes',
+    features: ['Victoria como tu mentora', 'Todo lo de Esencial', 'Coaching con voz', 'Seguimiento personalizado', 'Victoria recuerda tus conversaciones', 'Acceso anticipado a nuevo contenido'],
+  },
+]
+
 const dimensiones = [
   { key: 'mente', label: 'Mente', desc: '¿Alimentaste tu mente hoy?', color: '#6366f1' },
   { key: 'cuerpo', label: 'Cuerpo', desc: '¿Te moviste hoy?', color: '#10b981' },
@@ -33,7 +55,6 @@ export default function Dashboard() {
   const [prevView, setPrevView] = useState(null)
   const [loading, setLoading] = useState(true)
 
-  // Tests state
   const [tests, setTests] = useState([])
   const [herramientas, setHerramientas] = useState([])
   const [modulos, setModulos] = useState([])
@@ -45,10 +66,7 @@ export default function Dashboard() {
   const [activeHerramienta, setActiveHerramienta] = useState(null)
   const [herramientaStep, setHerramientaStep] = useState(0)
 
-  // Chat state
-  const [chatMsgs, setChatMsgs] = useState([
-    { r: 'a', t: 'Hola, bienvenida ✦\n\nSoy Clara, tu coach personal. Estoy aquí para ayudarte a ver con más claridad.\n\n¿Qué te trae hoy?' }
-  ])
+  const [chatMsgs, setChatMsgs] = useState([])
   const [chatInput, setChatInput] = useState('')
   const [typing, setTyping] = useState(false)
   const [checkinDone, setCheckinDone] = useState(false)
@@ -57,11 +75,11 @@ export default function Dashboard() {
   const chatEndRef = useRef(null)
   const router = useRouter()
 
-  useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [chatMsgs, typing])
-
+  useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [chatMsgs, typing])
   useEffect(() => { checkUser() }, [])
+
+  const plan = perfil?.plan_actual || 'free'
+  const coach = coaches[plan] || coaches.free
 
   const checkUser = async () => {
     const { data: { user } } = await supabase.auth.getUser()
@@ -69,8 +87,10 @@ export default function Dashboard() {
     setUser(user)
     const { data: profile } = await supabase.from('perfiles').select('*').eq('id', user.id).single()
     setPerfil(profile)
-    
-    // Load content
+
+    const currentCoach = coaches[profile?.plan_actual || 'free']
+    setChatMsgs([{ r: 'a', t: `Hola, bienvenida ✦\n\nSoy ${currentCoach.name}, ${currentCoach.credential.toLowerCase()}. Estoy aquí para ayudarte a ver con más claridad.\n\n¿Qué te trae hoy?` }])
+
     const { data: t } = await supabase.from('tests').select('*').eq('activo', true).order('orden')
     const { data: h } = await supabase.from('templates').select('*').eq('activo', true).order('orden')
     const { data: m } = await supabase.from('modulos').select('*').eq('activo', true).order('orden')
@@ -81,12 +101,11 @@ export default function Dashboard() {
   }
 
   const handleLogout = async () => { await supabase.auth.signOut(); router.push('/') }
-
   const navigate = (newView) => { setPrevView(view); setView(newView) }
   const goBack = () => {
     if (activeTest && !testResult) { setActiveTest(null); setTestStep(0); setTestAnswers([]); return }
     if (testResult) { setTestResult(null); setActiveTest(null); setTestStep(0); setTestAnswers([]); return }
-    if (activeHerramienta) { setActiveHerramienta(null); setHerramientaStep(0); return }
+    if (activeHerramienta) { setActiveHerramienta(null); setHerramientaStep(0); setView('herramientas'); return }
     if (prevView) { setView(prevView); setPrevView(null) }
     else { setView('inicio') }
   }
@@ -94,37 +113,22 @@ export default function Dashboard() {
   const startTest = async (test) => {
     const { data: questions } = await supabase.from('preguntas').select('*').eq('test_id', test.id).order('orden')
     if (questions && questions.length > 0) {
-      setTestQuestions(questions)
-      setActiveTest(test)
-      setTestStep(0)
-      setTestAnswers([])
-      setTestResult(null)
+      setTestQuestions(questions); setActiveTest(test); setTestStep(0); setTestAnswers([]); setTestResult(null)
     }
   }
 
   const answerQuestion = async (value) => {
     const newAnswers = [...testAnswers, value]
     setTestAnswers(newAnswers)
-    
-    if (testStep + 1 < testQuestions.length) {
-      setTestStep(testStep + 1)
-    } else {
-      // Calculate result
+    if (testStep + 1 < testQuestions.length) { setTestStep(testStep + 1) }
+    else {
       const counts = { 1: 0, 2: 0, 3: 0, 4: 0 }
       newAnswers.forEach(a => { counts[a] = (counts[a] || 0) + 1 })
       const dominant = Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0]
       const profile = elementProfiles[dominant] || { nombre: 'Explorador', desc: 'Tienes una combinación única de elementos.' }
       setTestResult(profile)
-
-      // Save to database
       if (user) {
-        await supabase.from('resultados_test').insert({
-          usuario_id: user.id,
-          test_id: activeTest.id,
-          puntaje_total: newAnswers.reduce((a, b) => a + b, 0),
-          perfil_resultado: profile.nombre,
-          respuestas: newAnswers,
-        })
+        await supabase.from('resultados_test').insert({ usuario_id: user.id, test_id: activeTest.id, puntaje_total: newAnswers.reduce((a, b) => a + b, 0), perfil_resultado: profile.nombre, respuestas: newAnswers })
       }
     }
   }
@@ -133,8 +137,7 @@ export default function Dashboard() {
     if (!chatInput.trim()) return
     const msg = chatInput.trim()
     setChatMsgs(prev => [...prev, { r: 'u', t: msg }])
-    setChatInput('')
-    setTyping(true)
+    setChatInput(''); setTyping(true)
     try {
       const history = chatMsgs.map(m => ({ role: m.r === 'a' ? 'assistant' : 'user', content: m.t }))
       history.push({ role: 'user', content: msg })
@@ -148,23 +151,18 @@ export default function Dashboard() {
     }
   }
 
-  if (loading) {
-    return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--warm)' }}>
-        <p style={{ color: 'var(--text-light)' }}>Cargando ✦</p>
-      </div>
-    )
-  }
+  if (loading) return (
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--warm)' }}>
+      <p style={{ color: 'var(--text-light)' }}>Cargando ✦</p>
+    </div>
+  )
 
-  const plan = perfil?.plan_actual || 'free'
   const nombre = perfil?.nombre || user?.user_metadata?.full_name || 'Bienvenida'
   const canAccess = (required) => required === 'free' || plan === 'premium' || (plan === 'esencial' && required !== 'premium')
 
   const Header = ({ title, subtitle, showBack = true }) => (
     <div style={{ padding: '48px 20px 16px', background: '#fff', borderBottom: '1px solid #eee', display: 'flex', alignItems: 'center', gap: 12 }}>
-      {showBack && (
-        <button onClick={goBack} style={{ background: 'none', border: 'none', fontSize: 24, cursor: 'pointer', color: 'var(--text)', padding: '4px 8px' }}>←</button>
-      )}
+      {showBack && <button onClick={goBack} style={{ background: 'none', border: 'none', fontSize: 24, cursor: 'pointer', color: 'var(--text)', padding: '4px 8px' }}>←</button>}
       <div>
         <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 22, margin: 0 }}>{title}</h2>
         {subtitle && <p style={{ fontSize: 12, color: 'var(--text-light)', margin: 0 }}>{subtitle}</p>}
@@ -199,10 +197,14 @@ export default function Dashboard() {
             </div>
           )}
 
-          <div className="card" style={{ marginBottom: 16, background: 'var(--dark)', color: '#fff', cursor: 'pointer' }} onClick={() => navigate('clara')}>
-            <p style={{ fontSize: 13, color: 'var(--gold-light)', marginBottom: 4 }}>Tu coach IA</p>
-            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: '#fff', marginBottom: 8 }}>Habla con Clara</h3>
-            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>Empieza una conversación de coaching ✦</p>
+          {/* Coach card with photo */}
+          <div className="card" style={{ marginBottom: 16, background: 'var(--dark)', color: '#fff', cursor: 'pointer', display: 'flex', gap: 16, alignItems: 'center' }} onClick={() => navigate('clara')}>
+            <img src={coach.photo} alt={coach.name} style={{ width: 56, height: 56, borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--gold-light)' }} />
+            <div>
+              <p style={{ fontSize: 11, color: 'var(--gold-light)', marginBottom: 2 }}>{coach.credential}</p>
+              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 20, color: '#fff', marginBottom: 4 }}>Habla con {coach.name}</h3>
+              <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>Tu coach personal con IA ✦</p>
+            </div>
           </div>
 
           <div className="card" style={{ marginBottom: 20, cursor: 'pointer' }} onClick={() => navigate('equilibrio')}>
@@ -221,18 +223,26 @@ export default function Dashboard() {
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 24 }}>
-            <div className="card" style={{ textAlign: 'center', padding: 16 }}>
-              <p style={{ fontSize: 24, fontWeight: 700, color: 'var(--gold)' }}>{perfil?.racha_dias || 0}</p>
-              <p style={{ fontSize: 11, color: 'var(--text-light)' }}>Racha</p>
+            {[{ label: 'Racha', val: perfil?.racha_dias || 0 }, { label: 'Nivel', val: perfil?.nivel || 1 }, { label: 'Puntos', val: perfil?.puntos_totales || 0 }].map(s => (
+              <div key={s.label} className="card" style={{ textAlign: 'center', padding: 16 }}>
+                <p style={{ fontSize: 24, fontWeight: 700, color: 'var(--gold)' }}>{s.val}</p>
+                <p style={{ fontSize: 11, color: 'var(--text-light)' }}>{s.label}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Conoce al equipo */}
+          <div className="card" style={{ marginBottom: 24, cursor: 'pointer' }} onClick={() => navigate('planes')}>
+            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 18, marginBottom: 12 }}>Conoce a tu equipo de coaches</h3>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: 12 }}>
+              {Object.values(coaches).map(c => (
+                <div key={c.name} style={{ textAlign: 'center' }}>
+                  <img src={c.photo} alt={c.name} style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover', border: plan === Object.keys(coaches).find(k => coaches[k].name === c.name) ? '2px solid var(--gold)' : '2px solid #e0dbd4' }} />
+                  <p style={{ fontSize: 11, color: 'var(--text-light)', marginTop: 4 }}>{c.name}</p>
+                </div>
+              ))}
             </div>
-            <div className="card" style={{ textAlign: 'center', padding: 16 }}>
-              <p style={{ fontSize: 24, fontWeight: 700, color: 'var(--gold)' }}>{perfil?.nivel || 1}</p>
-              <p style={{ fontSize: 11, color: 'var(--text-light)' }}>Nivel</p>
-            </div>
-            <div className="card" style={{ textAlign: 'center', padding: 16 }}>
-              <p style={{ fontSize: 24, fontWeight: 700, color: 'var(--gold)' }}>{perfil?.puntos_totales || 0}</p>
-              <p style={{ fontSize: 11, color: 'var(--text-light)' }}>Puntos</p>
-            </div>
+            <p style={{ fontSize: 12, color: 'var(--gold)', textAlign: 'center', marginTop: 8 }}>Ver planes →</p>
           </div>
 
           <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 22, marginBottom: 12 }}>Tests</h2>
@@ -244,29 +254,74 @@ export default function Dashboard() {
                   <p style={{ fontWeight: 600, fontSize: 14, marginBottom: 2 }}>{t.titulo}</p>
                   <p style={{ fontSize: 12, color: 'var(--text-light)' }}>{t.numero_preguntas} preguntas · {t.categoria}</p>
                 </div>
-                {!canAccess(t.plan_requerido) && (
-                  <span style={{ fontSize: 11, background: 'var(--warm-dark)', padding: '4px 10px', borderRadius: 8, color: 'var(--text-light)' }}>Premium</span>
-                )}
+                {!canAccess(t.plan_requerido) && <span style={{ fontSize: 11, background: 'var(--warm-dark)', padding: '4px 10px', borderRadius: 8, color: 'var(--text-light)' }}>Premium</span>}
               </div>
             ))}
           </div>
+        </div>
+      )}
 
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 22, marginBottom: 12 }}>Tu Camino</h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {modulos.slice(0, 3).map(m => (
-              <div key={m.id} className="card" style={{ cursor: 'pointer' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
-                  <div>
-                    <p style={{ fontWeight: 600, fontSize: 14, marginBottom: 2 }}>{m.titulo}</p>
-                    <p style={{ fontSize: 12, color: 'var(--text-light)' }}>{m.descripcion}</p>
-                    <p style={{ fontSize: 11, color: 'var(--gold)', marginTop: 4 }}>{m.numero_semanas} semanas</p>
-                  </div>
-                  {!canAccess(m.plan_requerido) && (
-                    <span style={{ fontSize: 11, background: 'var(--warm-dark)', padding: '4px 10px', borderRadius: 8, color: 'var(--text-light)' }}>Premium</span>
+      {/* === PLANES === */}
+      {view === 'planes' && (
+        <div>
+          <Header title="Elige tu coach ✦" subtitle="Cada plan te conecta con una coach diferente" />
+          <div style={{ padding: '20px' }}>
+            {planes.map(p => {
+              const c = coaches[p.id]
+              const isCurrentPlan = plan === p.id
+              return (
+                <div key={p.id} className="card" style={{
+                  marginBottom: 16,
+                  border: p.popular ? '2px solid var(--gold)' : isCurrentPlan ? '2px solid var(--dark)' : '2px solid transparent',
+                  position: 'relative',
+                }}>
+                  {p.popular && (
+                    <div style={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)', background: 'var(--gold)', color: '#fff', padding: '2px 16px', borderRadius: 12, fontSize: 11, fontWeight: 600 }}>
+                      Más popular
+                    </div>
                   )}
+                  <div style={{ display: 'flex', gap: 14, alignItems: 'center', marginBottom: 14 }}>
+                    <img src={c.photo} alt={c.name} style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'cover' }} />
+                    <div>
+                      <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 20, margin: 0 }}>{c.name}</h3>
+                      <p style={{ fontSize: 11, color: 'var(--gold)', marginTop: 2 }}>{c.credential}</p>
+                    </div>
+                  </div>
+                  <p style={{ fontSize: 13, color: 'var(--text-light)', lineHeight: 1.5, marginBottom: 14 }}>{c.desc}</p>
+                  <div style={{ marginBottom: 14 }}>
+                    {p.features.map((f, i) => (
+                      <p key={i} style={{ fontSize: 13, color: 'var(--text)', marginBottom: 4, paddingLeft: 16, position: 'relative' }}>
+                        <span style={{ position: 'absolute', left: 0, color: 'var(--gold)' }}>·</span>{f}
+                      </p>
+                    ))}
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <span style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 700 }}>{p.precio}</span>
+                      <span style={{ fontSize: 13, color: 'var(--text-light)' }}>{p.periodo}</span>
+                    </div>
+                    {isCurrentPlan ? (
+                      <span style={{ fontSize: 13, color: 'var(--gold)', fontWeight: 600 }}>Plan actual</span>
+                    ) : (
+                      <button className="btn-primary" style={{ width: 'auto', padding: '10px 24px' }}>
+                        {p.id === 'free' ? 'Actual' : 'Elegir plan'}
+                      </button>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
+
+            {/* Sesiones aparte */}
+            <div className="card" style={{ marginTop: 8, background: 'var(--warm-dark)' }}>
+              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 18, marginBottom: 8 }}>Sesiones con coach humana</h3>
+              <p style={{ fontSize: 13, color: 'var(--text-light)', lineHeight: 1.5, marginBottom: 12 }}>
+                Complementa tu proceso con una sesión 1:1 con una coach profesional certificada.
+              </p>
+              <p style={{ fontSize: 13, color: 'var(--text)' }}>1 sesión: <strong>$49.990</strong></p>
+              <p style={{ fontSize: 13, color: 'var(--text)' }}>Pack 4: <strong>$159.990</strong></p>
+              <p style={{ fontSize: 13, color: 'var(--text)' }}>Pack 8: <strong>$279.990</strong></p>
+            </div>
           </div>
         </div>
       )}
@@ -279,20 +334,11 @@ export default function Dashboard() {
             <div style={{ background: 'var(--warm-dark)', borderRadius: 12, height: 4, marginBottom: 32 }}>
               <div style={{ background: 'var(--gold)', borderRadius: 12, height: 4, width: `${((testStep + 1) / testQuestions.length) * 100}%`, transition: 'width 0.3s' }} />
             </div>
-            
-            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 22, lineHeight: 1.3, marginBottom: 28 }}>
-              {testQuestions[testStep]?.texto}
-            </h3>
-            
+            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 22, lineHeight: 1.3, marginBottom: 28 }}>{testQuestions[testStep]?.texto}</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {testQuestions[testStep]?.opciones?.map((opt, i) => (
                 <button key={i} onClick={() => answerQuestion(testQuestions[testStep].valores[i])}
-                  style={{
-                    padding: '16px 20px', borderRadius: 14, border: '2px solid #e0dbd4',
-                    background: '#fff', textAlign: 'left', fontSize: 14, cursor: 'pointer',
-                    fontFamily: 'var(--font-body)', lineHeight: 1.4, transition: 'all 0.2s',
-                    color: 'var(--text)',
-                  }}>
+                  style={{ padding: '16px 20px', borderRadius: 14, border: '2px solid #e0dbd4', background: '#fff', textAlign: 'left', fontSize: 14, cursor: 'pointer', fontFamily: 'var(--font-body)', lineHeight: 1.4, transition: 'all 0.2s', color: 'var(--text)' }}>
                   {opt}
                 </button>
               ))}
@@ -306,31 +352,15 @@ export default function Dashboard() {
         <div>
           <Header title="Tu Resultado ✦" />
           <div style={{ padding: '24px 20px', textAlign: 'center' }}>
-            <div style={{
-              width: 100, height: 100, borderRadius: '50%', margin: '0 auto 20px',
-              background: 'var(--dark)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
-              <span style={{ color: 'var(--gold-light)', fontSize: 36, fontFamily: 'var(--font-display)' }}>
-                {testResult.nombre[0]}
-              </span>
+            <div style={{ width: 100, height: 100, borderRadius: '50%', margin: '0 auto 20px', background: 'var(--dark)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ color: 'var(--gold-light)', fontSize: 36, fontFamily: 'var(--font-display)' }}>{testResult.nombre[0]}</span>
             </div>
-            
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 32, marginBottom: 8 }}>
-              {testResult.nombre}
-            </h2>
-            
-            <p style={{ fontSize: 15, color: 'var(--text)', lineHeight: 1.6, maxWidth: 340, margin: '0 auto 32px' }}>
-              {testResult.desc}
-            </p>
-
-            <button className="btn-primary" onClick={() => { setTestResult(null); setActiveTest(null); navigate('clara') }}
-              style={{ marginBottom: 12 }}>
-              Explorar esto con Clara ✦
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 32, marginBottom: 8 }}>{testResult.nombre}</h2>
+            <p style={{ fontSize: 15, color: 'var(--text)', lineHeight: 1.6, maxWidth: 340, margin: '0 auto 32px' }}>{testResult.desc}</p>
+            <button className="btn-primary" onClick={() => { setTestResult(null); setActiveTest(null); navigate('clara') }} style={{ marginBottom: 12 }}>
+              Explorar esto con {coach.name} ✦
             </button>
-            
-            <button className="btn-secondary" onClick={() => { setTestResult(null); setActiveTest(null) }}>
-              Volver al inicio
-            </button>
+            <button className="btn-secondary" onClick={() => { setTestResult(null); setActiveTest(null) }}>Volver al inicio</button>
           </div>
         </div>
       )}
@@ -340,9 +370,7 @@ export default function Dashboard() {
         <div>
           <Header title="Mi Equilibrio ✦" subtitle="Tu bienestar integral de hoy" />
           <div style={{ padding: '20px' }}>
-            <p style={{ fontSize: 14, color: 'var(--text-light)', marginBottom: 20, lineHeight: 1.5 }}>
-              Cuida las cuatro dimensiones que impactan tu claridad y tus decisiones.
-            </p>
+            <p style={{ fontSize: 14, color: 'var(--text-light)', marginBottom: 20, lineHeight: 1.5 }}>Cuida las cuatro dimensiones que impactan tu claridad y tus decisiones.</p>
             {dimensiones.map(d => (
               <div key={d.key} className="card" style={{ marginBottom: 14 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
@@ -355,11 +383,7 @@ export default function Dashboard() {
                 <div style={{ display: 'flex', gap: 6 }}>
                   {[1, 2, 3, 4, 5].map(v => (
                     <button key={v} onClick={() => setEquilibrio(prev => ({ ...prev, [d.key]: v }))}
-                      style={{
-                        flex: 1, height: 36, borderRadius: 8, border: 'none', cursor: 'pointer',
-                        background: equilibrio[d.key] >= v ? d.color : '#f0ebe3',
-                        opacity: equilibrio[d.key] >= v ? 1 : 0.5, transition: 'all 0.2s',
-                      }} />
+                      style={{ flex: 1, height: 36, borderRadius: 8, border: 'none', cursor: 'pointer', background: equilibrio[d.key] >= v ? d.color : '#f0ebe3', opacity: equilibrio[d.key] >= v ? 1 : 0.5, transition: 'all 0.2s' }} />
                   ))}
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
@@ -368,42 +392,45 @@ export default function Dashboard() {
                 </div>
               </div>
             ))}
-            <button className="btn-primary" style={{ marginTop: 8 }} onClick={() => navigate('inicio')}>
-              Guardar mi equilibrio ✦
-            </button>
+            <button className="btn-primary" style={{ marginTop: 8 }} onClick={() => navigate('inicio')}>Guardar mi equilibrio ✦</button>
           </div>
         </div>
       )}
 
-      {/* === CLARA === */}
+      {/* === CLARA/SOFÍA/VICTORIA CHAT === */}
       {view === 'clara' && !activeTest && (
         <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
           <div style={{ padding: '48px 20px 12px', borderBottom: '1px solid #eee', background: '#fff', display: 'flex', alignItems: 'center', gap: 12 }}>
             <button onClick={goBack} style={{ background: 'none', border: 'none', fontSize: 24, cursor: 'pointer', color: 'var(--text)', padding: '4px 8px' }}>←</button>
+            <img src={coach.photo} alt={coach.name} style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover' }} />
             <div>
-              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 22, margin: 0 }}>Clara ✦</h2>
-              <p style={{ fontSize: 12, color: 'var(--text-light)', margin: 0 }}>Tu coach personal con IA</p>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 20, margin: 0 }}>{coach.name} ✦</h2>
+              <p style={{ fontSize: 11, color: 'var(--text-light)', margin: 0 }}>{coach.credential}</p>
             </div>
           </div>
           <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
             {chatMsgs.map((m, i) => (
-              <div key={i} style={{
-                alignSelf: m.r === 'u' ? 'flex-end' : 'flex-start', maxWidth: '80%',
-                padding: '12px 16px', borderRadius: m.r === 'u' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
-                background: m.r === 'u' ? 'var(--dark)' : '#fff', color: m.r === 'u' ? '#fff' : 'var(--text)',
-                fontSize: 14, lineHeight: 1.5, whiteSpace: 'pre-wrap',
-                boxShadow: m.r === 'a' ? '0 1px 4px rgba(0,0,0,0.06)' : 'none',
-              }}>{m.t}</div>
+              <div key={i} style={{ display: 'flex', gap: 8, alignSelf: m.r === 'u' ? 'flex-end' : 'flex-start', maxWidth: '85%', flexDirection: m.r === 'u' ? 'row-reverse' : 'row' }}>
+                {m.r === 'a' && <img src={coach.photo} alt={coach.name} style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover', marginTop: 4, flexShrink: 0 }} />}
+                <div style={{
+                  padding: '12px 16px', borderRadius: m.r === 'u' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
+                  background: m.r === 'u' ? 'var(--dark)' : '#fff', color: m.r === 'u' ? '#fff' : 'var(--text)',
+                  fontSize: 14, lineHeight: 1.5, whiteSpace: 'pre-wrap', boxShadow: m.r === 'a' ? '0 1px 4px rgba(0,0,0,0.06)' : 'none',
+                }}>{m.t}</div>
+              </div>
             ))}
             {typing && (
-              <div style={{ alignSelf: 'flex-start', padding: '12px 16px', borderRadius: '16px 16px 16px 4px', background: '#fff', color: 'var(--text-light)', fontSize: 14 }}>
-                Clara está pensando ✦
+              <div style={{ display: 'flex', gap: 8, alignSelf: 'flex-start' }}>
+                <img src={coach.photo} alt={coach.name} style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover', marginTop: 4 }} />
+                <div style={{ padding: '12px 16px', borderRadius: '16px 16px 16px 4px', background: '#fff', color: 'var(--text-light)', fontSize: 14 }}>
+                  {coach.name} está pensando ✦
+                </div>
               </div>
             )}
             <div ref={chatEndRef} />
           </div>
           <div style={{ padding: '12px 20px 32px', background: '#fff', borderTop: '1px solid #eee', display: 'flex', gap: 8 }}>
-            <input className="input-field" placeholder="Escribe aquí..." value={chatInput}
+            <input className="input-field" placeholder={`Escríbele a ${coach.name}...`} value={chatInput}
               onChange={e => setChatInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && sendMessage()} style={{ flex: 1 }} />
             <button onClick={sendMessage} style={{ padding: '12px 20px', borderRadius: 12, border: 'none', background: 'var(--dark)', color: '#fff', fontSize: 16 }}>→</button>
           </div>
@@ -415,24 +442,20 @@ export default function Dashboard() {
         <div>
           <Header title="Tests ✦" subtitle="Descubre más sobre ti misma" showBack={false} />
           <div style={{ padding: '20px' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {tests.map(t => (
-                <div key={t.id} className="card" style={{ cursor: canAccess(t.plan_requerido) ? 'pointer' : 'default' }}
-                  onClick={() => canAccess(t.plan_requerido) && startTest(t)}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div>
-                      <p style={{ fontWeight: 600, fontSize: 14, marginBottom: 2 }}>{t.titulo}</p>
-                      <p style={{ fontSize: 12, color: 'var(--text-light)' }}>{t.numero_preguntas} preguntas · {t.categoria}</p>
-                    </div>
-                    {!canAccess(t.plan_requerido) ? (
-                      <span style={{ fontSize: 11, background: 'var(--warm-dark)', padding: '4px 10px', borderRadius: 8, color: 'var(--text-light)' }}>Premium</span>
-                    ) : (
-                      <span style={{ fontSize: 14, color: 'var(--gold)' }}>→</span>
-                    )}
+            {tests.map(t => (
+              <div key={t.id} className="card" style={{ marginBottom: 10, cursor: canAccess(t.plan_requerido) ? 'pointer' : 'default' }}
+                onClick={() => canAccess(t.plan_requerido) && startTest(t)}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <p style={{ fontWeight: 600, fontSize: 14, marginBottom: 2 }}>{t.titulo}</p>
+                    <p style={{ fontSize: 12, color: 'var(--text-light)' }}>{t.numero_preguntas} preguntas · {t.categoria}</p>
                   </div>
+                  {!canAccess(t.plan_requerido) ? (
+                    <span style={{ fontSize: 11, background: 'var(--warm-dark)', padding: '4px 10px', borderRadius: 8, color: 'var(--text-light)' }}>Premium</span>
+                  ) : <span style={{ fontSize: 14, color: 'var(--gold)' }}>→</span>}
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
         </div>
       )}
@@ -442,24 +465,20 @@ export default function Dashboard() {
         <div>
           <Header title="Herramientas ✦" subtitle="Ejercicios prácticos con neurociencia" showBack={false} />
           <div style={{ padding: '20px' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {herramientas.map(h => (
-                <div key={h.id} className="card" style={{ cursor: canAccess(h.plan_requerido) ? 'pointer' : 'default' }}
-                  onClick={() => canAccess(h.plan_requerido) && (() => { setActiveHerramienta(h); setHerramientaStep(0); navigate('herramienta_activa') })()}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div>
-                      <p style={{ fontWeight: 600, fontSize: 14, marginBottom: 2 }}>{h.titulo}</p>
-                      <p style={{ fontSize: 12, color: 'var(--text-light)' }}>{h.categoria} · {h.pasos?.length || 0} pasos</p>
-                    </div>
-                    {!canAccess(h.plan_requerido) ? (
-                      <span style={{ fontSize: 11, background: 'var(--warm-dark)', padding: '4px 10px', borderRadius: 8, color: 'var(--text-light)' }}>Premium</span>
-                    ) : (
-                      <span style={{ fontSize: 14, color: 'var(--gold)' }}>→</span>
-                    )}
+            {herramientas.map(h => (
+              <div key={h.id} className="card" style={{ marginBottom: 10, cursor: canAccess(h.plan_requerido) ? 'pointer' : 'default' }}
+                onClick={() => { if (canAccess(h.plan_requerido)) { setActiveHerramienta(h); setHerramientaStep(0); navigate('herramienta_activa') } }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <p style={{ fontWeight: 600, fontSize: 14, marginBottom: 2 }}>{h.titulo}</p>
+                    <p style={{ fontSize: 12, color: 'var(--text-light)' }}>{h.categoria} · {h.pasos?.length || 0} pasos</p>
                   </div>
+                  {!canAccess(h.plan_requerido) ? (
+                    <span style={{ fontSize: 11, background: 'var(--warm-dark)', padding: '4px 10px', borderRadius: 8, color: 'var(--text-light)' }}>Premium</span>
+                  ) : <span style={{ fontSize: 14, color: 'var(--gold)' }}>→</span>}
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
         </div>
       )}
@@ -472,61 +491,17 @@ export default function Dashboard() {
             <div style={{ background: 'var(--warm-dark)', borderRadius: 12, height: 4, marginBottom: 24 }}>
               <div style={{ background: 'var(--gold)', borderRadius: 12, height: 4, width: `${((herramientaStep + 1) / (activeHerramienta.pasos?.length || 1)) * 100}%`, transition: 'width 0.3s' }} />
             </div>
-
-            {herramientaStep === 0 && (
-              <p style={{ fontSize: 14, color: 'var(--text-light)', lineHeight: 1.6, marginBottom: 20, fontStyle: 'italic' }}>
-                {activeHerramienta.descripcion}
-              </p>
-            )}
-
+            {herramientaStep === 0 && <p style={{ fontSize: 14, color: 'var(--text-light)', lineHeight: 1.6, marginBottom: 20, fontStyle: 'italic' }}>{activeHerramienta.descripcion}</p>}
             <div className="card" style={{ marginBottom: 24 }}>
-              <p style={{ fontSize: 15, lineHeight: 1.7 }}>
-                {activeHerramienta.pasos?.[herramientaStep]}
-              </p>
+              <p style={{ fontSize: 15, lineHeight: 1.7 }}>{activeHerramienta.pasos?.[herramientaStep]}</p>
             </div>
-
             <div style={{ display: 'flex', gap: 10 }}>
-              {herramientaStep > 0 && (
-                <button className="btn-secondary" onClick={() => setHerramientaStep(herramientaStep - 1)} style={{ flex: 1 }}>
-                  ← Anterior
-                </button>
-              )}
+              {herramientaStep > 0 && <button className="btn-secondary" onClick={() => setHerramientaStep(herramientaStep - 1)} style={{ flex: 1 }}>← Anterior</button>}
               {herramientaStep < (activeHerramienta.pasos?.length || 1) - 1 ? (
-                <button className="btn-primary" onClick={() => setHerramientaStep(herramientaStep + 1)} style={{ flex: 1 }}>
-                  Siguiente →
-                </button>
+                <button className="btn-primary" onClick={() => setHerramientaStep(herramientaStep + 1)} style={{ flex: 1 }}>Siguiente →</button>
               ) : (
-                <button className="btn-primary" onClick={() => { setActiveHerramienta(null); setHerramientaStep(0); navigate('herramientas') }} style={{ flex: 1 }}>
-                  Completar ✦
-                </button>
+                <button className="btn-primary" onClick={() => { setActiveHerramienta(null); setHerramientaStep(0); setView('herramientas') }} style={{ flex: 1 }}>Completar ✦</button>
               )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* === CAMINO === */}
-      {view === 'camino' && !activeTest && (
-        <div>
-          <Header title="Tu Camino ✦" subtitle="Módulos de crecimiento personal" showBack={false} />
-          <div style={{ padding: '20px' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {modulos.map(m => (
-                <div key={m.id} className="card" style={{ cursor: 'pointer' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
-                    <div>
-                      <p style={{ fontWeight: 600, fontSize: 14, marginBottom: 2 }}>{m.titulo}</p>
-                      <p style={{ fontSize: 12, color: 'var(--text-light)' }}>{m.descripcion}</p>
-                      <p style={{ fontSize: 11, color: 'var(--gold)', marginTop: 4 }}>{m.numero_semanas} semanas</p>
-                    </div>
-                    {!canAccess(m.plan_requerido) ? (
-                      <span style={{ fontSize: 11, background: 'var(--warm-dark)', padding: '4px 10px', borderRadius: 8, color: 'var(--text-light)' }}>Premium</span>
-                    ) : (
-                      <span style={{ fontSize: 14, color: 'var(--gold)' }}>→</span>
-                    )}
-                  </div>
-                </div>
-              ))}
             </div>
           </div>
         </div>
@@ -545,49 +520,41 @@ export default function Dashboard() {
               <p style={{ fontSize: 13, color: 'var(--text-light)', marginTop: 4 }}>{user?.email}</p>
               <p style={{ display: 'inline-block', marginTop: 8, fontSize: 12, background: 'var(--warm-dark)', padding: '4px 12px', borderRadius: 8, color: 'var(--gold)', fontWeight: 600, textTransform: 'capitalize' }}>Plan {plan}</p>
             </div>
-            <div className="card" style={{ marginBottom: 16 }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-                <div style={{ textAlign: 'center' }}>
-                  <p style={{ fontSize: 28, fontWeight: 700, color: 'var(--gold)' }}>{perfil?.racha_dias || 0}</p>
-                  <p style={{ fontSize: 12, color: 'var(--text-light)' }}>Racha actual</p>
-                </div>
-                <div style={{ textAlign: 'center' }}>
-                  <p style={{ fontSize: 28, fontWeight: 700, color: 'var(--gold)' }}>{perfil?.mejor_racha || 0}</p>
-                  <p style={{ fontSize: 12, color: 'var(--text-light)' }}>Mejor racha</p>
-                </div>
-                <div style={{ textAlign: 'center' }}>
-                  <p style={{ fontSize: 28, fontWeight: 700, color: 'var(--gold)' }}>{perfil?.nivel || 1}</p>
-                  <p style={{ fontSize: 12, color: 'var(--text-light)' }}>Nivel</p>
-                </div>
-                <div style={{ textAlign: 'center' }}>
-                  <p style={{ fontSize: 28, fontWeight: 700, color: 'var(--gold)' }}>{perfil?.puntos_totales || 0}</p>
-                  <p style={{ fontSize: 12, color: 'var(--text-light)' }}>Puntos</p>
-                </div>
+
+            {/* Tu coach actual */}
+            <div className="card" style={{ marginBottom: 16, display: 'flex', gap: 14, alignItems: 'center' }}>
+              <img src={coach.photo} alt={coach.name} style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover' }} />
+              <div>
+                <p style={{ fontWeight: 600, fontSize: 14 }}>Tu coach: {coach.name}</p>
+                <p style={{ fontSize: 12, color: 'var(--text-light)' }}>{coach.credential}</p>
               </div>
             </div>
-            <button className="btn-secondary" onClick={handleLogout} style={{ marginTop: 8 }}>Cerrar sesión</button>
+
+            <div className="card" style={{ marginBottom: 16 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                {[{ label: 'Racha actual', val: perfil?.racha_dias || 0 }, { label: 'Mejor racha', val: perfil?.mejor_racha || 0 }, { label: 'Nivel', val: perfil?.nivel || 1 }, { label: 'Puntos', val: perfil?.puntos_totales || 0 }].map(s => (
+                  <div key={s.label} style={{ textAlign: 'center' }}>
+                    <p style={{ fontSize: 28, fontWeight: 700, color: 'var(--gold)' }}>{s.val}</p>
+                    <p style={{ fontSize: 12, color: 'var(--text-light)' }}>{s.label}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <button className="btn-primary" onClick={() => navigate('planes')} style={{ marginBottom: 12 }}>Cambiar plan</button>
+            <button className="btn-secondary" onClick={handleLogout}>Cerrar sesión</button>
           </div>
         </div>
       )}
 
       {/* === BOTTOM NAV === */}
-      {!activeTest && !testResult && !activeHerramienta && view !== 'clara' && view !== 'equilibrio' && view !== 'herramienta_activa' && (
+      {!activeTest && !testResult && !activeHerramienta && !['clara', 'equilibrio', 'herramienta_activa', 'planes'].includes(view) && (
         <div className="bottom-nav">
-          <button className={`nav-item ${view === 'inicio' ? 'active' : ''}`} onClick={() => setView('inicio')}>
-            <span className="nav-icon">⬡</span>Inicio
-          </button>
-          <button className={`nav-item ${view === 'tests' ? 'active' : ''}`} onClick={() => setView('tests')}>
-            <span className="nav-icon">◇</span>Tests
-          </button>
-          <button className="nav-item" onClick={() => navigate('clara')}>
-            <span className="nav-icon">✦</span>Clara
-          </button>
-          <button className={`nav-item ${view === 'herramientas' ? 'active' : ''}`} onClick={() => setView('herramientas')}>
-            <span className="nav-icon">◎</span>Herramientas
-          </button>
-          <button className={`nav-item ${view === 'perfil' ? 'active' : ''}`} onClick={() => setView('perfil')}>
-            <span className="nav-icon">○</span>Yo
-          </button>
+          <button className={`nav-item ${view === 'inicio' ? 'active' : ''}`} onClick={() => setView('inicio')}><span className="nav-icon">⬡</span>Inicio</button>
+          <button className={`nav-item ${view === 'tests' ? 'active' : ''}`} onClick={() => setView('tests')}><span className="nav-icon">◇</span>Tests</button>
+          <button className="nav-item" onClick={() => navigate('clara')}><span className="nav-icon">✦</span>{coach.name}</button>
+          <button className={`nav-item ${view === 'herramientas' ? 'active' : ''}`} onClick={() => setView('herramientas')}><span className="nav-icon">◎</span>Herramientas</button>
+          <button className={`nav-item ${view === 'perfil' ? 'active' : ''}`} onClick={() => setView('perfil')}><span className="nav-icon">○</span>Yo</button>
         </div>
       )}
     </div>
