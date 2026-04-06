@@ -72,7 +72,11 @@ export default function Dashboard() {
   const [checkinDone, setCheckinDone] = useState(false)
   const [animoHoy, setAnimoHoy] = useState(null)
   const [equilibrio, setEquilibrio] = useState({ mente: 0, cuerpo: 0, corazon: 0, espiritu: 0 })
+  const [isRecording, setIsRecording] = useState(false)
+  const [isPlaying, setIsPlaying] = useState(false)
   const chatEndRef = useRef(null)
+  const mediaRecorderRef = useRef(null)
+  const audioChunksRef = useRef([])
   const router = useRouter()
 
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [chatMsgs, typing])
@@ -144,11 +148,95 @@ export default function Dashboard() {
       const res = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: history }) })
       const data = await res.json()
       setTyping(false)
-      setChatMsgs(prev => [...prev, { r: 'a', t: data.reply || 'Cuéntame más ✦' }])
+      const reply = data.reply || 'Cuéntame más ✦'
+      setChatMsgs(prev => [...prev, { r: 'a', t: reply }])
+      speakText(reply)
     } catch {
       setTyping(false)
       setChatMsgs(prev => [...prev, { r: 'a', t: 'Perdona, hubo un error. ¿Puedes intentar de nuevo? ✦' }])
     }
+  }
+
+  const speakText = async (text) => {
+    try {
+      const coachKey = Object.keys(coaches).find(k => coaches[k] === coach) || 'clara'
+      const res = await fetch('/api/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, coach: coachKey }),
+      })
+      const data = await res.json()
+      if (data.audio) {
+        setIsPlaying(true)
+        const audio = new Audio(`data:audio/mp3;base64,${data.audio}`)
+        audio.onended = () => setIsPlaying(false)
+        audio.play()
+      }
+    } catch (err) {
+      console.error('TTS error:', err)
+    }
+  }
+
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      const mediaRecorder = new MediaRecorder(stream)
+      mediaRecorderRef.current = mediaRecorder
+      audioChunksRef.current = []
+
+      mediaRecorder.ondataavailable = (event) => {
+        audioChunksRef.current.push(event.data)
+      }
+
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' })
+        stream.getTracks().forEach(track => track.stop())
+        
+        // Use browser SpeechRecognition for simplicity
+        // The text will be set in chatInput for the user to review before sending
+      }
+
+      mediaRecorder.start()
+      setIsRecording(true)
+
+      // Use Web Speech API for real-time transcription
+      if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+        const recognition = new SpeechRecognition()
+        recognition.lang = 'es-CL'
+        recognition.interimResults = false
+        recognition.maxAlternatives = 1
+
+        recognition.onresult = (event) => {
+          const transcript = event.results[0][0].transcript
+          setChatInput(transcript)
+          setIsRecording(false)
+        }
+
+        recognition.onerror = () => {
+          setIsRecording(false)
+        }
+
+        recognition.onend = () => {
+          setIsRecording(false)
+          if (mediaRecorderRef.current?.state === 'recording') {
+            mediaRecorderRef.current.stop()
+          }
+        }
+
+        recognition.start()
+      }
+    } catch (err) {
+      console.error('Microphone error:', err)
+      setIsRecording(false)
+    }
+  }
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current?.state === 'recording') {
+      mediaRecorderRef.current.stop()
+    }
+    setIsRecording(false)
   }
 
   if (loading) return (
@@ -430,6 +518,10 @@ export default function Dashboard() {
             <div ref={chatEndRef} />
           </div>
           <div style={{ padding: '12px 20px 32px', background: '#fff', borderTop: '1px solid #eee', display: 'flex', gap: 8 }}>
+            <button onClick={isRecording ? stopRecording : startRecording}
+              style={{ padding: '12px 16px', borderRadius: 12, border: 'none', background: isRecording ? '#c53030' : 'var(--warm-dark)', color: isRecording ? '#fff' : 'var(--text)', fontSize: 18, cursor: 'pointer', transition: 'all 0.2s' }}>
+              {isRecording ? '◼' : '🎙'}
+            </button>
             <input className="input-field" placeholder={`Escríbele a ${coach.name}...`} value={chatInput}
               onChange={e => setChatInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && sendMessage()} style={{ flex: 1 }} />
             <button onClick={sendMessage} style={{ padding: '12px 20px', borderRadius: 12, border: 'none', background: 'var(--dark)', color: '#fff', fontSize: 16 }}>→</button>
