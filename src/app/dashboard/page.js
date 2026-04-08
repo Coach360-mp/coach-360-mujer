@@ -11,19 +11,9 @@ const coaches = {
 }
 
 const planes = [
-  {
-    id: 'free', nombre: 'Gratis', precio: '$0', periodo: '',
-    features: ['Clara como tu coach', '3 conversaciones por semana', '2 tests básicos', 'Check-in diario', 'Mi Equilibrio'],
-  },
-  {
-    id: 'esencial', nombre: 'Esencial', precio: '$6.990', periodo: '/mes',
-    features: ['Sofía como tu coach', 'Conversaciones ilimitadas', 'Todos los tests', 'Todos los módulos', 'Herramientas guiadas', 'Mi Equilibrio completo'],
-    popular: true,
-  },
-  {
-    id: 'premium', nombre: 'Premium', precio: '$19.990', periodo: '/mes',
-    features: ['Victoria como tu mentora', 'Todo lo de Esencial', 'Coaching con voz', 'Seguimiento personalizado', 'Victoria recuerda tus conversaciones', 'Acceso anticipado a nuevo contenido'],
-  },
+  { id: 'free', nombre: 'Gratis', precio: '$0', periodo: '', features: ['Clara como tu coach', '3 conversaciones por semana', '2 tests básicos', 'Check-in diario', 'Mi Equilibrio'] },
+  { id: 'esencial', nombre: 'Esencial', precio: '$6.990', periodo: '/mes', features: ['Sofía como tu coach', 'Conversaciones ilimitadas', 'Todos los tests', 'Todos los módulos', 'Herramientas guiadas', 'Mi Equilibrio completo'], popular: true },
+  { id: 'premium', nombre: 'Premium', precio: '$19.990', periodo: '/mes', features: ['Victoria como tu mentora', 'Todo lo de Esencial', 'Coaching con voz', 'Seguimiento personalizado', 'Victoria recuerda tus conversaciones', 'Acceso anticipado a nuevo contenido'] },
 ]
 
 const dimensiones = [
@@ -33,119 +23,13 @@ const dimensiones = [
   { key: 'espiritu', label: 'Espíritu', desc: '¿Tuviste un momento de calma?', color: '#8b5cf6' },
 ]
 
-const animos = [
-  { label: 'Difícil', value: 1 },
-  { label: 'Regular', value: 2 },
-  { label: 'Bien', value: 3 },
-  { label: 'Muy bien', value: 4 },
-  { label: 'Increíble', value: 5 },
-]
+const animos = [{ label: 'Difícil', value: 1 }, { label: 'Regular', value: 2 }, { label: 'Bien', value: 3 }, { label: 'Muy bien', value: 4 }, { label: 'Increíble', value: 5 }]
 
 const elementProfiles = {
-  1: {
-    nombre: 'Agua',
-    icono: '💧',
-    color: '#0ea5e9',
-    colorBg: 'rgba(14, 165, 233, 0.12)',
-    desc: 'Eres profunda, intuitiva y empática. Sientes antes de pensar.',
-    descLarga: 'Tu naturaleza fluye con las emociones — las tuyas y las de quienes te rodean. Tienes una capacidad poco común de leer entre líneas, percibir lo no dicho y conectar con la verdad emocional de cada situación.',
-    fortalezas: [
-      'Empatía profunda con otros',
-      'Intuición que rara vez se equivoca',
-      'Capacidad de crear vínculos auténticos',
-      'Sensibilidad para captar lo que otros no ven',
-    ],
-    sombras: [
-      'Puedes perderte en las emociones de otros',
-      'A veces evitas la confrontación necesaria',
-      'Cargas con peso que no es tuyo',
-    ],
-    recomendaciones: [
-      'Practica poner límites desde el amor, no desde el miedo',
-      'Pregúntate: ¿esta emoción es mía o la estoy absorbiendo?',
-      'Date espacios de soledad para reconectar contigo misma',
-    ],
-    proximoPaso: 'El módulo "Gestión Emocional" está diseñado para ti.',
-    promptClara: 'Acabo de descubrir que mi elemento es Agua. Me gustaría conversar sobre cómo gestionar mejor mi sensibilidad emocional sin perderme en las emociones de otros.',
-  },
-  2: {
-    nombre: 'Tierra',
-    icono: '🌱',
-    color: '#84cc16',
-    colorBg: 'rgba(132, 204, 22, 0.12)',
-    desc: 'Eres estable, práctica y confiable. Analizas antes de actuar.',
-    descLarga: 'Tu fortaleza es la solidez. Eres el ancla en momentos de tormenta, la voz de la razón, la que construye paso a paso lo que otras solo sueñan. Tu palabra vale, tus compromisos se cumplen.',
-    fortalezas: [
-      'Estabilidad que inspira confianza',
-      'Capacidad de planificar y ejecutar',
-      'Paciencia para los procesos largos',
-      'Pragmatismo que evita errores costosos',
-    ],
-    sombras: [
-      'Te cuesta soltar el control',
-      'A veces pierdes oportunidades por sobreanalizar',
-      'Puedes volverte rígida ante el cambio',
-    ],
-    recomendaciones: [
-      'Practica decir sí a algo nuevo cada semana sin planearlo',
-      'Permítete equivocarte — la perfección es una jaula',
-      'Confía en otros para soltar parte del peso',
-    ],
-    proximoPaso: 'La herramienta "Pausa Antes de Decidir" te va a sorprender.',
-    promptClara: 'Mi elemento es Tierra. Soy muy analítica y me cuesta soltar el control. Quiero trabajar en confiar más y permitirme fluir.',
-  },
-  3: {
-    nombre: 'Fuego',
-    icono: '🔥',
-    color: '#f97316',
-    colorBg: 'rgba(249, 115, 22, 0.12)',
-    desc: 'Eres apasionada, directa y valiente. Actúas antes de dudar.',
-    descLarga: 'Tu energía es contagiosa. Donde otras ven obstáculos, tú ves desafíos. Cuando te comprometes con algo, lo das todo. Eres la chispa que enciende proyectos, conversaciones y cambios.',
-    fortalezas: [
-      'Determinación que mueve montañas',
-      'Coraje para iniciar lo que otras posponen',
-      'Pasión que inspira a quienes te rodean',
-      'Honestidad directa, sin máscaras',
-    ],
-    sombras: [
-      'A veces respondes antes de escuchar',
-      'Puedes quemarte por exceso de intensidad',
-      'Tu directness puede herir sin querer',
-    ],
-    recomendaciones: [
-      'Antes de responder, respira 3 veces',
-      'Aprende la diferencia entre directo y abrupto',
-      'Programa pausas reales — no son debilidad, son estrategia',
-    ],
-    proximoPaso: 'La herramienta "Reset de 10 Minutos" es tu mejor aliada esta semana.',
-    promptClara: 'Mi elemento es Fuego. Soy intensa y directa, pero a veces actúo antes de pensar. Quiero aprender a pausar sin perder mi energía.',
-  },
-  4: {
-    nombre: 'Aire',
-    icono: '🌬️',
-    color: '#a78bfa',
-    colorBg: 'rgba(167, 139, 250, 0.12)',
-    desc: 'Eres creativa, adaptable y libre. Exploras antes de comprometerte.',
-    descLarga: 'Tu mente vuela alto y conecta ideas que otras no ven. Eres la que llena espacios de chispa, humor y posibilidades nuevas. Tu libertad es tu mayor tesoro y tu mayor desafío.',
-    fortalezas: [
-      'Creatividad que rompe esquemas',
-      'Adaptabilidad ante el cambio',
-      'Visión amplia y conectiva',
-      'Capacidad de reinventarte',
-    ],
-    sombras: [
-      'Te cuesta sostener compromisos largos',
-      'Saltas de idea en idea sin profundizar',
-      'A veces evitas el peso de las emociones difíciles',
-    ],
-    recomendaciones: [
-      'Elige UNA cosa esta semana y termínala',
-      'Practica quedarte 5 minutos más en una conversación incómoda',
-      'Profundiza en algo que ya conoces antes de buscar lo nuevo',
-    ],
-    proximoPaso: 'El módulo "Decisiones Alineadas" te va a ayudar a sostener tus elecciones.',
-    promptClara: 'Mi elemento es Aire. Soy creativa pero me cuesta profundizar y sostener compromisos. Quiero trabajar en elegir y mantenerme.',
-  },
+  1: { nombre: 'Agua', icono: '💧', color: '#0ea5e9', colorBg: 'rgba(14, 165, 233, 0.12)', desc: 'Eres profunda, intuitiva y empática. Sientes antes de pensar.', descLarga: 'Tu naturaleza fluye con las emociones — las tuyas y las de quienes te rodean. Tienes una capacidad poco común de leer entre líneas, percibir lo no dicho y conectar con la verdad emocional de cada situación.', fortalezas: ['Empatía profunda con otros', 'Intuición que rara vez se equivoca', 'Capacidad de crear vínculos auténticos', 'Sensibilidad para captar lo que otros no ven'], sombras: ['Puedes perderte en las emociones de otros', 'A veces evitas la confrontación necesaria', 'Cargas con peso que no es tuyo'], recomendaciones: ['Practica poner límites desde el amor, no desde el miedo', 'Pregúntate: ¿esta emoción es mía o la estoy absorbiendo?', 'Date espacios de soledad para reconectar contigo misma'], proximoPaso: 'El módulo "Gestión Emocional" está diseñado para ti.', promptClara: 'Acabo de descubrir que mi elemento es Agua. Me gustaría conversar sobre cómo gestionar mejor mi sensibilidad emocional sin perderme en las emociones de otros.' },
+  2: { nombre: 'Tierra', icono: '🌱', color: '#84cc16', colorBg: 'rgba(132, 204, 22, 0.12)', desc: 'Eres estable, práctica y confiable. Analizas antes de actuar.', descLarga: 'Tu fortaleza es la solidez. Eres el ancla en momentos de tormenta, la voz de la razón, la que construye paso a paso lo que otras solo sueñan.', fortalezas: ['Estabilidad que inspira confianza', 'Capacidad de planificar y ejecutar', 'Paciencia para los procesos largos', 'Pragmatismo que evita errores costosos'], sombras: ['Te cuesta soltar el control', 'A veces pierdes oportunidades por sobreanalizar', 'Puedes volverte rígida ante el cambio'], recomendaciones: ['Practica decir sí a algo nuevo cada semana sin planearlo', 'Permítete equivocarte — la perfección es una jaula', 'Confía en otros para soltar parte del peso'], proximoPaso: 'La herramienta "Pausa Antes de Decidir" te va a sorprender.', promptClara: 'Mi elemento es Tierra. Soy muy analítica y me cuesta soltar el control. Quiero trabajar en confiar más y permitirme fluir.' },
+  3: { nombre: 'Fuego', icono: '🔥', color: '#f97316', colorBg: 'rgba(249, 115, 22, 0.12)', desc: 'Eres apasionada, directa y valiente. Actúas antes de dudar.', descLarga: 'Tu energía es contagiosa. Donde otras ven obstáculos, tú ves desafíos. Cuando te comprometes con algo, lo das todo.', fortalezas: ['Determinación que mueve montañas', 'Coraje para iniciar lo que otras posponen', 'Pasión que inspira a quienes te rodean', 'Honestidad directa, sin máscaras'], sombras: ['A veces respondes antes de escuchar', 'Puedes quemarte por exceso de intensidad', 'Tu directness puede herir sin querer'], recomendaciones: ['Antes de responder, respira 3 veces', 'Aprende la diferencia entre directo y abrupto', 'Programa pausas reales — no son debilidad, son estrategia'], proximoPaso: 'La herramienta "Reset de 10 Minutos" es tu mejor aliada esta semana.', promptClara: 'Mi elemento es Fuego. Soy intensa y directa, pero a veces actúo antes de pensar.' },
+  4: { nombre: 'Aire', icono: '🌬️', color: '#a78bfa', colorBg: 'rgba(167, 139, 250, 0.12)', desc: 'Eres creativa, adaptable y libre. Exploras antes de comprometerte.', descLarga: 'Tu mente vuela alto y conecta ideas que otras no ven. Eres la que llena espacios de chispa, humor y posibilidades nuevas.', fortalezas: ['Creatividad que rompe esquemas', 'Adaptabilidad ante el cambio', 'Visión amplia y conectiva', 'Capacidad de reinventarte'], sombras: ['Te cuesta sostener compromisos largos', 'Saltas de idea en idea sin profundizar', 'A veces evitas el peso de las emociones difíciles'], recomendaciones: ['Elige UNA cosa esta semana y termínala', 'Practica quedarte 5 minutos más en una conversación incómoda', 'Profundiza en algo que ya conoces antes de buscar lo nuevo'], proximoPaso: 'El módulo "Decisiones Alineadas" te va a ayudar a sostener tus elecciones.', promptClara: 'Mi elemento es Aire. Soy creativa pero me cuesta profundizar y sostener compromisos.' },
 }
 
 export default function Dashboard() {
@@ -154,7 +38,6 @@ export default function Dashboard() {
   const [view, setView] = useState('inicio')
   const [prevView, setPrevView] = useState(null)
   const [loading, setLoading] = useState(true)
-
   const [tests, setTests] = useState([])
   const [herramientas, setHerramientas] = useState([])
   const [modulos, setModulos] = useState([])
@@ -165,7 +48,8 @@ export default function Dashboard() {
   const [testResult, setTestResult] = useState(null)
   const [activeHerramienta, setActiveHerramienta] = useState(null)
   const [herramientaStep, setHerramientaStep] = useState(0)
-
+  const [herramientaReflexion, setHerramientaReflexion] = useState('')
+  const [herramientaCompletada, setHerramientaCompletada] = useState(false)
   const [chatMsgs, setChatMsgs] = useState([])
   const [chatInput, setChatInput] = useState('')
   const [typing, setTyping] = useState(false)
@@ -191,10 +75,8 @@ export default function Dashboard() {
     setUser(user)
     const { data: profile } = await supabase.from('perfiles').select('*').eq('id', user.id).single()
     setPerfil(profile)
-
     const currentCoach = coaches[profile?.plan_actual || 'free']
     setChatMsgs([{ r: 'a', t: `Hola, bienvenida ✦\n\nSoy ${currentCoach.name}, ${currentCoach.credential.toLowerCase()}. Estoy aquí para ayudarte a ver con más claridad.\n\n¿Qué te trae hoy?` }])
-
     const { data: t } = await supabase.from('tests').select('*').eq('activo', true).order('orden')
     const { data: h } = await supabase.from('templates').select('*').eq('activo', true).order('orden')
     const { data: m } = await supabase.from('modulos').select('*').eq('activo', true).order('orden')
@@ -209,7 +91,7 @@ export default function Dashboard() {
   const goBack = () => {
     if (activeTest && !testResult) { setActiveTest(null); setTestStep(0); setTestAnswers([]); return }
     if (testResult) { setTestResult(null); setActiveTest(null); setTestStep(0); setTestAnswers([]); return }
-    if (activeHerramienta) { setActiveHerramienta(null); setHerramientaStep(0); setView('herramientas'); return }
+    if (activeHerramienta) { setActiveHerramienta(null); setHerramientaStep(0); setHerramientaReflexion(''); setHerramientaCompletada(false); setView('herramientas'); return }
     if (prevView) { setView(prevView); setPrevView(null) }
     else { setView('inicio') }
   }
@@ -237,6 +119,19 @@ export default function Dashboard() {
     }
   }
 
+  const startHerramienta = (h) => {
+    setActiveHerramienta(h); setHerramientaStep(0); setHerramientaReflexion(''); setHerramientaCompletada(false); navigate('herramienta_activa')
+  }
+
+  const completeHerramienta = async () => {
+    setHerramientaCompletada(true)
+    if (user && herramientaReflexion.trim()) {
+      try {
+        await supabase.from('resultados_test').insert({ usuario_id: user.id, test_id: null, puntaje_total: 0, perfil_resultado: `Herramienta: ${activeHerramienta.titulo}`, respuestas: { reflexion: herramientaReflexion, herramienta_id: activeHerramienta.id } })
+      } catch (err) { console.error('Error guardando reflexión:', err) }
+    }
+  }
+
   const sendMessage = async () => {
     if (!chatInput.trim()) return
     const msg = chatInput.trim()
@@ -260,11 +155,7 @@ export default function Dashboard() {
   const speakText = async (text) => {
     try {
       const coachKey = Object.keys(coaches).find(k => coaches[k] === coach) || 'clara'
-      const res = await fetch('/api/tts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text, coach: coachKey }),
-      })
+      const res = await fetch('/api/tts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text, coach: coachKey }) })
       const data = await res.json()
       if (data.audio) {
         setIsPlaying(true)
@@ -272,9 +163,7 @@ export default function Dashboard() {
         audio.onended = () => setIsPlaying(false)
         audio.play()
       }
-    } catch (err) {
-      console.error('TTS error:', err)
-    }
+    } catch (err) { console.error('TTS error:', err) }
   }
 
   const startRecording = async () => {
@@ -283,81 +172,37 @@ export default function Dashboard() {
       const mediaRecorder = new MediaRecorder(stream)
       mediaRecorderRef.current = mediaRecorder
       audioChunksRef.current = []
-
-      mediaRecorder.ondataavailable = (event) => {
-        audioChunksRef.current.push(event.data)
-      }
-
-      mediaRecorder.onstop = async () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' })
-        stream.getTracks().forEach(track => track.stop())
-      }
-
+      mediaRecorder.ondataavailable = (event) => { audioChunksRef.current.push(event.data) }
+      mediaRecorder.onstop = async () => { stream.getTracks().forEach(track => track.stop()) }
       mediaRecorder.start()
       setIsRecording(true)
-
       if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
         const recognition = new SpeechRecognition()
         recognition.lang = 'es-CL'
         recognition.interimResults = false
         recognition.maxAlternatives = 1
-
-        recognition.onresult = (event) => {
-          const transcript = event.results[0][0].transcript
-          setChatInput(transcript)
-          setIsRecording(false)
-        }
-
-        recognition.onerror = () => {
-          setIsRecording(false)
-        }
-
-        recognition.onend = () => {
-          setIsRecording(false)
-          if (mediaRecorderRef.current?.state === 'recording') {
-            mediaRecorderRef.current.stop()
-          }
-        }
-
+        recognition.onresult = (event) => { const transcript = event.results[0][0].transcript; setChatInput(transcript); setIsRecording(false) }
+        recognition.onerror = () => { setIsRecording(false) }
+        recognition.onend = () => { setIsRecording(false); if (mediaRecorderRef.current?.state === 'recording') { mediaRecorderRef.current.stop() } }
         recognition.start()
       }
-    } catch (err) {
-      console.error('Microphone error:', err)
-      setIsRecording(false)
-    }
+    } catch (err) { console.error('Microphone error:', err); setIsRecording(false) }
   }
 
-  const stopRecording = () => {
-    if (mediaRecorderRef.current?.state === 'recording') {
-      mediaRecorderRef.current.stop()
-    }
-    setIsRecording(false)
-  }
+  const stopRecording = () => { if (mediaRecorderRef.current?.state === 'recording') { mediaRecorderRef.current.stop() } setIsRecording(false) }
 
-  if (loading) return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--warm)' }}>
-      <p style={{ color: 'var(--text-light)' }}>Cargando ✦</p>
-    </div>
-  )
+  if (loading) return (<div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--warm)' }}><p style={{ color: 'var(--text-light)' }}>Cargando ✦</p></div>)
 
   const nombre = perfil?.nombre || user?.user_metadata?.full_name || 'Bienvenida'
   const canAccess = (required) => required === 'free' || plan === 'premium' || (plan === 'esencial' && required !== 'premium')
 
   const handleCheckout = async (planId) => {
     try {
-      const res = await fetch('/api/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ planId, userId: user.id, userEmail: user.email }),
-      })
+      const res = await fetch('/api/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ planId, userId: user.id, userEmail: user.email }) })
       const data = await res.json()
-      if (data.url) {
-        window.location.href = data.url
-      }
-    } catch (err) {
-      console.error('Checkout error:', err)
-    }
+      if (data.url) { window.location.href = data.url }
+    } catch (err) { console.error('Checkout error:', err) }
   }
 
   const Header = ({ title, subtitle, showBack = true }) => (
@@ -373,29 +218,18 @@ export default function Dashboard() {
   return (
     <div style={{ minHeight: '100vh', background: 'var(--warm)', paddingBottom: 80 }}>
 
-      {/* === INICIO === */}
       {view === 'inicio' && (
         <div style={{ padding: '48px 20px 20px' }}>
           <p style={{ fontSize: 14, color: 'var(--text-light)' }}>Hola,</p>
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, marginBottom: 20 }}>{nombre} ✦</h1>
-
           {!checkinDone ? (
             <div className="card" style={{ marginBottom: 20, textAlign: 'center' }}>
               <p style={{ fontSize: 14, fontWeight: 600, marginBottom: 12 }}>¿Cómo te sientes hoy?</p>
               <div style={{ display: 'flex', justifyContent: 'center', gap: 6 }}>
-                {animos.map(a => (
-                  <button key={a.value} onClick={() => { setAnimoHoy(a.value); setCheckinDone(true) }}
-                    style={{ background: animoHoy === a.value ? 'var(--gold)' : 'var(--warm-dark)', border: 'none', borderRadius: 12, padding: '10px 14px', cursor: 'pointer', fontSize: 12, fontWeight: 600, color: animoHoy === a.value ? '#fff' : 'var(--text)', transition: 'all 0.2s', fontFamily: 'var(--font-body)' }}>
-                    {a.label}
-                  </button>
-                ))}
+                {animos.map(a => (<button key={a.value} onClick={() => { setAnimoHoy(a.value); setCheckinDone(true) }} style={{ background: animoHoy === a.value ? 'var(--gold)' : 'var(--warm-dark)', border: 'none', borderRadius: 12, padding: '10px 14px', cursor: 'pointer', fontSize: 12, fontWeight: 600, color: animoHoy === a.value ? '#fff' : 'var(--text)', transition: 'all 0.2s', fontFamily: 'var(--font-body)' }}>{a.label}</button>))}
               </div>
             </div>
-          ) : (
-            <div className="card" style={{ marginBottom: 20, textAlign: 'center', padding: 16 }}>
-              <p style={{ fontSize: 13, color: 'var(--gold)' }}>Check-in completado ✦</p>
-            </div>
-          )}
+          ) : (<div className="card" style={{ marginBottom: 20, textAlign: 'center', padding: 16 }}><p style={{ fontSize: 13, color: 'var(--gold)' }}>Check-in completado ✦</p></div>)}
 
           <div className="card" style={{ marginBottom: 16, background: 'var(--dark)', color: '#fff', cursor: 'pointer', display: 'flex', gap: 16, alignItems: 'center' }} onClick={() => navigate('clara')}>
             <img src={coach.photo} alt={coach.name} style={{ width: 56, height: 56, borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--gold-light)' }} />
@@ -412,54 +246,29 @@ export default function Dashboard() {
               <span style={{ fontSize: 14, color: 'var(--gold)' }}>→</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-around' }}>
-              {dimensiones.map(d => (
-                <div key={d.key} style={{ textAlign: 'center' }}>
-                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: d.color, margin: '0 auto 6px' }} />
-                  <p style={{ fontSize: 10, color: 'var(--text-light)' }}>{d.label}</p>
-                </div>
-              ))}
+              {dimensiones.map(d => (<div key={d.key} style={{ textAlign: 'center' }}><div style={{ width: 8, height: 8, borderRadius: '50%', background: d.color, margin: '0 auto 6px' }} /><p style={{ fontSize: 10, color: 'var(--text-light)' }}>{d.label}</p></div>))}
             </div>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 24 }}>
-            {[{ label: 'Racha', val: perfil?.racha_dias || 0 }, { label: 'Nivel', val: perfil?.nivel || 1 }, { label: 'Puntos', val: perfil?.puntos_totales || 0 }].map(s => (
-              <div key={s.label} className="card" style={{ textAlign: 'center', padding: 16 }}>
-                <p style={{ fontSize: 24, fontWeight: 700, color: 'var(--gold)' }}>{s.val}</p>
-                <p style={{ fontSize: 11, color: 'var(--text-light)' }}>{s.label}</p>
-              </div>
-            ))}
+            {[{ label: 'Racha', val: perfil?.racha_dias || 0 }, { label: 'Nivel', val: perfil?.nivel || 1 }, { label: 'Puntos', val: perfil?.puntos_totales || 0 }].map(s => (<div key={s.label} className="card" style={{ textAlign: 'center', padding: 16 }}><p style={{ fontSize: 24, fontWeight: 700, color: 'var(--gold)' }}>{s.val}</p><p style={{ fontSize: 11, color: 'var(--text-light)' }}>{s.label}</p></div>))}
           </div>
 
           <div className="card" style={{ marginBottom: 24, cursor: 'pointer' }} onClick={() => navigate('planes')}>
             <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 18, marginBottom: 12 }}>Conoce a tu equipo de coaches</h3>
             <div style={{ display: 'flex', justifyContent: 'center', gap: 12 }}>
-              {Object.values(coaches).map(c => (
-                <div key={c.name} style={{ textAlign: 'center' }}>
-                  <img src={c.photo} alt={c.name} style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover', border: plan === Object.keys(coaches).find(k => coaches[k].name === c.name) ? '2px solid var(--gold)' : '2px solid #e0dbd4' }} />
-                  <p style={{ fontSize: 11, color: 'var(--text-light)', marginTop: 4 }}>{c.name}</p>
-                </div>
-              ))}
+              {Object.values(coaches).map(c => (<div key={c.name} style={{ textAlign: 'center' }}><img src={c.photo} alt={c.name} style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover', border: plan === Object.keys(coaches).find(k => coaches[k].name === c.name) ? '2px solid var(--gold)' : '2px solid #e0dbd4' }} /><p style={{ fontSize: 11, color: 'var(--text-light)', marginTop: 4 }}>{c.name}</p></div>))}
             </div>
             <p style={{ fontSize: 12, color: 'var(--gold)', textAlign: 'center', marginTop: 8 }}>Ver planes →</p>
           </div>
 
           <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 22, marginBottom: 12 }}>Tests</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
-            {tests.slice(0, 3).map(t => (
-              <div key={t.id} className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}
-                onClick={() => canAccess(t.plan_requerido) && startTest(t)}>
-                <div>
-                  <p style={{ fontWeight: 600, fontSize: 14, marginBottom: 2 }}>{t.titulo}</p>
-                  <p style={{ fontSize: 12, color: 'var(--text-light)' }}>{t.numero_preguntas} preguntas · {t.categoria}</p>
-                </div>
-                {!canAccess(t.plan_requerido) && <span style={{ fontSize: 11, background: 'var(--warm-dark)', padding: '4px 10px', borderRadius: 8, color: 'var(--text-light)' }}>Premium</span>}
-              </div>
-            ))}
+            {tests.slice(0, 3).map(t => (<div key={t.id} className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }} onClick={() => canAccess(t.plan_requerido) && startTest(t)}><div><p style={{ fontWeight: 600, fontSize: 14, marginBottom: 2 }}>{t.titulo}</p><p style={{ fontSize: 12, color: 'var(--text-light)' }}>{t.numero_preguntas} preguntas · {t.categoria}</p></div>{!canAccess(t.plan_requerido) && <span style={{ fontSize: 11, background: 'var(--warm-dark)', padding: '4px 10px', borderRadius: 8, color: 'var(--text-light)' }}>Premium</span>}</div>))}
           </div>
         </div>
       )}
 
-      {/* === PLANES === */}
       {view === 'planes' && (
         <div>
           <Header title="Elige tu coach ✦" subtitle="Cada plan te conecta con una coach diferente" />
@@ -468,287 +277,111 @@ export default function Dashboard() {
               const c = coaches[p.id]
               const isCurrentPlan = plan === p.id
               return (
-                <div key={p.id} className="card" style={{
-                  marginBottom: 16,
-                  border: p.popular ? '2px solid var(--gold)' : isCurrentPlan ? '2px solid var(--dark)' : '2px solid transparent',
-                  position: 'relative',
-                }}>
-                  {p.popular && (
-                    <div style={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)', background: 'var(--gold)', color: '#fff', padding: '2px 16px', borderRadius: 12, fontSize: 11, fontWeight: 600 }}>
-                      Más popular
-                    </div>
-                  )}
-                  <div style={{ display: 'flex', gap: 14, alignItems: 'center', marginBottom: 14 }}>
-                    <img src={c.photo} alt={c.name} style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'cover' }} />
-                    <div>
-                      <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 20, margin: 0 }}>{c.name}</h3>
-                      <p style={{ fontSize: 11, color: 'var(--gold)', marginTop: 2 }}>{c.credential}</p>
-                    </div>
-                  </div>
+                <div key={p.id} className="card" style={{ marginBottom: 16, border: p.popular ? '2px solid var(--gold)' : isCurrentPlan ? '2px solid var(--dark)' : '2px solid transparent', position: 'relative' }}>
+                  {p.popular && (<div style={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)', background: 'var(--gold)', color: '#fff', padding: '2px 16px', borderRadius: 12, fontSize: 11, fontWeight: 600 }}>Más popular</div>)}
+                  <div style={{ display: 'flex', gap: 14, alignItems: 'center', marginBottom: 14 }}><img src={c.photo} alt={c.name} style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'cover' }} /><div><h3 style={{ fontFamily: 'var(--font-display)', fontSize: 20, margin: 0 }}>{c.name}</h3><p style={{ fontSize: 11, color: 'var(--gold)', marginTop: 2 }}>{c.credential}</p></div></div>
                   <p style={{ fontSize: 13, color: 'var(--text-light)', lineHeight: 1.5, marginBottom: 14 }}>{c.desc}</p>
-                  <div style={{ marginBottom: 14 }}>
-                    {p.features.map((f, i) => (
-                      <p key={i} style={{ fontSize: 13, color: 'var(--text)', marginBottom: 4, paddingLeft: 16, position: 'relative' }}>
-                        <span style={{ position: 'absolute', left: 0, color: 'var(--gold)' }}>·</span>{f}
-                      </p>
-                    ))}
-                  </div>
+                  <div style={{ marginBottom: 14 }}>{p.features.map((f, i) => (<p key={i} style={{ fontSize: 13, color: 'var(--text)', marginBottom: 4, paddingLeft: 16, position: 'relative' }}><span style={{ position: 'absolute', left: 0, color: 'var(--gold)' }}>·</span>{f}</p>))}</div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div>
-                      <span style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 700 }}>{p.precio}</span>
-                      <span style={{ fontSize: 13, color: 'var(--text-light)' }}>{p.periodo}</span>
-                    </div>
-                    {isCurrentPlan ? (
-                      <span style={{ fontSize: 13, color: 'var(--gold)', fontWeight: 600 }}>Plan actual</span>
-                    ) : p.id === 'free' ? (
-                      <span style={{ fontSize: 13, color: 'var(--text-light)' }}>Gratis</span>
-                    ) : (
-                      <button className="btn-primary" style={{ width: 'auto', padding: '10px 24px' }}
-                        onClick={() => handleCheckout(p.id)}>
-                        Elegir plan
-                      </button>
-                    )}
+                    <div><span style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 700 }}>{p.precio}</span><span style={{ fontSize: 13, color: 'var(--text-light)' }}>{p.periodo}</span></div>
+                    {isCurrentPlan ? (<span style={{ fontSize: 13, color: 'var(--gold)', fontWeight: 600 }}>Plan actual</span>) : p.id === 'free' ? (<span style={{ fontSize: 13, color: 'var(--text-light)' }}>Gratis</span>) : (<button className="btn-primary" style={{ width: 'auto', padding: '10px 24px' }} onClick={() => handleCheckout(p.id)}>Elegir plan</button>)}
                   </div>
                 </div>
               )
             })}
-
-            <div className="card" style={{ marginTop: 8, background: 'var(--warm-dark)' }}>
-              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 18, marginBottom: 8 }}>Sesiones con coach humana</h3>
-              <p style={{ fontSize: 13, color: 'var(--text-light)', lineHeight: 1.5, marginBottom: 12 }}>
-                Complementa tu proceso con una sesión 1:1 con una coach profesional certificada.
-              </p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <p style={{ fontSize: 13 }}>1 sesión: <strong>$49.990</strong></p>
-                  <button onClick={() => handleCheckout('sesion_1')} style={{ fontSize: 12, padding: '6px 14px', borderRadius: 8, border: '1px solid var(--dark)', background: 'transparent', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Comprar</button>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <p style={{ fontSize: 13 }}>Pack 4: <strong>$159.990</strong></p>
-                  <button onClick={() => handleCheckout('sesion_4')} style={{ fontSize: 12, padding: '6px 14px', borderRadius: 8, border: '1px solid var(--dark)', background: 'transparent', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Comprar</button>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <p style={{ fontSize: 13 }}>Pack 8: <strong>$279.990</strong></p>
-                  <button onClick={() => handleCheckout('sesion_8')} style={{ fontSize: 12, padding: '6px 14px', borderRadius: 8, border: '1px solid var(--dark)', background: 'transparent', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Comprar</button>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       )}
 
-      {/* === TEST ACTIVO - PANTALLA COMPLETA === */}
       {activeTest && !testResult && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          background: 'linear-gradient(180deg, #1a1410 0%, #0a0a0a 100%)',
-          zIndex: 1000, overflowY: 'auto',
-          display: 'flex', flexDirection: 'column',
-        }}>
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'linear-gradient(180deg, #1a1410 0%, #0a0a0a 100%)', zIndex: 1000, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
           <div style={{ padding: '20px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <button onClick={() => { setActiveTest(null); setTestStep(0); setTestAnswers([]); }}
-              style={{ background: 'transparent', border: 'none', color: '#a8a8a8', fontSize: 14, cursor: 'pointer' }}>
-              ← Salir
-            </button>
-            <div style={{ fontSize: 11, letterSpacing: 2, color: '#d4af37', textTransform: 'uppercase' }}>
-              {testStep + 1} / {testQuestions.length}
-            </div>
+            <button onClick={() => { setActiveTest(null); setTestStep(0); setTestAnswers([]); }} style={{ background: 'transparent', border: 'none', color: '#a8a8a8', fontSize: 14, cursor: 'pointer' }}>← Salir</button>
+            <div style={{ fontSize: 11, letterSpacing: 2, color: '#d4af37', textTransform: 'uppercase' }}>{testStep + 1} / {testQuestions.length}</div>
           </div>
-
-          <div style={{ padding: '0 24px 32px' }}>
-            <div style={{ background: 'rgba(212, 175, 55, 0.15)', borderRadius: 12, height: 4, overflow: 'hidden' }}>
-              <div style={{
-                background: 'linear-gradient(90deg, #d4af37, #f5c842)',
-                height: '100%',
-                width: `${((testStep + 1) / testQuestions.length) * 100}%`,
-                transition: 'width 0.4s ease',
-              }} />
-            </div>
-          </div>
-
+          <div style={{ padding: '0 24px 32px' }}><div style={{ background: 'rgba(212, 175, 55, 0.15)', borderRadius: 12, height: 4, overflow: 'hidden' }}><div style={{ background: 'linear-gradient(90deg, #d4af37, #f5c842)', height: '100%', width: `${((testStep + 1) / testQuestions.length) * 100}%`, transition: 'width 0.4s ease' }} /></div></div>
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 24px 40px', maxWidth: 560, margin: '0 auto', width: '100%' }}>
-            <div style={{ fontSize: 11, letterSpacing: 3, color: '#d4af37', textTransform: 'uppercase', marginBottom: 16, textAlign: 'center' }}>
-              {activeTest.titulo}
-            </div>
-            <h2 style={{
-              fontFamily: 'Georgia, serif',
-              fontSize: 26, lineHeight: 1.4, marginBottom: 40,
-              color: '#fff', textAlign: 'center', fontWeight: 300,
-            }}>
-              {testQuestions[testStep]?.texto}
-            </h2>
-
+            <div style={{ fontSize: 11, letterSpacing: 3, color: '#d4af37', textTransform: 'uppercase', marginBottom: 16, textAlign: 'center' }}>{activeTest.titulo}</div>
+            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 26, lineHeight: 1.4, marginBottom: 40, color: '#fff', textAlign: 'center', fontWeight: 300 }}>{testQuestions[testStep]?.texto}</h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {testQuestions[testStep]?.opciones?.map((opt, i) => (
-                <button key={i}
-                  onClick={() => answerQuestion(testQuestions[testStep].valores[i])}
-                  style={{
-                    background: 'rgba(212, 175, 55, 0.08)',
-                    border: '1px solid rgba(212, 175, 55, 0.25)',
-                    borderRadius: 14,
-                    padding: '18px 20px',
-                    color: '#fff',
-                    fontSize: 15,
-                    textAlign: 'left',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
-                    lineHeight: 1.5,
-                    fontFamily: 'inherit',
-                  }}>
-                  {opt}
-                </button>
-              ))}
+              {testQuestions[testStep]?.opciones?.map((opt, i) => (<button key={i} onClick={() => answerQuestion(testQuestions[testStep].valores[i])} style={{ background: 'rgba(212, 175, 55, 0.08)', border: '1px solid rgba(212, 175, 55, 0.25)', borderRadius: 14, padding: '18px 20px', color: '#fff', fontSize: 15, textAlign: 'left', cursor: 'pointer', transition: 'all 0.2s', lineHeight: 1.5, fontFamily: 'inherit' }}>{opt}</button>))}
             </div>
           </div>
         </div>
       )}
 
-      {/* === RESULTADO TEST - PANTALLA COMPLETA ENRIQUECIDA === */}
       {testResult && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          background: `linear-gradient(180deg, ${testResult.colorBg || 'rgba(212,175,55,0.1)'} 0%, #0a0a0a 60%)`,
-          zIndex: 1000, overflowY: 'auto',
-        }}>
-          <div style={{ padding: '20px 24px' }}>
-            <button onClick={() => { setTestResult(null); setActiveTest(null); }}
-              style={{ background: 'transparent', border: 'none', color: '#a8a8a8', fontSize: 14, cursor: 'pointer' }}>
-              ← Cerrar
-            </button>
-          </div>
-
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: `linear-gradient(180deg, ${testResult.colorBg || 'rgba(212,175,55,0.1)'} 0%, #0a0a0a 60%)`, zIndex: 1000, overflowY: 'auto' }}>
+          <div style={{ padding: '20px 24px' }}><button onClick={() => { setTestResult(null); setActiveTest(null); }} style={{ background: 'transparent', border: 'none', color: '#a8a8a8', fontSize: 14, cursor: 'pointer' }}>← Cerrar</button></div>
           <div style={{ maxWidth: 560, margin: '0 auto', padding: '20px 24px 60px' }}>
             <div style={{ textAlign: 'center', marginBottom: 40 }}>
-              <div style={{ fontSize: 11, letterSpacing: 3, color: testResult.color || '#d4af37', textTransform: 'uppercase', marginBottom: 12 }}>
-                Tu elemento es
-              </div>
+              <div style={{ fontSize: 11, letterSpacing: 3, color: testResult.color || '#d4af37', textTransform: 'uppercase', marginBottom: 12 }}>Tu elemento es</div>
               <div style={{ fontSize: 80, marginBottom: 8 }}>{testResult.icono || '✦'}</div>
-              <h1 style={{
-                fontFamily: 'Georgia, serif',
-                fontSize: 44, fontWeight: 300,
-                color: '#fff', marginBottom: 16,
-              }}>
-                {testResult.nombre}
-              </h1>
-              <p style={{ fontSize: 16, color: '#d4d4d4', lineHeight: 1.6, maxWidth: 440, margin: '0 auto' }}>
-                {testResult.descLarga || testResult.desc}
-              </p>
+              <h1 style={{ fontFamily: 'Georgia, serif', fontSize: 44, fontWeight: 300, color: '#fff', marginBottom: 16 }}>{testResult.nombre}</h1>
+              <p style={{ fontSize: 16, color: '#d4d4d4', lineHeight: 1.6, maxWidth: 440, margin: '0 auto' }}>{testResult.descLarga || testResult.desc}</p>
             </div>
-
-            {testResult.fortalezas && (
-              <div style={{
-                background: 'rgba(255,255,255,0.03)',
-                border: '1px solid rgba(255,255,255,0.08)',
-                borderRadius: 16, padding: 24, marginBottom: 16,
-              }}>
-                <div style={{ fontSize: 11, letterSpacing: 2, color: testResult.color, textTransform: 'uppercase', marginBottom: 14, fontWeight: 600 }}>
-                  ✦ Tus fortalezas
-                </div>
-                {testResult.fortalezas.map((f, i) => (
-                  <div key={i} style={{ display: 'flex', gap: 12, marginBottom: 10, color: '#e5e5e5', fontSize: 14, lineHeight: 1.5 }}>
-                    <span style={{ color: testResult.color, flexShrink: 0 }}>—</span>
-                    <span>{f}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {testResult.sombras && (
-              <div style={{
-                background: 'rgba(255,255,255,0.03)',
-                border: '1px solid rgba(255,255,255,0.08)',
-                borderRadius: 16, padding: 24, marginBottom: 16,
-              }}>
-                <div style={{ fontSize: 11, letterSpacing: 2, color: '#a8a8a8', textTransform: 'uppercase', marginBottom: 14, fontWeight: 600 }}>
-                  Tu sombra
-                </div>
-                {testResult.sombras.map((s, i) => (
-                  <div key={i} style={{ display: 'flex', gap: 12, marginBottom: 10, color: '#c4c4c4', fontSize: 14, lineHeight: 1.5 }}>
-                    <span style={{ color: '#a8a8a8', flexShrink: 0 }}>—</span>
-                    <span>{s}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {testResult.recomendaciones && (
-              <div style={{
-                background: 'rgba(255,255,255,0.03)',
-                border: '1px solid rgba(255,255,255,0.08)',
-                borderRadius: 16, padding: 24, marginBottom: 16,
-              }}>
-                <div style={{ fontSize: 11, letterSpacing: 2, color: testResult.color, textTransform: 'uppercase', marginBottom: 14, fontWeight: 600 }}>
-                  Para esta semana
-                </div>
-                {testResult.recomendaciones.map((r, i) => (
-                  <div key={i} style={{ display: 'flex', gap: 12, marginBottom: 10, color: '#e5e5e5', fontSize: 14, lineHeight: 1.5 }}>
-                    <span style={{ color: testResult.color, flexShrink: 0, fontWeight: 600 }}>{i + 1}.</span>
-                    <span>{r}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {testResult.proximoPaso && (
-              <div style={{
-                background: testResult.colorBg,
-                border: `1px solid ${testResult.color}40`,
-                borderRadius: 16, padding: 24, marginBottom: 24,
-              }}>
-                <div style={{ fontSize: 11, letterSpacing: 2, color: testResult.color, textTransform: 'uppercase', marginBottom: 8, fontWeight: 600 }}>
-                  ✦ Tu próximo paso
-                </div>
-                <div style={{ color: '#fff', fontSize: 15, lineHeight: 1.5 }}>
-                  {testResult.proximoPaso}
-                </div>
-              </div>
-            )}
-
-            <button
-              onClick={() => {
-                const prompt = testResult.promptClara || `Acabo de hacer un test y mi resultado es ${testResult.nombre}. Me gustaría conversar contigo sobre eso.`
-                setChatMsgs([{ r: 'u', t: prompt }])
-                setTestResult(null); setActiveTest(null);
-                setView('clara')
-              }}
-              style={{
-                width: '100%',
-                background: `linear-gradient(135deg, ${testResult.color}, ${testResult.color}cc)`,
-                color: '#0a0a0a',
-                border: 'none',
-                padding: '18px 24px',
-                borderRadius: 30,
-                fontSize: 15,
-                fontWeight: 600,
-                cursor: 'pointer',
-                marginBottom: 12,
-                fontFamily: 'inherit',
-              }}
-            >
-              Conversar con {coach.name} sobre esto →
-            </button>
-
-            <button
-              onClick={() => { setTestResult(null); setActiveTest(null); }}
-              style={{
-                width: '100%',
-                background: 'transparent',
-                color: '#a8a8a8',
-                border: '1px solid rgba(255,255,255,0.15)',
-                padding: '14px 24px',
-                borderRadius: 30,
-                fontSize: 14,
-                cursor: 'pointer',
-                fontFamily: 'inherit',
-              }}
-            >
-              Volver al inicio
-            </button>
+            {testResult.fortalezas && (<div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: 24, marginBottom: 16 }}><div style={{ fontSize: 11, letterSpacing: 2, color: testResult.color, textTransform: 'uppercase', marginBottom: 14, fontWeight: 600 }}>✦ Tus fortalezas</div>{testResult.fortalezas.map((f, i) => (<div key={i} style={{ display: 'flex', gap: 12, marginBottom: 10, color: '#e5e5e5', fontSize: 14, lineHeight: 1.5 }}><span style={{ color: testResult.color, flexShrink: 0 }}>—</span><span>{f}</span></div>))}</div>)}
+            {testResult.sombras && (<div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: 24, marginBottom: 16 }}><div style={{ fontSize: 11, letterSpacing: 2, color: '#a8a8a8', textTransform: 'uppercase', marginBottom: 14, fontWeight: 600 }}>Tu sombra</div>{testResult.sombras.map((s, i) => (<div key={i} style={{ display: 'flex', gap: 12, marginBottom: 10, color: '#c4c4c4', fontSize: 14, lineHeight: 1.5 }}><span style={{ color: '#a8a8a8', flexShrink: 0 }}>—</span><span>{s}</span></div>))}</div>)}
+            {testResult.recomendaciones && (<div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: 24, marginBottom: 16 }}><div style={{ fontSize: 11, letterSpacing: 2, color: testResult.color, textTransform: 'uppercase', marginBottom: 14, fontWeight: 600 }}>Para esta semana</div>{testResult.recomendaciones.map((r, i) => (<div key={i} style={{ display: 'flex', gap: 12, marginBottom: 10, color: '#e5e5e5', fontSize: 14, lineHeight: 1.5 }}><span style={{ color: testResult.color, flexShrink: 0, fontWeight: 600 }}>{i + 1}.</span><span>{r}</span></div>))}</div>)}
+            {testResult.proximoPaso && (<div style={{ background: testResult.colorBg, border: `1px solid ${testResult.color}40`, borderRadius: 16, padding: 24, marginBottom: 24 }}><div style={{ fontSize: 11, letterSpacing: 2, color: testResult.color, textTransform: 'uppercase', marginBottom: 8, fontWeight: 600 }}>✦ Tu próximo paso</div><div style={{ color: '#fff', fontSize: 15, lineHeight: 1.5 }}>{testResult.proximoPaso}</div></div>)}
+            <button onClick={() => { const prompt = testResult.promptClara || `Acabo de hacer un test y mi resultado es ${testResult.nombre}.`; setChatMsgs([{ r: 'u', t: prompt }]); setTestResult(null); setActiveTest(null); setView('clara') }} style={{ width: '100%', background: `linear-gradient(135deg, ${testResult.color}, ${testResult.color}cc)`, color: '#0a0a0a', border: 'none', padding: '18px 24px', borderRadius: 30, fontSize: 15, fontWeight: 600, cursor: 'pointer', marginBottom: 12, fontFamily: 'inherit' }}>Conversar con {coach.name} sobre esto →</button>
+            <button onClick={() => { setTestResult(null); setActiveTest(null); }} style={{ width: '100%', background: 'transparent', color: '#a8a8a8', border: '1px solid rgba(255,255,255,0.15)', padding: '14px 24px', borderRadius: 30, fontSize: 14, cursor: 'pointer', fontFamily: 'inherit' }}>Volver al inicio</button>
           </div>
         </div>
       )}
 
-      {/* === MI EQUILIBRIO === */}
+      {activeHerramienta && view === 'herramienta_activa' && !herramientaCompletada && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'linear-gradient(180deg, #1a1410 0%, #0a0a0a 100%)', zIndex: 1000, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ padding: '20px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <button onClick={() => { setActiveHerramienta(null); setHerramientaStep(0); setHerramientaReflexion(''); setView('herramientas') }} style={{ background: 'transparent', border: 'none', color: '#a8a8a8', fontSize: 14, cursor: 'pointer' }}>← Salir</button>
+            <div style={{ fontSize: 11, letterSpacing: 2, color: '#d4af37', textTransform: 'uppercase' }}>{herramientaStep + 1} / {(activeHerramienta.pasos?.length || 0) + 1}</div>
+          </div>
+          <div style={{ padding: '0 24px 32px' }}><div style={{ background: 'rgba(212, 175, 55, 0.15)', borderRadius: 12, height: 4, overflow: 'hidden' }}><div style={{ background: 'linear-gradient(90deg, #d4af37, #f5c842)', height: '100%', width: `${((herramientaStep + 1) / ((activeHerramienta.pasos?.length || 1) + 1)) * 100}%`, transition: 'width 0.4s ease' }} /></div></div>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 24px 40px', maxWidth: 560, margin: '0 auto', width: '100%' }}>
+            <div style={{ fontSize: 11, letterSpacing: 3, color: '#d4af37', textTransform: 'uppercase', marginBottom: 16, textAlign: 'center' }}>{activeHerramienta.titulo}</div>
+            {herramientaStep < (activeHerramienta.pasos?.length || 0) ? (
+              <>
+                {herramientaStep === 0 && activeHerramienta.descripcion && (<p style={{ fontSize: 14, color: '#a8a8a8', lineHeight: 1.6, marginBottom: 24, textAlign: 'center', fontStyle: 'italic' }}>{activeHerramienta.descripcion}</p>)}
+                <div style={{ background: 'rgba(212, 175, 55, 0.06)', border: '1px solid rgba(212, 175, 55, 0.2)', borderRadius: 16, padding: 28, marginBottom: 32 }}>
+                  <div style={{ fontSize: 11, letterSpacing: 2, color: '#d4af37', textTransform: 'uppercase', marginBottom: 12, fontWeight: 600 }}>Paso {herramientaStep + 1}</div>
+                  <p style={{ fontSize: 17, lineHeight: 1.7, color: '#fff', fontFamily: 'Georgia, serif', fontWeight: 300 }}>{activeHerramienta.pasos?.[herramientaStep]}</p>
+                </div>
+                <div style={{ display: 'flex', gap: 10 }}>
+                  {herramientaStep > 0 && (<button onClick={() => setHerramientaStep(herramientaStep - 1)} style={{ flex: 1, background: 'transparent', color: '#a8a8a8', border: '1px solid rgba(255,255,255,0.15)', padding: '14px 24px', borderRadius: 30, fontSize: 14, cursor: 'pointer', fontFamily: 'inherit' }}>← Anterior</button>)}
+                  <button onClick={() => setHerramientaStep(herramientaStep + 1)} style={{ flex: 1, background: 'linear-gradient(135deg, #d4af37, #f5c842)', color: '#0a0a0a', border: 'none', padding: '16px 24px', borderRadius: 30, fontSize: 15, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>{herramientaStep + 1 < (activeHerramienta.pasos?.length || 1) ? 'Siguiente →' : 'Reflexión final →'}</button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div style={{ background: 'rgba(212, 175, 55, 0.06)', border: '1px solid rgba(212, 175, 55, 0.2)', borderRadius: 16, padding: 28, marginBottom: 24 }}>
+                  <div style={{ fontSize: 11, letterSpacing: 2, color: '#d4af37', textTransform: 'uppercase', marginBottom: 12, fontWeight: 600 }}>✦ Tu reflexión</div>
+                  <p style={{ fontSize: 16, lineHeight: 1.6, color: '#fff', marginBottom: 20, fontFamily: 'Georgia, serif', fontWeight: 300 }}>¿Qué se te abrió al hacer este ejercicio? ¿Qué notaste? ¿Qué te llevas?</p>
+                  <textarea value={herramientaReflexion} onChange={(e) => setHerramientaReflexion(e.target.value)} placeholder="Escribe lo que necesites soltar..." style={{ width: '100%', minHeight: 140, background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(212, 175, 55, 0.2)', borderRadius: 12, padding: 16, color: '#fff', fontSize: 14, lineHeight: 1.6, fontFamily: 'inherit', resize: 'vertical' }} />
+                </div>
+                <button onClick={completeHerramienta} disabled={!herramientaReflexion.trim()} style={{ width: '100%', background: herramientaReflexion.trim() ? 'linear-gradient(135deg, #d4af37, #f5c842)' : 'rgba(212, 175, 55, 0.2)', color: herramientaReflexion.trim() ? '#0a0a0a' : '#a8a8a8', border: 'none', padding: '18px 24px', borderRadius: 30, fontSize: 15, fontWeight: 600, cursor: herramientaReflexion.trim() ? 'pointer' : 'default', fontFamily: 'inherit' }}>Completar ✦</button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {activeHerramienta && herramientaCompletada && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'linear-gradient(180deg, rgba(212, 175, 55, 0.15) 0%, #0a0a0a 60%)', zIndex: 1000, overflowY: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 24px' }}>
+          <div style={{ maxWidth: 480, textAlign: 'center' }}>
+            <div style={{ fontSize: 80, marginBottom: 16 }}>✦</div>
+            <div style={{ fontSize: 11, letterSpacing: 3, color: '#d4af37', textTransform: 'uppercase', marginBottom: 12 }}>Completaste</div>
+            <h1 style={{ fontFamily: 'Georgia, serif', fontSize: 36, fontWeight: 300, color: '#fff', marginBottom: 16 }}>{activeHerramienta.titulo}</h1>
+            <p style={{ fontSize: 16, color: '#d4d4d4', lineHeight: 1.6, marginBottom: 32, maxWidth: 400, margin: '0 auto 32px' }}>Tu reflexión quedó guardada. Puedes volver a ella cuando necesites recordar este momento.</p>
+            <div style={{ background: 'rgba(212, 175, 55, 0.08)', border: '1px solid rgba(212, 175, 55, 0.3)', borderRadius: 16, padding: 20, marginBottom: 24 }}>
+              <div style={{ fontSize: 11, letterSpacing: 2, color: '#d4af37', textTransform: 'uppercase', marginBottom: 6 }}>+10 puntos</div>
+              <div style={{ fontSize: 13, color: '#a8a8a8' }}>Cada herramienta completada te acerca a tu siguiente nivel</div>
+            </div>
+            <button onClick={() => { const prompt = `Acabo de completar la herramienta "${activeHerramienta.titulo}" y mi reflexión fue: "${herramientaReflexion}". Me gustaría conversar contigo sobre lo que se me abrió.`; setChatMsgs([{ r: 'u', t: prompt }]); setActiveHerramienta(null); setHerramientaStep(0); setHerramientaReflexion(''); setHerramientaCompletada(false); setView('clara') }} style={{ width: '100%', background: 'linear-gradient(135deg, #d4af37, #f5c842)', color: '#0a0a0a', border: 'none', padding: '18px 24px', borderRadius: 30, fontSize: 15, fontWeight: 600, cursor: 'pointer', marginBottom: 12, fontFamily: 'inherit' }}>Conversar con {coach.name} sobre esto →</button>
+            <button onClick={() => { setActiveHerramienta(null); setHerramientaStep(0); setHerramientaReflexion(''); setHerramientaCompletada(false); setView('herramientas') }} style={{ width: '100%', background: 'transparent', color: '#a8a8a8', border: '1px solid rgba(255,255,255,0.15)', padding: '14px 24px', borderRadius: 30, fontSize: 14, cursor: 'pointer', fontFamily: 'inherit' }}>Volver a herramientas</button>
+          </div>
+        </div>
+      )}
+
       {view === 'equilibrio' && !activeTest && (
         <div>
           <Header title="Mi Equilibrio ✦" subtitle="Tu bienestar integral de hoy" />
@@ -756,23 +389,8 @@ export default function Dashboard() {
             <p style={{ fontSize: 14, color: 'var(--text-light)', marginBottom: 20, lineHeight: 1.5 }}>Cuida las cuatro dimensiones que impactan tu claridad y tus decisiones.</p>
             {dimensiones.map(d => (
               <div key={d.key} className="card" style={{ marginBottom: 14 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-                  <div style={{ width: 12, height: 12, borderRadius: '50%', background: d.color }} />
-                  <div>
-                    <p style={{ fontWeight: 600, fontSize: 15 }}>{d.label}</p>
-                    <p style={{ fontSize: 12, color: 'var(--text-light)' }}>{d.desc}</p>
-                  </div>
-                </div>
-                <div style={{ display: 'flex', gap: 6 }}>
-                  {[1, 2, 3, 4, 5].map(v => (
-                    <button key={v} onClick={() => setEquilibrio(prev => ({ ...prev, [d.key]: v }))}
-                      style={{ flex: 1, height: 36, borderRadius: 8, border: 'none', cursor: 'pointer', background: equilibrio[d.key] >= v ? d.color : '#f0ebe3', opacity: equilibrio[d.key] >= v ? 1 : 0.5, transition: 'all 0.2s' }} />
-                  ))}
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
-                  <span style={{ fontSize: 10, color: 'var(--text-light)' }}>Nada</span>
-                  <span style={{ fontSize: 10, color: 'var(--text-light)' }}>Mucho</span>
-                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}><div style={{ width: 12, height: 12, borderRadius: '50%', background: d.color }} /><div><p style={{ fontWeight: 600, fontSize: 15 }}>{d.label}</p><p style={{ fontSize: 12, color: 'var(--text-light)' }}>{d.desc}</p></div></div>
+                <div style={{ display: 'flex', gap: 6 }}>{[1, 2, 3, 4, 5].map(v => (<button key={v} onClick={() => setEquilibrio(prev => ({ ...prev, [d.key]: v }))} style={{ flex: 1, height: 36, borderRadius: 8, border: 'none', cursor: 'pointer', background: equilibrio[d.key] >= v ? d.color : '#f0ebe3', opacity: equilibrio[d.key] >= v ? 1 : 0.5, transition: 'all 0.2s' }} />))}</div>
               </div>
             ))}
             <button className="btn-primary" style={{ marginTop: 8 }} onClick={() => navigate('inicio')}>Guardar mi equilibrio ✦</button>
@@ -780,160 +398,69 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* === CHAT CON COACH === */}
       {view === 'clara' && !activeTest && (
         <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
           <div style={{ padding: '48px 20px 12px', borderBottom: '1px solid #eee', background: '#fff', display: 'flex', alignItems: 'center', gap: 12 }}>
             <button onClick={goBack} style={{ background: 'none', border: 'none', fontSize: 24, cursor: 'pointer', color: 'var(--text)', padding: '4px 8px' }}>←</button>
             <img src={coach.photo} alt={coach.name} style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover' }} />
-            <div>
-              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 20, margin: 0 }}>{coach.name} ✦</h2>
-              <p style={{ fontSize: 11, color: 'var(--text-light)', margin: 0 }}>{coach.credential}</p>
-            </div>
+            <div><h2 style={{ fontFamily: 'var(--font-display)', fontSize: 20, margin: 0 }}>{coach.name} ✦</h2><p style={{ fontSize: 11, color: 'var(--text-light)', margin: 0 }}>{coach.credential}</p></div>
           </div>
           <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {chatMsgs.map((m, i) => (
-              <div key={i} style={{ display: 'flex', gap: 8, alignSelf: m.r === 'u' ? 'flex-end' : 'flex-start', maxWidth: '85%', flexDirection: m.r === 'u' ? 'row-reverse' : 'row' }}>
-                {m.r === 'a' && <img src={coach.photo} alt={coach.name} style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover', marginTop: 4, flexShrink: 0 }} />}
-                <div style={{
-                  padding: '12px 16px', borderRadius: m.r === 'u' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
-                  background: m.r === 'u' ? 'var(--dark)' : '#fff', color: m.r === 'u' ? '#fff' : 'var(--text)',
-                  fontSize: 14, lineHeight: 1.5, whiteSpace: 'pre-wrap', boxShadow: m.r === 'a' ? '0 1px 4px rgba(0,0,0,0.06)' : 'none',
-                }}>{m.t}</div>
-              </div>
-            ))}
-            {typing && (
-              <div style={{ display: 'flex', gap: 8, alignSelf: 'flex-start' }}>
-                <img src={coach.photo} alt={coach.name} style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover', marginTop: 4 }} />
-                <div style={{ padding: '12px 16px', borderRadius: '16px 16px 16px 4px', background: '#fff', color: 'var(--text-light)', fontSize: 14 }}>
-                  {coach.name} está pensando ✦
-                </div>
-              </div>
-            )}
+            {chatMsgs.map((m, i) => (<div key={i} style={{ display: 'flex', gap: 8, alignSelf: m.r === 'u' ? 'flex-end' : 'flex-start', maxWidth: '85%', flexDirection: m.r === 'u' ? 'row-reverse' : 'row' }}>{m.r === 'a' && <img src={coach.photo} alt={coach.name} style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover', marginTop: 4, flexShrink: 0 }} />}<div style={{ padding: '12px 16px', borderRadius: m.r === 'u' ? '16px 16px 4px 16px' : '16px 16px 16px 4px', background: m.r === 'u' ? 'var(--dark)' : '#fff', color: m.r === 'u' ? '#fff' : 'var(--text)', fontSize: 14, lineHeight: 1.5, whiteSpace: 'pre-wrap', boxShadow: m.r === 'a' ? '0 1px 4px rgba(0,0,0,0.06)' : 'none' }}>{m.t}</div></div>))}
+            {typing && (<div style={{ display: 'flex', gap: 8, alignSelf: 'flex-start' }}><img src={coach.photo} alt={coach.name} style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover', marginTop: 4 }} /><div style={{ padding: '12px 16px', borderRadius: '16px 16px 16px 4px', background: '#fff', color: 'var(--text-light)', fontSize: 14 }}>{coach.name} está pensando ✦</div></div>)}
             <div ref={chatEndRef} />
           </div>
           <div style={{ padding: '12px 20px 32px', background: '#fff', borderTop: '1px solid #eee', display: 'flex', gap: 8 }}>
-            <button onClick={isRecording ? stopRecording : startRecording}
-              style={{ padding: '12px 16px', borderRadius: 12, border: 'none', background: isRecording ? '#c53030' : 'var(--warm-dark)', color: isRecording ? '#fff' : 'var(--text)', fontSize: 18, cursor: 'pointer', transition: 'all 0.2s' }}>
-              {isRecording ? '◼' : '🎙'}
-            </button>
-            <input className="input-field" placeholder={`Escríbele a ${coach.name}...`} value={chatInput}
-              onChange={e => setChatInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && sendMessage()} style={{ flex: 1 }} />
+            <button onClick={isRecording ? stopRecording : startRecording} style={{ padding: '12px 16px', borderRadius: 12, border: 'none', background: isRecording ? '#c53030' : 'var(--warm-dark)', color: isRecording ? '#fff' : 'var(--text)', fontSize: 18, cursor: 'pointer', transition: 'all 0.2s' }}>{isRecording ? '◼' : '🎙'}</button>
+            <input className="input-field" placeholder={`Escríbele a ${coach.name}...`} value={chatInput} onChange={e => setChatInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && sendMessage()} style={{ flex: 1 }} />
             <button onClick={sendMessage} style={{ padding: '12px 20px', borderRadius: 12, border: 'none', background: 'var(--dark)', color: '#fff', fontSize: 16 }}>→</button>
           </div>
         </div>
       )}
 
-      {/* === TESTS LIST === */}
       {view === 'tests' && !activeTest && (
         <div>
           <Header title="Tests ✦" subtitle="Descubre más sobre ti misma" showBack={false} />
           <div style={{ padding: '20px' }}>
-            {tests.map(t => (
-              <div key={t.id} className="card" style={{ marginBottom: 10, cursor: canAccess(t.plan_requerido) ? 'pointer' : 'default' }}
-                onClick={() => canAccess(t.plan_requerido) && startTest(t)}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div>
-                    <p style={{ fontWeight: 600, fontSize: 14, marginBottom: 2 }}>{t.titulo}</p>
-                    <p style={{ fontSize: 12, color: 'var(--text-light)' }}>{t.numero_preguntas} preguntas · {t.categoria}</p>
-                  </div>
-                  {!canAccess(t.plan_requerido) ? (
-                    <span style={{ fontSize: 11, background: 'var(--warm-dark)', padding: '4px 10px', borderRadius: 8, color: 'var(--text-light)' }}>Premium</span>
-                  ) : <span style={{ fontSize: 14, color: 'var(--gold)' }}>→</span>}
-                </div>
-              </div>
-            ))}
+            {tests.map(t => (<div key={t.id} className="card" style={{ marginBottom: 10, cursor: canAccess(t.plan_requerido) ? 'pointer' : 'default' }} onClick={() => canAccess(t.plan_requerido) && startTest(t)}><div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}><div><p style={{ fontWeight: 600, fontSize: 14, marginBottom: 2 }}>{t.titulo}</p><p style={{ fontSize: 12, color: 'var(--text-light)' }}>{t.numero_preguntas} preguntas · {t.categoria}</p></div>{!canAccess(t.plan_requerido) ? (<span style={{ fontSize: 11, background: 'var(--warm-dark)', padding: '4px 10px', borderRadius: 8, color: 'var(--text-light)' }}>Premium</span>) : <span style={{ fontSize: 14, color: 'var(--gold)' }}>→</span>}</div></div>))}
           </div>
         </div>
       )}
 
-      {/* === HERRAMIENTAS === */}
       {view === 'herramientas' && !activeHerramienta && (
         <div>
           <Header title="Herramientas ✦" subtitle="Ejercicios prácticos con neurociencia" showBack={false} />
           <div style={{ padding: '20px' }}>
-            {herramientas.map(h => (
-              <div key={h.id} className="card" style={{ marginBottom: 10, cursor: canAccess(h.plan_requerido) ? 'pointer' : 'default' }}
-                onClick={() => { if (canAccess(h.plan_requerido)) { setActiveHerramienta(h); setHerramientaStep(0); navigate('herramienta_activa') } }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div>
-                    <p style={{ fontWeight: 600, fontSize: 14, marginBottom: 2 }}>{h.titulo}</p>
-                    <p style={{ fontSize: 12, color: 'var(--text-light)' }}>{h.categoria} · {h.pasos?.length || 0} pasos</p>
-                  </div>
-                  {!canAccess(h.plan_requerido) ? (
-                    <span style={{ fontSize: 11, background: 'var(--warm-dark)', padding: '4px 10px', borderRadius: 8, color: 'var(--text-light)' }}>Premium</span>
-                  ) : <span style={{ fontSize: 14, color: 'var(--gold)' }}>→</span>}
-                </div>
-              </div>
-            ))}
+            {herramientas.map(h => (<div key={h.id} className="card" style={{ marginBottom: 10, cursor: canAccess(h.plan_requerido) ? 'pointer' : 'default' }} onClick={() => { if (canAccess(h.plan_requerido)) { startHerramienta(h) } }}><div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}><div><p style={{ fontWeight: 600, fontSize: 14, marginBottom: 2 }}>{h.titulo}</p><p style={{ fontSize: 12, color: 'var(--text-light)' }}>{h.categoria} · {h.pasos?.length || 0} pasos</p></div>{!canAccess(h.plan_requerido) ? (<span style={{ fontSize: 11, background: 'var(--warm-dark)', padding: '4px 10px', borderRadius: 8, color: 'var(--text-light)' }}>Premium</span>) : <span style={{ fontSize: 14, color: 'var(--gold)' }}>→</span>}</div></div>))}
           </div>
         </div>
       )}
 
-      {/* === HERRAMIENTA ACTIVA === */}
-      {activeHerramienta && view === 'herramienta_activa' && (
-        <div>
-          <Header title={activeHerramienta.titulo} subtitle={`Paso ${herramientaStep + 1} de ${activeHerramienta.pasos?.length || 0}`} />
-          <div style={{ padding: '24px 20px' }}>
-            <div style={{ background: 'var(--warm-dark)', borderRadius: 12, height: 4, marginBottom: 24 }}>
-              <div style={{ background: 'var(--gold)', borderRadius: 12, height: 4, width: `${((herramientaStep + 1) / (activeHerramienta.pasos?.length || 1)) * 100}%`, transition: 'width 0.3s' }} />
-            </div>
-            {herramientaStep === 0 && <p style={{ fontSize: 14, color: 'var(--text-light)', lineHeight: 1.6, marginBottom: 20, fontStyle: 'italic' }}>{activeHerramienta.descripcion}</p>}
-            <div className="card" style={{ marginBottom: 24 }}>
-              <p style={{ fontSize: 15, lineHeight: 1.7 }}>{activeHerramienta.pasos?.[herramientaStep]}</p>
-            </div>
-            <div style={{ display: 'flex', gap: 10 }}>
-              {herramientaStep > 0 && <button className="btn-secondary" onClick={() => setHerramientaStep(herramientaStep - 1)} style={{ flex: 1 }}>← Anterior</button>}
-              {herramientaStep < (activeHerramienta.pasos?.length || 1) - 1 ? (
-                <button className="btn-primary" onClick={() => setHerramientaStep(herramientaStep + 1)} style={{ flex: 1 }}>Siguiente →</button>
-              ) : (
-                <button className="btn-primary" onClick={() => { setActiveHerramienta(null); setHerramientaStep(0); setView('herramientas') }} style={{ flex: 1 }}>Completar ✦</button>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* === PERFIL === */}
       {view === 'perfil' && !activeTest && (
         <div>
           <Header title="Tu Perfil ✦" showBack={false} />
           <div style={{ padding: '20px' }}>
             <div className="card" style={{ marginBottom: 16, textAlign: 'center' }}>
-              <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'var(--gold)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, fontFamily: 'var(--font-display)', margin: '0 auto 12px' }}>
-                {nombre[0].toUpperCase()}
-              </div>
+              <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'var(--gold)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, fontFamily: 'var(--font-display)', margin: '0 auto 12px' }}>{nombre[0].toUpperCase()}</div>
               <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 22 }}>{nombre}</h3>
               <p style={{ fontSize: 13, color: 'var(--text-light)', marginTop: 4 }}>{user?.email}</p>
               <p style={{ display: 'inline-block', marginTop: 8, fontSize: 12, background: 'var(--warm-dark)', padding: '4px 12px', borderRadius: 8, color: 'var(--gold)', fontWeight: 600, textTransform: 'capitalize' }}>Plan {plan}</p>
             </div>
-
             <div className="card" style={{ marginBottom: 16, display: 'flex', gap: 14, alignItems: 'center' }}>
               <img src={coach.photo} alt={coach.name} style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover' }} />
-              <div>
-                <p style={{ fontWeight: 600, fontSize: 14 }}>Tu coach: {coach.name}</p>
-                <p style={{ fontSize: 12, color: 'var(--text-light)' }}>{coach.credential}</p>
-              </div>
+              <div><p style={{ fontWeight: 600, fontSize: 14 }}>Tu coach: {coach.name}</p><p style={{ fontSize: 12, color: 'var(--text-light)' }}>{coach.credential}</p></div>
             </div>
-
             <div className="card" style={{ marginBottom: 16 }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-                {[{ label: 'Racha actual', val: perfil?.racha_dias || 0 }, { label: 'Mejor racha', val: perfil?.mejor_racha || 0 }, { label: 'Nivel', val: perfil?.nivel || 1 }, { label: 'Puntos', val: perfil?.puntos_totales || 0 }].map(s => (
-                  <div key={s.label} style={{ textAlign: 'center' }}>
-                    <p style={{ fontSize: 28, fontWeight: 700, color: 'var(--gold)' }}>{s.val}</p>
-                    <p style={{ fontSize: 12, color: 'var(--text-light)' }}>{s.label}</p>
-                  </div>
-                ))}
+                {[{ label: 'Racha actual', val: perfil?.racha_dias || 0 }, { label: 'Mejor racha', val: perfil?.mejor_racha || 0 }, { label: 'Nivel', val: perfil?.nivel || 1 }, { label: 'Puntos', val: perfil?.puntos_totales || 0 }].map(s => (<div key={s.label} style={{ textAlign: 'center' }}><p style={{ fontSize: 28, fontWeight: 700, color: 'var(--gold)' }}>{s.val}</p><p style={{ fontSize: 12, color: 'var(--text-light)' }}>{s.label}</p></div>))}
               </div>
             </div>
-
             <button className="btn-primary" onClick={() => navigate('planes')} style={{ marginBottom: 12 }}>Cambiar plan</button>
             <button className="btn-secondary" onClick={handleLogout}>Cerrar sesión</button>
           </div>
         </div>
       )}
 
-      {/* === BOTTOM NAV === */}
       {!activeTest && !testResult && !activeHerramienta && !['clara', 'equilibrio', 'herramienta_activa', 'planes'].includes(view) && (
         <div className="bottom-nav">
           <button className={`nav-item ${view === 'inicio' ? 'active' : ''}`} onClick={() => setView('inicio')}><span className="nav-icon">⬡</span>Inicio</button>
