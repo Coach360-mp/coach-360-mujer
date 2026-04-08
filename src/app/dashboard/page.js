@@ -42,10 +42,110 @@ const animos = [
 ]
 
 const elementProfiles = {
-  1: { nombre: 'Agua', desc: 'Eres profunda, intuitiva y empática. Sientes antes de pensar. Tu fortaleza es la conexión emocional. Tu desafío es no perderte en las emociones de otros.' },
-  2: { nombre: 'Tierra', desc: 'Eres estable, práctica y confiable. Analizas antes de actuar. Tu fortaleza es la solidez. Tu desafío es soltar el control y fluir con lo inesperado.' },
-  3: { nombre: 'Fuego', desc: 'Eres apasionada, directa y valiente. Actúas antes de dudar. Tu fortaleza es la determinación. Tu desafío es pausar y escuchar antes de responder.' },
-  4: { nombre: 'Aire', desc: 'Eres creativa, adaptable y libre. Exploras antes de comprometerte. Tu fortaleza es la versatilidad. Tu desafío es profundizar y sostener.' },
+  1: {
+    nombre: 'Agua',
+    icono: '💧',
+    color: '#0ea5e9',
+    colorBg: 'rgba(14, 165, 233, 0.12)',
+    desc: 'Eres profunda, intuitiva y empática. Sientes antes de pensar.',
+    descLarga: 'Tu naturaleza fluye con las emociones — las tuyas y las de quienes te rodean. Tienes una capacidad poco común de leer entre líneas, percibir lo no dicho y conectar con la verdad emocional de cada situación.',
+    fortalezas: [
+      'Empatía profunda con otros',
+      'Intuición que rara vez se equivoca',
+      'Capacidad de crear vínculos auténticos',
+      'Sensibilidad para captar lo que otros no ven',
+    ],
+    sombras: [
+      'Puedes perderte en las emociones de otros',
+      'A veces evitas la confrontación necesaria',
+      'Cargas con peso que no es tuyo',
+    ],
+    recomendaciones: [
+      'Practica poner límites desde el amor, no desde el miedo',
+      'Pregúntate: ¿esta emoción es mía o la estoy absorbiendo?',
+      'Date espacios de soledad para reconectar contigo misma',
+    ],
+    proximoPaso: 'El módulo "Gestión Emocional" está diseñado para ti.',
+    promptClara: 'Acabo de descubrir que mi elemento es Agua. Me gustaría conversar sobre cómo gestionar mejor mi sensibilidad emocional sin perderme en las emociones de otros.',
+  },
+  2: {
+    nombre: 'Tierra',
+    icono: '🌱',
+    color: '#84cc16',
+    colorBg: 'rgba(132, 204, 22, 0.12)',
+    desc: 'Eres estable, práctica y confiable. Analizas antes de actuar.',
+    descLarga: 'Tu fortaleza es la solidez. Eres el ancla en momentos de tormenta, la voz de la razón, la que construye paso a paso lo que otras solo sueñan. Tu palabra vale, tus compromisos se cumplen.',
+    fortalezas: [
+      'Estabilidad que inspira confianza',
+      'Capacidad de planificar y ejecutar',
+      'Paciencia para los procesos largos',
+      'Pragmatismo que evita errores costosos',
+    ],
+    sombras: [
+      'Te cuesta soltar el control',
+      'A veces pierdes oportunidades por sobreanalizar',
+      'Puedes volverte rígida ante el cambio',
+    ],
+    recomendaciones: [
+      'Practica decir sí a algo nuevo cada semana sin planearlo',
+      'Permítete equivocarte — la perfección es una jaula',
+      'Confía en otros para soltar parte del peso',
+    ],
+    proximoPaso: 'La herramienta "Pausa Antes de Decidir" te va a sorprender.',
+    promptClara: 'Mi elemento es Tierra. Soy muy analítica y me cuesta soltar el control. Quiero trabajar en confiar más y permitirme fluir.',
+  },
+  3: {
+    nombre: 'Fuego',
+    icono: '🔥',
+    color: '#f97316',
+    colorBg: 'rgba(249, 115, 22, 0.12)',
+    desc: 'Eres apasionada, directa y valiente. Actúas antes de dudar.',
+    descLarga: 'Tu energía es contagiosa. Donde otras ven obstáculos, tú ves desafíos. Cuando te comprometes con algo, lo das todo. Eres la chispa que enciende proyectos, conversaciones y cambios.',
+    fortalezas: [
+      'Determinación que mueve montañas',
+      'Coraje para iniciar lo que otras posponen',
+      'Pasión que inspira a quienes te rodean',
+      'Honestidad directa, sin máscaras',
+    ],
+    sombras: [
+      'A veces respondes antes de escuchar',
+      'Puedes quemarte por exceso de intensidad',
+      'Tu directness puede herir sin querer',
+    ],
+    recomendaciones: [
+      'Antes de responder, respira 3 veces',
+      'Aprende la diferencia entre directo y abrupto',
+      'Programa pausas reales — no son debilidad, son estrategia',
+    ],
+    proximoPaso: 'La herramienta "Reset de 10 Minutos" es tu mejor aliada esta semana.',
+    promptClara: 'Mi elemento es Fuego. Soy intensa y directa, pero a veces actúo antes de pensar. Quiero aprender a pausar sin perder mi energía.',
+  },
+  4: {
+    nombre: 'Aire',
+    icono: '🌬️',
+    color: '#a78bfa',
+    colorBg: 'rgba(167, 139, 250, 0.12)',
+    desc: 'Eres creativa, adaptable y libre. Exploras antes de comprometerte.',
+    descLarga: 'Tu mente vuela alto y conecta ideas que otras no ven. Eres la que llena espacios de chispa, humor y posibilidades nuevas. Tu libertad es tu mayor tesoro y tu mayor desafío.',
+    fortalezas: [
+      'Creatividad que rompe esquemas',
+      'Adaptabilidad ante el cambio',
+      'Visión amplia y conectiva',
+      'Capacidad de reinventarte',
+    ],
+    sombras: [
+      'Te cuesta sostener compromisos largos',
+      'Saltas de idea en idea sin profundizar',
+      'A veces evitas el peso de las emociones difíciles',
+    ],
+    recomendaciones: [
+      'Elige UNA cosa esta semana y termínala',
+      'Practica quedarte 5 minutos más en una conversación incómoda',
+      'Profundiza en algo que ya conoces antes de buscar lo nuevo',
+    ],
+    proximoPaso: 'El módulo "Decisiones Alineadas" te va a ayudar a sostener tus elecciones.',
+    promptClara: 'Mi elemento es Aire. Soy creativa pero me cuesta profundizar y sostener compromisos. Quiero trabajar en elegir y mantenerme.',
+  },
 }
 
 export default function Dashboard() {
@@ -191,15 +291,11 @@ export default function Dashboard() {
       mediaRecorder.onstop = async () => {
         const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' })
         stream.getTracks().forEach(track => track.stop())
-        
-        // Use browser SpeechRecognition for simplicity
-        // The text will be set in chatInput for the user to review before sending
       }
 
       mediaRecorder.start()
       setIsRecording(true)
 
-      // Use Web Speech API for real-time transcription
       if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
         const recognition = new SpeechRecognition()
@@ -301,7 +397,6 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* Coach card with photo */}
           <div className="card" style={{ marginBottom: 16, background: 'var(--dark)', color: '#fff', cursor: 'pointer', display: 'flex', gap: 16, alignItems: 'center' }} onClick={() => navigate('clara')}>
             <img src={coach.photo} alt={coach.name} style={{ width: 56, height: 56, borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--gold-light)' }} />
             <div>
@@ -335,7 +430,6 @@ export default function Dashboard() {
             ))}
           </div>
 
-          {/* Conoce al equipo */}
           <div className="card" style={{ marginBottom: 24, cursor: 'pointer' }} onClick={() => navigate('planes')}>
             <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 18, marginBottom: 12 }}>Conoce a tu equipo de coaches</h3>
             <div style={{ display: 'flex', justifyContent: 'center', gap: 12 }}>
@@ -419,7 +513,6 @@ export default function Dashboard() {
               )
             })}
 
-            {/* Sesiones aparte */}
             <div className="card" style={{ marginTop: 8, background: 'var(--warm-dark)' }}>
               <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 18, marginBottom: 8 }}>Sesiones con coach humana</h3>
               <p style={{ fontSize: 13, color: 'var(--text-light)', lineHeight: 1.5, marginBottom: 12 }}>
@@ -444,19 +537,64 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* === TEST ACTIVO === */}
+      {/* === TEST ACTIVO - PANTALLA COMPLETA === */}
       {activeTest && !testResult && (
-        <div>
-          <Header title={activeTest.titulo} subtitle={`Pregunta ${testStep + 1} de ${testQuestions.length}`} />
-          <div style={{ padding: '24px 20px' }}>
-            <div style={{ background: 'var(--warm-dark)', borderRadius: 12, height: 4, marginBottom: 32 }}>
-              <div style={{ background: 'var(--gold)', borderRadius: 12, height: 4, width: `${((testStep + 1) / testQuestions.length) * 100}%`, transition: 'width 0.3s' }} />
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'linear-gradient(180deg, #1a1410 0%, #0a0a0a 100%)',
+          zIndex: 1000, overflowY: 'auto',
+          display: 'flex', flexDirection: 'column',
+        }}>
+          <div style={{ padding: '20px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <button onClick={() => { setActiveTest(null); setTestStep(0); setTestAnswers([]); }}
+              style={{ background: 'transparent', border: 'none', color: '#a8a8a8', fontSize: 14, cursor: 'pointer' }}>
+              ← Salir
+            </button>
+            <div style={{ fontSize: 11, letterSpacing: 2, color: '#d4af37', textTransform: 'uppercase' }}>
+              {testStep + 1} / {testQuestions.length}
             </div>
-            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 22, lineHeight: 1.3, marginBottom: 28 }}>{testQuestions[testStep]?.texto}</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          </div>
+
+          <div style={{ padding: '0 24px 32px' }}>
+            <div style={{ background: 'rgba(212, 175, 55, 0.15)', borderRadius: 12, height: 4, overflow: 'hidden' }}>
+              <div style={{
+                background: 'linear-gradient(90deg, #d4af37, #f5c842)',
+                height: '100%',
+                width: `${((testStep + 1) / testQuestions.length) * 100}%`,
+                transition: 'width 0.4s ease',
+              }} />
+            </div>
+          </div>
+
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 24px 40px', maxWidth: 560, margin: '0 auto', width: '100%' }}>
+            <div style={{ fontSize: 11, letterSpacing: 3, color: '#d4af37', textTransform: 'uppercase', marginBottom: 16, textAlign: 'center' }}>
+              {activeTest.titulo}
+            </div>
+            <h2 style={{
+              fontFamily: 'Georgia, serif',
+              fontSize: 26, lineHeight: 1.4, marginBottom: 40,
+              color: '#fff', textAlign: 'center', fontWeight: 300,
+            }}>
+              {testQuestions[testStep]?.texto}
+            </h2>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {testQuestions[testStep]?.opciones?.map((opt, i) => (
-                <button key={i} onClick={() => answerQuestion(testQuestions[testStep].valores[i])}
-                  style={{ padding: '16px 20px', borderRadius: 14, border: '2px solid #e0dbd4', background: '#fff', textAlign: 'left', fontSize: 14, cursor: 'pointer', fontFamily: 'var(--font-body)', lineHeight: 1.4, transition: 'all 0.2s', color: 'var(--text)' }}>
+                <button key={i}
+                  onClick={() => answerQuestion(testQuestions[testStep].valores[i])}
+                  style={{
+                    background: 'rgba(212, 175, 55, 0.08)',
+                    border: '1px solid rgba(212, 175, 55, 0.25)',
+                    borderRadius: 14,
+                    padding: '18px 20px',
+                    color: '#fff',
+                    fontSize: 15,
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    lineHeight: 1.5,
+                    fontFamily: 'inherit',
+                  }}>
                   {opt}
                 </button>
               ))}
@@ -465,20 +603,147 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* === RESULTADO TEST === */}
+      {/* === RESULTADO TEST - PANTALLA COMPLETA ENRIQUECIDA === */}
       {testResult && (
-        <div>
-          <Header title="Tu Resultado ✦" />
-          <div style={{ padding: '24px 20px', textAlign: 'center' }}>
-            <div style={{ width: 100, height: 100, borderRadius: '50%', margin: '0 auto 20px', background: 'var(--dark)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ color: 'var(--gold-light)', fontSize: 36, fontFamily: 'var(--font-display)' }}>{testResult.nombre[0]}</span>
-            </div>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 32, marginBottom: 8 }}>{testResult.nombre}</h2>
-            <p style={{ fontSize: 15, color: 'var(--text)', lineHeight: 1.6, maxWidth: 340, margin: '0 auto 32px' }}>{testResult.desc}</p>
-            <button className="btn-primary" onClick={() => { setTestResult(null); setActiveTest(null); navigate('clara') }} style={{ marginBottom: 12 }}>
-              Explorar esto con {coach.name} ✦
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: `linear-gradient(180deg, ${testResult.colorBg || 'rgba(212,175,55,0.1)'} 0%, #0a0a0a 60%)`,
+          zIndex: 1000, overflowY: 'auto',
+        }}>
+          <div style={{ padding: '20px 24px' }}>
+            <button onClick={() => { setTestResult(null); setActiveTest(null); }}
+              style={{ background: 'transparent', border: 'none', color: '#a8a8a8', fontSize: 14, cursor: 'pointer' }}>
+              ← Cerrar
             </button>
-            <button className="btn-secondary" onClick={() => { setTestResult(null); setActiveTest(null) }}>Volver al inicio</button>
+          </div>
+
+          <div style={{ maxWidth: 560, margin: '0 auto', padding: '20px 24px 60px' }}>
+            <div style={{ textAlign: 'center', marginBottom: 40 }}>
+              <div style={{ fontSize: 11, letterSpacing: 3, color: testResult.color || '#d4af37', textTransform: 'uppercase', marginBottom: 12 }}>
+                Tu elemento es
+              </div>
+              <div style={{ fontSize: 80, marginBottom: 8 }}>{testResult.icono || '✦'}</div>
+              <h1 style={{
+                fontFamily: 'Georgia, serif',
+                fontSize: 44, fontWeight: 300,
+                color: '#fff', marginBottom: 16,
+              }}>
+                {testResult.nombre}
+              </h1>
+              <p style={{ fontSize: 16, color: '#d4d4d4', lineHeight: 1.6, maxWidth: 440, margin: '0 auto' }}>
+                {testResult.descLarga || testResult.desc}
+              </p>
+            </div>
+
+            {testResult.fortalezas && (
+              <div style={{
+                background: 'rgba(255,255,255,0.03)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                borderRadius: 16, padding: 24, marginBottom: 16,
+              }}>
+                <div style={{ fontSize: 11, letterSpacing: 2, color: testResult.color, textTransform: 'uppercase', marginBottom: 14, fontWeight: 600 }}>
+                  ✦ Tus fortalezas
+                </div>
+                {testResult.fortalezas.map((f, i) => (
+                  <div key={i} style={{ display: 'flex', gap: 12, marginBottom: 10, color: '#e5e5e5', fontSize: 14, lineHeight: 1.5 }}>
+                    <span style={{ color: testResult.color, flexShrink: 0 }}>—</span>
+                    <span>{f}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {testResult.sombras && (
+              <div style={{
+                background: 'rgba(255,255,255,0.03)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                borderRadius: 16, padding: 24, marginBottom: 16,
+              }}>
+                <div style={{ fontSize: 11, letterSpacing: 2, color: '#a8a8a8', textTransform: 'uppercase', marginBottom: 14, fontWeight: 600 }}>
+                  Tu sombra
+                </div>
+                {testResult.sombras.map((s, i) => (
+                  <div key={i} style={{ display: 'flex', gap: 12, marginBottom: 10, color: '#c4c4c4', fontSize: 14, lineHeight: 1.5 }}>
+                    <span style={{ color: '#a8a8a8', flexShrink: 0 }}>—</span>
+                    <span>{s}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {testResult.recomendaciones && (
+              <div style={{
+                background: 'rgba(255,255,255,0.03)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                borderRadius: 16, padding: 24, marginBottom: 16,
+              }}>
+                <div style={{ fontSize: 11, letterSpacing: 2, color: testResult.color, textTransform: 'uppercase', marginBottom: 14, fontWeight: 600 }}>
+                  Para esta semana
+                </div>
+                {testResult.recomendaciones.map((r, i) => (
+                  <div key={i} style={{ display: 'flex', gap: 12, marginBottom: 10, color: '#e5e5e5', fontSize: 14, lineHeight: 1.5 }}>
+                    <span style={{ color: testResult.color, flexShrink: 0, fontWeight: 600 }}>{i + 1}.</span>
+                    <span>{r}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {testResult.proximoPaso && (
+              <div style={{
+                background: testResult.colorBg,
+                border: `1px solid ${testResult.color}40`,
+                borderRadius: 16, padding: 24, marginBottom: 24,
+              }}>
+                <div style={{ fontSize: 11, letterSpacing: 2, color: testResult.color, textTransform: 'uppercase', marginBottom: 8, fontWeight: 600 }}>
+                  ✦ Tu próximo paso
+                </div>
+                <div style={{ color: '#fff', fontSize: 15, lineHeight: 1.5 }}>
+                  {testResult.proximoPaso}
+                </div>
+              </div>
+            )}
+
+            <button
+              onClick={() => {
+                const prompt = testResult.promptClara || `Acabo de hacer un test y mi resultado es ${testResult.nombre}. Me gustaría conversar contigo sobre eso.`
+                setChatMsgs([{ r: 'u', t: prompt }])
+                setTestResult(null); setActiveTest(null);
+                setView('clara')
+              }}
+              style={{
+                width: '100%',
+                background: `linear-gradient(135deg, ${testResult.color}, ${testResult.color}cc)`,
+                color: '#0a0a0a',
+                border: 'none',
+                padding: '18px 24px',
+                borderRadius: 30,
+                fontSize: 15,
+                fontWeight: 600,
+                cursor: 'pointer',
+                marginBottom: 12,
+                fontFamily: 'inherit',
+              }}
+            >
+              Conversar con {coach.name} sobre esto →
+            </button>
+
+            <button
+              onClick={() => { setTestResult(null); setActiveTest(null); }}
+              style={{
+                width: '100%',
+                background: 'transparent',
+                color: '#a8a8a8',
+                border: '1px solid rgba(255,255,255,0.15)',
+                padding: '14px 24px',
+                borderRadius: 30,
+                fontSize: 14,
+                cursor: 'pointer',
+                fontFamily: 'inherit',
+              }}
+            >
+              Volver al inicio
+            </button>
           </div>
         </div>
       )}
@@ -515,7 +780,7 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* === CLARA/SOFÍA/VICTORIA CHAT === */}
+      {/* === CHAT CON COACH === */}
       {view === 'clara' && !activeTest && (
         <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
           <div style={{ padding: '48px 20px 12px', borderBottom: '1px solid #eee', background: '#fff', display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -559,7 +824,7 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* === TESTS === */}
+      {/* === TESTS LIST === */}
       {view === 'tests' && !activeTest && (
         <div>
           <Header title="Tests ✦" subtitle="Descubre más sobre ti misma" showBack={false} />
@@ -643,7 +908,6 @@ export default function Dashboard() {
               <p style={{ display: 'inline-block', marginTop: 8, fontSize: 12, background: 'var(--warm-dark)', padding: '4px 12px', borderRadius: 8, color: 'var(--gold)', fontWeight: 600, textTransform: 'capitalize' }}>Plan {plan}</p>
             </div>
 
-            {/* Tu coach actual */}
             <div className="card" style={{ marginBottom: 16, display: 'flex', gap: 14, alignItems: 'center' }}>
               <img src={coach.photo} alt={coach.name} style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover' }} />
               <div>
