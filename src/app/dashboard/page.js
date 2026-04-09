@@ -315,51 +315,6 @@ export default function Dashboard() {
     }
   }
 
-  const sumarPuntos = async (accion, puntos, descripcion = null) => {
-    if (!user) return
-    try {
-      const { data } = await supabase.rpc('sumar_puntos', {
-        p_user_id: user.id,
-        p_accion: accion,
-        p_puntos: puntos,
-        p_descripcion: descripcion
-      })
-      if (data) {
-        setPerfil(prev => ({
-          ...prev,
-          puntos_totales: data.puntos_totales,
-          nivel: data.nivel,
-          racha_dias: data.racha_dias,
-        }))
-      }
-    } catch (err) {
-      console.error('Error sumando puntos:', err)
-    }
-  }
-
-  const sumarPuntos = async (accion, puntos, descripcion = null) => {
-    if (!user) return
-    try {
-      const { data } = await supabase.rpc('sumar_puntos', {
-        p_user_id: user.id,
-        p_accion: accion,
-        p_puntos: puntos,
-        p_descripcion: descripcion,
-      })
-      if (data) {
-        setPerfil(prev => ({
-          ...prev,
-          puntos_totales: data.puntos_totales,
-          nivel: data.nivel,
-          racha_dias: data.racha_dias,
-          mejor_racha: Math.max(prev?.mejor_racha || 0, data.racha_dias),
-        }))
-      }
-    } catch (err) {
-      console.error('Error sumando puntos:', err)
-    }
-  }
-
   if (loading) return (<div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--warm)' }}><p style={{ color: 'var(--text-light)' }}>Cargando ✦</p></div>)
 
   const nombre = perfil?.nombre || user?.user_metadata?.full_name || 'Bienvenida'
