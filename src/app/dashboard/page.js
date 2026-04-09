@@ -139,6 +139,7 @@ export default function Dashboard() {
       setTestResult(profile)
       if (user) {
         await supabase.from('resultados_test').insert({ usuario_id: user.id, test_id: activeTest.id, puntaje_total: newAnswers.reduce((a, b) => a + b, 0), perfil_resultado: profile.nombre, respuestas: newAnswers })
+        await sumarPuntos('test_completado', 20, `Test: ${activeTest.titulo}`)
       }
     }
   }
@@ -152,6 +153,7 @@ export default function Dashboard() {
     if (user && herramientaReflexion.trim()) {
       try {
         await supabase.from('resultados_test').insert({ usuario_id: user.id, test_id: null, puntaje_total: 0, perfil_resultado: `Herramienta: ${activeHerramienta.titulo}`, respuestas: { reflexion: herramientaReflexion, herramienta_id: activeHerramienta.id } })
+        await sumarPuntos('herramienta_completada', 15, `Herramienta: ${activeHerramienta.titulo}`)
       } catch (err) { console.error('Error guardando reflexión:', err) }
     }
   }
@@ -170,6 +172,11 @@ export default function Dashboard() {
       const reply = data.reply || 'Cuéntame más ✦'
       setChatMsgs(prev => [...prev, { r: 'a', t: reply }])
       speakText(reply)
+      // Sumar puntos solo si es el primer mensaje del usuario en esta sesión de chat
+      const mensajesDelUsuario = chatMsgs.filter(m => m.r === 'u').length
+      if (mensajesDelUsuario === 0) {
+        sumarPuntos('conversacion_coach', 5, `Conversación con ${coach.name}`)
+      }
     } catch {
       setTyping(false)
       setChatMsgs(prev => [...prev, { r: 'a', t: 'Perdona, hubo un error. ¿Puedes intentar de nuevo? ✦' }])
@@ -274,6 +281,8 @@ export default function Dashboard() {
     } else {
       await supabase.from('habitos_completados').insert({ user_id: user.id, habito_id: habitoId, fecha: hoy })
       setHabitosCompletados(prev => [...prev, habitoId])
+      const habito = habitosUsuario.find(h => h.id === habitoId)
+      await sumarPuntos('habito', 3, habito ? `Hábito: ${habito.nombre}` : 'Hábito completado')
     }
   }
 
@@ -281,6 +290,74 @@ export default function Dashboard() {
     setConfigurandoHabitos(true)
     setConfigDimension(0)
     setHabitosSeleccionados({ mente: [], cuerpo: [], corazon: [], espiritu: [] })
+  }
+
+  const sumarPuntos = async (accion, puntos, descripcion = null) => {
+    if (!user) return
+    try {
+      const { data } = await supabase.rpc('sumar_puntos', {
+        p_user_id: user.id,
+        p_accion: accion,
+        p_puntos: puntos,
+        p_descripcion: descripcion,
+      })
+      if (data) {
+        setPerfil(prev => ({
+          ...prev,
+          puntos_totales: data.puntos_totales,
+          nivel: data.nivel,
+          racha_dias: data.racha_dias,
+          mejor_racha: Math.max(prev?.mejor_racha || 0, data.racha_dias),
+        }))
+      }
+    } catch (err) {
+      console.error('Error sumando puntos:', err)
+    }
+  }
+
+  const sumarPuntos = async (accion, puntos, descripcion = null) => {
+    if (!user) return
+    try {
+      const { data } = await supabase.rpc('sumar_puntos', {
+        p_user_id: user.id,
+        p_accion: accion,
+        p_puntos: puntos,
+        p_descripcion: descripcion
+      })
+      if (data) {
+        setPerfil(prev => ({
+          ...prev,
+          puntos_totales: data.puntos_totales,
+          nivel: data.nivel,
+          racha_dias: data.racha_dias,
+        }))
+      }
+    } catch (err) {
+      console.error('Error sumando puntos:', err)
+    }
+  }
+
+  const sumarPuntos = async (accion, puntos, descripcion = null) => {
+    if (!user) return
+    try {
+      const { data } = await supabase.rpc('sumar_puntos', {
+        p_user_id: user.id,
+        p_accion: accion,
+        p_puntos: puntos,
+        p_descripcion: descripcion,
+      })
+      if (data) {
+        setPerfil(prev => ({
+          ...prev,
+          puntos_totales: data.puntos_totales,
+          nivel: data.nivel,
+          racha_dias: data.racha_dias,
+          mejor_racha: Math.max(prev?.mejor_racha || 0, data.racha_dias),
+        }))
+      }
+    } catch (err) {
+      console.error('Error sumando puntos:', err)
+    }
   }
 
   if (loading) return (<div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--warm)' }}><p style={{ color: 'var(--text-light)' }}>Cargando ✦</p></div>)
@@ -317,7 +394,7 @@ export default function Dashboard() {
             <div className="card" style={{ marginBottom: 20, textAlign: 'center' }}>
               <p style={{ fontSize: 14, fontWeight: 600, marginBottom: 12 }}>¿Cómo te sientes hoy?</p>
               <div style={{ display: 'flex', justifyContent: 'center', gap: 6 }}>
-                {animos.map(a => (<button key={a.value} onClick={() => { setAnimoHoy(a.value); setCheckinDone(true) }} style={{ background: animoHoy === a.value ? 'var(--gold)' : 'var(--warm-dark)', border: 'none', borderRadius: 12, padding: '10px 14px', cursor: 'pointer', fontSize: 12, fontWeight: 600, color: animoHoy === a.value ? '#fff' : 'var(--text)', transition: 'all 0.2s', fontFamily: 'var(--font-body)' }}>{a.label}</button>))}
+                {animos.map(a => (<button key={a.value} onClick={() => { setAnimoHoy(a.value); setCheckinDone(true); sumarPuntos('checkin', 5, `Check-in: ${a.label}`) }} style={{ background: animoHoy === a.value ? 'var(--gold)' : 'var(--warm-dark)', border: 'none', borderRadius: 12, padding: '10px 14px', cursor: 'pointer', fontSize: 12, fontWeight: 600, color: animoHoy === a.value ? '#fff' : 'var(--text)', transition: 'all 0.2s', fontFamily: 'var(--font-body)' }}>{a.label}</button>))}
               </div>
             </div>
           ) : (<div className="card" style={{ marginBottom: 20, textAlign: 'center', padding: 16 }}><p style={{ fontSize: 13, color: 'var(--gold)' }}>Check-in completado ✦</p></div>)}
