@@ -25,6 +25,15 @@ const dimensiones = [
 
 const animos = [{ label: 'Difícil', value: 1 }, { label: 'Regular', value: 2 }, { label: 'Bien', value: 3 }, { label: 'Muy bien', value: 4 }, { label: 'Increíble', value: 5 }]
 
+const habitosSugeridos = {
+  mente: ['Leer 20 minutos', 'Meditar', 'Escribir en un diario', 'Aprender algo nuevo', 'Hacer un puzzle', 'Escuchar un podcast', 'Desconectarme del celular 1 hora', 'Journaling matutino'],
+  cuerpo: ['Caminar 30 minutos', 'Pilates', 'Gimnasio', 'Yoga', 'Tomar 2 litros de agua', 'Dormir 8 horas', 'Comer 5 porciones de verduras', 'Estirarme 10 minutos'],
+  corazon: ['Llamar a alguien querido', 'Expresar agradecimiento', 'Journaling emocional', 'Conectar con amigas', 'Cuidar a alguien', 'Escribir lo que sentí hoy', 'Pasar tiempo con mi pareja', 'Tiempo con mis hijos'],
+  espiritu: ['Meditación guiada', 'Caminar en naturaleza', 'Oración', 'Momento de silencio', 'Respiración consciente', 'Leer algo inspirador', 'Gratitud al dormir', 'Contemplación'],
+}
+
+const diasSemana = ['L', 'M', 'X', 'J', 'V', 'S', 'D']
+
 const elementProfiles = {
   1: { nombre: 'Agua', icono: '💧', color: '#0ea5e9', colorBg: 'rgba(14, 165, 233, 0.12)', desc: 'Eres profunda, intuitiva y empática. Sientes antes de pensar.', descLarga: 'Tu naturaleza fluye con las emociones — las tuyas y las de quienes te rodean. Tienes una capacidad poco común de leer entre líneas, percibir lo no dicho y conectar con la verdad emocional de cada situación.', fortalezas: ['Empatía profunda con otros', 'Intuición que rara vez se equivoca', 'Capacidad de crear vínculos auténticos', 'Sensibilidad para captar lo que otros no ven'], sombras: ['Puedes perderte en las emociones de otros', 'A veces evitas la confrontación necesaria', 'Cargas con peso que no es tuyo'], recomendaciones: ['Practica poner límites desde el amor, no desde el miedo', 'Pregúntate: ¿esta emoción es mía o la estoy absorbiendo?', 'Date espacios de soledad para reconectar contigo misma'], proximoPaso: 'El módulo "Gestión Emocional" está diseñado para ti.', promptClara: 'Acabo de descubrir que mi elemento es Agua. Me gustaría conversar sobre cómo gestionar mejor mi sensibilidad emocional sin perderme en las emociones de otros.' },
   2: { nombre: 'Tierra', icono: '🌱', color: '#84cc16', colorBg: 'rgba(132, 204, 22, 0.12)', desc: 'Eres estable, práctica y confiable. Analizas antes de actuar.', descLarga: 'Tu fortaleza es la solidez. Eres el ancla en momentos de tormenta, la voz de la razón, la que construye paso a paso lo que otras solo sueñan.', fortalezas: ['Estabilidad que inspira confianza', 'Capacidad de planificar y ejecutar', 'Paciencia para los procesos largos', 'Pragmatismo que evita errores costosos'], sombras: ['Te cuesta soltar el control', 'A veces pierdes oportunidades por sobreanalizar', 'Puedes volverte rígida ante el cambio'], recomendaciones: ['Practica decir sí a algo nuevo cada semana sin planearlo', 'Permítete equivocarte — la perfección es una jaula', 'Confía en otros para soltar parte del peso'], proximoPaso: 'La herramienta "Pausa Antes de Decidir" te va a sorprender.', promptClara: 'Mi elemento es Tierra. Soy muy analítica y me cuesta soltar el control. Quiero trabajar en confiar más y permitirme fluir.' },
@@ -56,6 +65,12 @@ export default function Dashboard() {
   const [checkinDone, setCheckinDone] = useState(false)
   const [animoHoy, setAnimoHoy] = useState(null)
   const [equilibrio, setEquilibrio] = useState({ mente: 0, cuerpo: 0, corazon: 0, espiritu: 0 })
+  const [habitosUsuario, setHabitosUsuario] = useState([])
+  const [habitosCompletados, setHabitosCompletados] = useState([])
+  const [configurandoHabitos, setConfigurandoHabitos] = useState(false)
+  const [configDimension, setConfigDimension] = useState(0)
+  const [habitosSeleccionados, setHabitosSeleccionados] = useState({ mente: [], cuerpo: [], corazon: [], espiritu: [] })
+  const [nuevoHabito, setNuevoHabito] = useState('')
   const [isRecording, setIsRecording] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
   const chatEndRef = useRef(null)
@@ -83,6 +98,14 @@ export default function Dashboard() {
     if (t) setTests(t)
     if (h) setHerramientas(h)
     if (m) setModulos(m)
+
+    // Cargar hábitos personalizados y completados del día
+    const hoy = new Date().toISOString().split('T')[0]
+    const { data: hab } = await supabase.from('habitos_usuario').select('*').eq('user_id', user.id).eq('activo', true)
+    const { data: hcomp } = await supabase.from('habitos_completados').select('*').eq('user_id', user.id).eq('fecha', hoy)
+    if (hab) setHabitosUsuario(hab)
+    if (hcomp) setHabitosCompletados(hcomp.map(c => c.habito_id))
+
     setLoading(false)
   }
 
@@ -191,6 +214,73 @@ export default function Dashboard() {
   }
 
   const stopRecording = () => { if (mediaRecorderRef.current?.state === 'recording') { mediaRecorderRef.current.stop() } setIsRecording(false) }
+
+  const toggleHabitoSeleccionado = (dim, habito) => {
+    setHabitosSeleccionados(prev => {
+      const actuales = prev[dim] || []
+      const existe = actuales.find(h => h.nombre === habito)
+      if (existe) {
+        return { ...prev, [dim]: actuales.filter(h => h.nombre !== habito) }
+      } else {
+        return { ...prev, [dim]: [...actuales, { nombre: habito, dias: [1,2,3,4,5,6,7], horario: null }] }
+      }
+    })
+  }
+
+  const toggleDiaHabito = (dim, habitoNombre, dia) => {
+    setHabitosSeleccionados(prev => ({
+      ...prev,
+      [dim]: prev[dim].map(h => {
+        if (h.nombre !== habitoNombre) return h
+        const nuevosDias = h.dias.includes(dia) ? h.dias.filter(d => d !== dia) : [...h.dias, dia].sort()
+        return { ...h, dias: nuevosDias }
+      })
+    }))
+  }
+
+  const agregarHabitoPropio = (dim) => {
+    if (!nuevoHabito.trim()) return
+    setHabitosSeleccionados(prev => ({
+      ...prev,
+      [dim]: [...(prev[dim] || []), { nombre: nuevoHabito.trim(), dias: [1,2,3,4,5,6,7], horario: null }]
+    }))
+    setNuevoHabito('')
+  }
+
+  const guardarHabitos = async () => {
+    if (!user) return
+    const todosLosHabitos = []
+    Object.keys(habitosSeleccionados).forEach(dim => {
+      habitosSeleccionados[dim].forEach(h => {
+        todosLosHabitos.push({ user_id: user.id, dimension: dim, nombre: h.nombre, dias_semana: h.dias, horario: h.horario, activo: true })
+      })
+    })
+    if (todosLosHabitos.length > 0) {
+      const { data } = await supabase.from('habitos_usuario').insert(todosLosHabitos).select()
+      if (data) setHabitosUsuario(data)
+    }
+    setConfigurandoHabitos(false)
+    setConfigDimension(0)
+  }
+
+  const toggleHabitoCompletado = async (habitoId) => {
+    if (!user) return
+    const hoy = new Date().toISOString().split('T')[0]
+    const yaCompletado = habitosCompletados.includes(habitoId)
+    if (yaCompletado) {
+      await supabase.from('habitos_completados').delete().eq('habito_id', habitoId).eq('fecha', hoy)
+      setHabitosCompletados(prev => prev.filter(id => id !== habitoId))
+    } else {
+      await supabase.from('habitos_completados').insert({ user_id: user.id, habito_id: habitoId, fecha: hoy })
+      setHabitosCompletados(prev => [...prev, habitoId])
+    }
+  }
+
+  const iniciarConfiguracion = () => {
+    setConfigurandoHabitos(true)
+    setConfigDimension(0)
+    setHabitosSeleccionados({ mente: [], cuerpo: [], corazon: [], espiritu: [] })
+  }
 
   if (loading) return (<div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--warm)' }}><p style={{ color: 'var(--text-light)' }}>Cargando ✦</p></div>)
 
@@ -384,17 +474,167 @@ export default function Dashboard() {
 
       {view === 'equilibrio' && !activeTest && (
         <div>
-          <Header title="Mi Equilibrio ✦" subtitle="Tu bienestar integral de hoy" />
-          <div style={{ padding: '20px' }}>
-            <p style={{ fontSize: 14, color: 'var(--text-light)', marginBottom: 20, lineHeight: 1.5 }}>Cuida las cuatro dimensiones que impactan tu claridad y tus decisiones.</p>
-            {dimensiones.map(d => (
-              <div key={d.key} className="card" style={{ marginBottom: 14 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}><div style={{ width: 12, height: 12, borderRadius: '50%', background: d.color }} /><div><p style={{ fontWeight: 600, fontSize: 15 }}>{d.label}</p><p style={{ fontSize: 12, color: 'var(--text-light)' }}>{d.desc}</p></div></div>
-                <div style={{ display: 'flex', gap: 6 }}>{[1, 2, 3, 4, 5].map(v => (<button key={v} onClick={() => setEquilibrio(prev => ({ ...prev, [d.key]: v }))} style={{ flex: 1, height: 36, borderRadius: 8, border: 'none', cursor: 'pointer', background: equilibrio[d.key] >= v ? d.color : '#f0ebe3', opacity: equilibrio[d.key] >= v ? 1 : 0.5, transition: 'all 0.2s' }} />))}</div>
-              </div>
-            ))}
-            <button className="btn-primary" style={{ marginTop: 8 }} onClick={() => navigate('inicio')}>Guardar mi equilibrio ✦</button>
-          </div>
+          <Header title="Mi Equilibrio ✦" subtitle={habitosUsuario.length > 0 ? 'Tus hábitos de hoy' : 'Configura tu bienestar'} />
+
+          {/* Modo configuración (primera vez o reconfigurar) */}
+          {(configurandoHabitos || habitosUsuario.length === 0) && (
+            <div style={{ padding: '20px' }}>
+              {!configurandoHabitos && habitosUsuario.length === 0 && (
+                <div style={{ textAlign: 'center', padding: '20px 0 30px' }}>
+                  <p style={{ fontSize: 14, color: 'var(--text-light)', lineHeight: 1.6, marginBottom: 20 }}>
+                    Tu bienestar se construye con hábitos propios. Elige los que quieres cultivar en cada dimensión y nosotras te acompañamos.
+                  </p>
+                  <button className="btn-primary" onClick={iniciarConfiguracion}>Empezar ✦</button>
+                </div>
+              )}
+
+              {configurandoHabitos && (() => {
+                const dim = dimensiones[configDimension]
+                const seleccionados = habitosSeleccionados[dim.key] || []
+                const sugerencias = habitosSugeridos[dim.key] || []
+                return (
+                  <div>
+                    {/* Progress */}
+                    <div style={{ display: 'flex', gap: 6, marginBottom: 20 }}>
+                      {dimensiones.map((d, i) => (
+                        <div key={d.key} style={{ flex: 1, height: 4, borderRadius: 4, background: i <= configDimension ? d.color : '#e0dbd4', transition: 'all 0.3s' }} />
+                      ))}
+                    </div>
+
+                    <div style={{ textAlign: 'center', marginBottom: 24 }}>
+                      <div style={{ width: 16, height: 16, borderRadius: '50%', background: dim.color, margin: '0 auto 8px' }} />
+                      <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 26, marginBottom: 6 }}>{dim.label}</h3>
+                      <p style={{ fontSize: 13, color: 'var(--text-light)' }}>¿Qué hábitos quieres cultivar?</p>
+                    </div>
+
+                    {/* Sugerencias */}
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 20 }}>
+                      {sugerencias.map(h => {
+                        const isSelected = seleccionados.find(s => s.nombre === h)
+                        return (
+                          <button key={h} onClick={() => toggleHabitoSeleccionado(dim.key, h)} style={{
+                            padding: '10px 14px', borderRadius: 20, border: `1.5px solid ${isSelected ? dim.color : '#e0dbd4'}`,
+                            background: isSelected ? `${dim.color}15` : '#fff', color: isSelected ? dim.color : 'var(--text)',
+                            fontSize: 13, cursor: 'pointer', fontFamily: 'inherit', fontWeight: isSelected ? 600 : 400, transition: 'all 0.2s'
+                          }}>
+                            {isSelected && '✓ '}{h}
+                          </button>
+                        )
+                      })}
+                    </div>
+
+                    {/* Agregar propio */}
+                    <div style={{ display: 'flex', gap: 8, marginBottom: 24 }}>
+                      <input type="text" value={nuevoHabito} onChange={(e) => setNuevoHabito(e.target.value)}
+                        placeholder="Agregar hábito propio..." className="input-field" style={{ flex: 1, fontSize: 13 }}
+                        onKeyDown={(e) => e.key === 'Enter' && agregarHabitoPropio(dim.key)} />
+                      <button onClick={() => agregarHabitoPropio(dim.key)} style={{
+                        padding: '0 16px', borderRadius: 12, border: 'none', background: dim.color, color: '#fff', fontSize: 18, cursor: 'pointer'
+                      }}>+</button>
+                    </div>
+
+                    {/* Días por hábito seleccionado */}
+                    {seleccionados.length > 0 && (
+                      <div style={{ marginBottom: 24 }}>
+                        <p style={{ fontSize: 12, color: 'var(--text-light)', marginBottom: 12, textTransform: 'uppercase', letterSpacing: 1 }}>Tus hábitos de {dim.label.toLowerCase()}</p>
+                        {seleccionados.map(h => (
+                          <div key={h.nombre} className="card" style={{ marginBottom: 10, padding: 14 }}>
+                            <p style={{ fontSize: 14, fontWeight: 600, marginBottom: 10 }}>{h.nombre}</p>
+                            <div style={{ display: 'flex', gap: 4 }}>
+                              {diasSemana.map((d, i) => {
+                                const diaNum = i + 1
+                                const activo = h.dias.includes(diaNum)
+                                return (
+                                  <button key={i} onClick={() => toggleDiaHabito(dim.key, h.nombre, diaNum)} style={{
+                                    flex: 1, height: 32, borderRadius: 8, border: 'none',
+                                    background: activo ? dim.color : '#f0ebe3', color: activo ? '#fff' : 'var(--text-light)',
+                                    fontSize: 11, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit'
+                                  }}>{d}</button>
+                                )
+                              })}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Navegación */}
+                    <div style={{ display: 'flex', gap: 10 }}>
+                      {configDimension > 0 && (
+                        <button className="btn-secondary" onClick={() => setConfigDimension(configDimension - 1)} style={{ flex: 1 }}>← Anterior</button>
+                      )}
+                      {configDimension < dimensiones.length - 1 ? (
+                        <button className="btn-primary" onClick={() => setConfigDimension(configDimension + 1)} style={{ flex: 1 }}>Siguiente →</button>
+                      ) : (
+                        <button className="btn-primary" onClick={guardarHabitos} style={{ flex: 1 }}>Guardar ✦</button>
+                      )}
+                    </div>
+                  </div>
+                )
+              })()}
+            </div>
+          )}
+
+          {/* Modo tracking diario (ya configuró) */}
+          {!configurandoHabitos && habitosUsuario.length > 0 && (
+            <div style={{ padding: '20px' }}>
+              <p style={{ fontSize: 13, color: 'var(--text-light)', marginBottom: 20, lineHeight: 1.5 }}>
+                Marca los hábitos que completaste hoy. Cada uno suma puntos a tu progreso.
+              </p>
+
+              {dimensiones.map(d => {
+                const habitosDim = habitosUsuario.filter(h => h.dimension === d.key)
+                if (habitosDim.length === 0) return null
+                const completadosDim = habitosDim.filter(h => habitosCompletados.includes(h.id)).length
+                const porcentaje = habitosDim.length > 0 ? (completadosDim / habitosDim.length) * 100 : 0
+
+                return (
+                  <div key={d.key} className="card" style={{ marginBottom: 14 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <div style={{ width: 12, height: 12, borderRadius: '50%', background: d.color }} />
+                        <p style={{ fontWeight: 600, fontSize: 15 }}>{d.label}</p>
+                      </div>
+                      <p style={{ fontSize: 12, color: d.color, fontWeight: 600 }}>{completadosDim}/{habitosDim.length}</p>
+                    </div>
+                    <div style={{ background: '#f0ebe3', borderRadius: 12, height: 6, marginBottom: 12, overflow: 'hidden' }}>
+                      <div style={{ background: d.color, height: '100%', width: `${porcentaje}%`, transition: 'width 0.4s ease' }} />
+                    </div>
+                    {habitosDim.map(h => {
+                      const completado = habitosCompletados.includes(h.id)
+                      return (
+                        <button key={h.id} onClick={() => toggleHabitoCompletado(h.id)} style={{
+                          display: 'flex', alignItems: 'center', gap: 12, width: '100%',
+                          padding: '10px 12px', marginBottom: 6, borderRadius: 10,
+                          background: completado ? `${d.color}12` : 'transparent',
+                          border: `1px solid ${completado ? d.color + '40' : '#e0dbd4'}`,
+                          cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left', transition: 'all 0.2s'
+                        }}>
+                          <div style={{
+                            width: 22, height: 22, borderRadius: '50%',
+                            border: `2px solid ${completado ? d.color : '#c0b8ab'}`,
+                            background: completado ? d.color : 'transparent',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            color: '#fff', fontSize: 12, fontWeight: 700, flexShrink: 0
+                          }}>{completado && '✓'}</div>
+                          <span style={{ fontSize: 14, color: completado ? d.color : 'var(--text)', fontWeight: completado ? 600 : 400, textDecoration: completado ? 'line-through' : 'none' }}>
+                            {h.nombre}
+                          </span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                )
+              })}
+
+              <button onClick={iniciarConfiguracion} style={{
+                width: '100%', background: 'transparent', color: 'var(--gold)', border: '1px dashed var(--gold)',
+                padding: '12px', borderRadius: 12, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit', marginTop: 16
+              }}>
+                + Reconfigurar mis hábitos
+              </button>
+            </div>
+          )}
         </div>
       )}
 
