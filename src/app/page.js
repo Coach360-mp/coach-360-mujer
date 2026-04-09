@@ -9,22 +9,17 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true)
   const [user, setUser] = useState(null)
 
-  useEffect(() => {
-    checkUser()
-  }, [])
+  useEffect(() => { checkUser() }, [])
 
   async function checkUser() {
     const { data: { session } } = await supabase.auth.getSession()
-    if (session?.user) {
-      setUser(session.user)
-    }
+    if (session?.user) setUser(session.user)
     setLoading(false)
   }
 
   function goToVertical(vertical) {
     if (vertical === 'mujer') {
-      // Si ya está logueado, va al dashboard. Si no, al login.
-      router.push(user ? '/dashboard' : '/auth')
+      router.push(user ? '/dashboard' : '/mujer')
     } else {
       router.push(`/${vertical}`)
     }
@@ -38,152 +33,206 @@ export default function HomePage() {
     )
   }
 
+  const verticales = [
+    {
+      id: 'mujer',
+      nombre: 'Coach 360 Mujer',
+      frase: 'Más claridad. Más poder. Más tú.',
+      descripcion: 'Crecimiento personal para mujeres. Autoconocimiento, bienestar emocional y decisiones alineadas.',
+      color: '#d4af37',
+      colorSecondary: '#f5c842',
+      colorBg: 'rgba(212, 175, 55, 0.12)',
+      colorBorder: 'rgba(212, 175, 55, 0.35)',
+      disponible: true,
+      badge: null,
+    },
+    {
+      id: 'general',
+      nombre: 'Coach 360',
+      frase: 'Hábitos, propósito, resultados.',
+      descripcion: 'Desarrollo personal integral. Hábitos, enfoque, productividad y mentalidad de crecimiento.',
+      color: '#14b8a6',
+      colorSecondary: '#0d9488',
+      colorBg: 'rgba(20, 184, 166, 0.10)',
+      colorBorder: 'rgba(20, 184, 166, 0.30)',
+      disponible: false,
+      badge: 'Próximamente',
+    },
+    {
+      id: 'lideres',
+      nombre: 'Coach 360 Líderes',
+      frase: 'Lidera con claridad. Decide con evidencia.',
+      descripcion: 'Coaching ejecutivo para jefaturas. Feedback, acuerdos, delegación y conversaciones difíciles.',
+      color: '#818cf8',
+      colorSecondary: '#6366f1',
+      colorBg: 'rgba(99, 102, 241, 0.10)',
+      colorBorder: 'rgba(99, 102, 241, 0.30)',
+      disponible: false,
+      badge: 'Próximamente',
+    },
+    {
+      id: 'equipos',
+      nombre: 'Coach 360 Equipos',
+      frase: 'Alineación, confianza, resultados.',
+      descripcion: 'Coaching grupal para equipos completos. Confianza, comunicación y alto rendimiento.',
+      color: '#f472b6',
+      colorSecondary: '#ec4899',
+      colorBg: 'rgba(244, 114, 182, 0.10)',
+      colorBorder: 'rgba(244, 114, 182, 0.30)',
+      disponible: false,
+      badge: 'Próximamente',
+    },
+  ]
+
   return (
     <div style={{
       minHeight: '100vh',
       background: 'linear-gradient(180deg, #0a0a0a 0%, #1a1410 100%)',
       color: '#fff',
       fontFamily: 'system-ui, -apple-system, sans-serif',
-      padding: '60px 24px 80px',
+      padding: '60px 20px 80px',
     }}>
-      {/* Header */}
-      <div style={{ textAlign: 'center', maxWidth: 700, margin: '0 auto 60px' }}>
-        <div style={{
-          fontSize: 12,
-          letterSpacing: 4,
-          color: '#d4af37',
-          textTransform: 'uppercase',
-          marginBottom: 16,
-          fontWeight: 500,
-        }}>
+      <div style={{ textAlign: 'center', maxWidth: 720, margin: '0 auto 56px' }}>
+        <div style={{ fontSize: 12, letterSpacing: 5, color: '#d4af37', textTransform: 'uppercase', marginBottom: 20, fontWeight: 500 }}>
           ✦ Coach 360 ✦
         </div>
-        <h1 style={{
-          fontSize: 38,
-          fontWeight: 300,
-          lineHeight: 1.2,
-          marginBottom: 20,
-          fontFamily: 'Georgia, serif',
-        }}>
-          Más claridad.<br />Más poder.<br /><span style={{ fontStyle: 'italic', color: '#d4af37' }}>Más tú.</span>
+        <h1 style={{ fontSize: 40, fontWeight: 300, lineHeight: 1.15, marginBottom: 20, fontFamily: 'Georgia, serif', letterSpacing: -0.5 }}>
+          Coaching para cada<br /><span style={{ fontStyle: 'italic', color: '#d4af37' }}>versión de ti.</span>
         </h1>
-        <p style={{ fontSize: 16, color: '#a8a8a8', lineHeight: 1.6, maxWidth: 500, margin: '0 auto' }}>
-          Coaching con inteligencia artificial. Tres caminos especializados según quién eres y qué necesitas hoy.
+        <p style={{ fontSize: 16, color: '#a8a8a8', lineHeight: 1.6, maxWidth: 520, margin: '0 auto' }}>
+          Cuatro plataformas especializadas con inteligencia artificial. Elige el camino que mejor se adapta a ti hoy.
         </p>
       </div>
 
-      {/* Verticales */}
-      <div style={{ maxWidth: 480, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 16 }}>
-        {/* Mujer */}
-        <div
-          onClick={() => goToVertical('mujer')}
-          style={{
-            background: 'linear-gradient(135deg, rgba(212, 175, 55, 0.12), rgba(212, 175, 55, 0.04))',
-            border: '1px solid rgba(212, 175, 55, 0.3)',
-            borderRadius: 16,
-            padding: 24,
-            cursor: 'pointer',
-            transition: 'transform 0.2s, border-color 0.2s',
-          }}
-          onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.borderColor = 'rgba(212, 175, 55, 0.6)' }}
-          onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'rgba(212, 175, 55, 0.3)' }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <div style={{
-              width: 56, height: 56, borderRadius: '50%',
-              background: 'linear-gradient(135deg, #d4af37, #b8941f)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 22, fontWeight: 600, color: '#0a0a0a', flexShrink: 0,
-            }}>C</div>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 11, letterSpacing: 2, color: '#d4af37', textTransform: 'uppercase', marginBottom: 4 }}>
-                Coach 360 ✦ Mujer
+      <div style={{
+        maxWidth: 720,
+        margin: '0 auto',
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+        gap: 16,
+      }}>
+        {verticales.map((v) => (
+          <div
+            key={v.id}
+            onClick={() => v.disponible && goToVertical(v.id)}
+            style={{
+              background: `linear-gradient(135deg, ${v.colorBg}, rgba(0,0,0,0.2))`,
+              border: `1px solid ${v.colorBorder}`,
+              borderRadius: 20,
+              padding: 28,
+              cursor: v.disponible ? 'pointer' : 'default',
+              transition: 'all 0.25s ease',
+              position: 'relative',
+              minHeight: 240,
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              opacity: v.disponible ? 1 : 0.85,
+            }}
+            onMouseEnter={(e) => {
+              if (v.disponible) {
+                e.currentTarget.style.transform = 'translateY(-4px)'
+                e.currentTarget.style.borderColor = v.color
+                e.currentTarget.style.boxShadow = `0 12px 40px ${v.colorBg}`
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)'
+              e.currentTarget.style.borderColor = v.colorBorder
+              e.currentTarget.style.boxShadow = 'none'
+            }}
+          >
+            {v.badge && (
+              <div style={{
+                position: 'absolute',
+                top: 16,
+                right: 16,
+                fontSize: 10,
+                letterSpacing: 1.5,
+                color: v.color,
+                background: v.colorBg,
+                padding: '5px 12px',
+                borderRadius: 12,
+                textTransform: 'uppercase',
+                fontWeight: 600,
+                border: `1px solid ${v.colorBorder}`,
+              }}>
+                {v.badge}
               </div>
-              <div style={{ fontSize: 18, fontWeight: 500, marginBottom: 4 }}>Clara</div>
-              <div style={{ fontSize: 13, color: '#a8a8a8', lineHeight: 1.4 }}>
-                Crecimiento personal para mujeres. Cálida, intuitiva, profunda.
-              </div>
-            </div>
-            <div style={{ color: '#d4af37', fontSize: 20 }}>→</div>
-          </div>
-        </div>
+            )}
 
-        {/* General */}
-        <div
-          onClick={() => goToVertical('general')}
-          style={{
-            background: 'linear-gradient(135deg, rgba(20, 184, 166, 0.10), rgba(20, 184, 166, 0.03))',
-            border: '1px solid rgba(20, 184, 166, 0.25)',
-            borderRadius: 16,
-            padding: 24,
-            cursor: 'pointer',
-            transition: 'transform 0.2s, border-color 0.2s',
-          }}
-          onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.borderColor = 'rgba(20, 184, 166, 0.5)' }}
-          onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'rgba(20, 184, 166, 0.25)' }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <div style={{
-              width: 56, height: 56, borderRadius: '50%',
-              background: 'linear-gradient(135deg, #14b8a6, #0d9488)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 22, fontWeight: 600, color: '#0a0a0a', flexShrink: 0,
-            }}>L</div>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 11, letterSpacing: 2, color: '#14b8a6', textTransform: 'uppercase', marginBottom: 4 }}>
-                Coach 360
+            <div>
+              <div style={{
+                fontSize: 11,
+                letterSpacing: 2.5,
+                color: v.color,
+                textTransform: 'uppercase',
+                marginBottom: 10,
+                fontWeight: 600,
+              }}>
+                {v.nombre}
               </div>
-              <div style={{ fontSize: 18, fontWeight: 500, marginBottom: 4 }}>Leo</div>
-              <div style={{ fontSize: 13, color: '#a8a8a8', lineHeight: 1.4 }}>
-                Hábitos, propósito, productividad. Directo y estratégico.
-              </div>
-            </div>
-            <div style={{ fontSize: 11, color: '#14b8a6', background: 'rgba(20, 184, 166, 0.15)', padding: '4px 10px', borderRadius: 12 }}>
-              Pronto
-            </div>
-          </div>
-        </div>
 
-        {/* Líderes */}
-        <div
-          onClick={() => goToVertical('lideres')}
-          style={{
-            background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.10), rgba(99, 102, 241, 0.03))',
-            border: '1px solid rgba(99, 102, 241, 0.25)',
-            borderRadius: 16,
-            padding: 24,
-            cursor: 'pointer',
-            transition: 'transform 0.2s, border-color 0.2s',
-          }}
-          onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.borderColor = 'rgba(99, 102, 241, 0.5)' }}
-          onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'rgba(99, 102, 241, 0.25)' }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <div style={{
-              width: 56, height: 56, borderRadius: '50%',
-              background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 22, fontWeight: 600, color: '#fff', flexShrink: 0,
-            }}>M</div>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 11, letterSpacing: 2, color: '#818cf8', textTransform: 'uppercase', marginBottom: 4 }}>
-                Coach 360 ✦ Líderes
-              </div>
-              <div style={{ fontSize: 18, fontWeight: 500, marginBottom: 4 }}>Marco</div>
-              <div style={{ fontSize: 13, color: '#a8a8a8', lineHeight: 1.4 }}>
-                Liderazgo ejecutivo. Socrático, estratégico, basado en evidencia.
-              </div>
+              <h2 style={{
+                fontFamily: 'Georgia, serif',
+                fontSize: 24,
+                fontWeight: 300,
+                lineHeight: 1.3,
+                color: '#fff',
+                marginBottom: 14,
+                fontStyle: 'italic',
+              }}>
+                {v.frase}
+              </h2>
+
+              <p style={{
+                fontSize: 13,
+                color: '#b8b8b8',
+                lineHeight: 1.55,
+                marginBottom: 20,
+              }}>
+                {v.descripcion}
+              </p>
             </div>
-            <div style={{ fontSize: 11, color: '#818cf8', background: 'rgba(99, 102, 241, 0.15)', padding: '4px 10px', borderRadius: 12 }}>
-              Pronto
+
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              paddingTop: 16,
+              borderTop: `1px solid ${v.colorBorder}`,
+            }}>
+              <span style={{
+                fontSize: 13,
+                color: v.disponible ? v.color : '#666',
+                fontWeight: 600,
+                letterSpacing: 0.5,
+              }}>
+                {v.disponible ? 'Explorar →' : 'Disponible pronto'}
+              </span>
+              {v.disponible && (
+                <div style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: '50%',
+                  background: `linear-gradient(135deg, ${v.color}, ${v.colorSecondary})`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#0a0a0a',
+                  fontSize: 16,
+                  fontWeight: 700,
+                }}>
+                  →
+                </div>
+              )}
             </div>
           </div>
-        </div>
+        ))}
       </div>
 
-      {/* Footer */}
-      <div style={{ textAlign: 'center', marginTop: 60, color: '#666', fontSize: 12 }}>
-        Coach 360 · Coaching para personas reales
+      <div style={{ textAlign: 'center', marginTop: 60, color: '#666', fontSize: 12, letterSpacing: 1 }}>
+        Coach 360 · Coaching con inteligencia artificial
       </div>
     </div>
   )
