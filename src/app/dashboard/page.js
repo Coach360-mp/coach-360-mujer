@@ -11,9 +11,42 @@ const coaches = {
 }
 
 const planes = [
-  { id: 'free', nombre: 'Gratis', precio: '$0', periodo: '', features: ['Clara como tu coach', '3 conversaciones por semana', '2 tests básicos', 'Check-in diario', 'Mi Equilibrio'] },
-  { id: 'esencial', nombre: 'Esencial', precio: '$6.990', periodo: '/mes', features: ['Sofía como tu coach', 'Conversaciones ilimitadas', 'Todos los tests', 'Todos los módulos', 'Herramientas guiadas', 'Mi Equilibrio completo'], popular: true },
-  { id: 'premium', nombre: 'Premium', precio: '$19.990', periodo: '/mes', features: ['Victoria como tu mentora', 'Todo lo de Esencial', 'Coaching con voz', 'Seguimiento personalizado', 'Victoria recuerda tus conversaciones', 'Acceso anticipado a nuevo contenido'] },
+  {
+    id: 'free',
+    nombre: 'Gratis',
+    features: [
+      'Clara como tu coach',
+      '3 conversaciones por semana',
+      '2 tests básicos',
+      'Check-in diario',
+      'Mi Equilibrio',
+    ],
+  },
+  {
+    id: 'esencial',
+    nombre: 'Esencial',
+    features: [
+      'Clara sin límites',
+      'Conversaciones ilimitadas',
+      'Todos los tests y herramientas',
+      'Todos los módulos',
+      'Mi Equilibrio completo',
+      'Acceso solo a Coach 360 Mujer',
+    ],
+    popular: true,
+  },
+  {
+    id: 'premium',
+    nombre: 'Premium',
+    features: [
+      'Todo lo de Esencial',
+      'Acceso a las 3 verticales (Mujer + General + Líderes)',
+      'Memoria cruzada entre coaches',
+      'Coaching con voz',
+      'Acceso anticipado a nuevo contenido',
+      'Soporte prioritario',
+    ],
+  },
 ]
 
 const dimensiones = [
@@ -72,6 +105,7 @@ export default function Dashboard() {
   const [habitosSeleccionados, setHabitosSeleccionados] = useState({ mente: [], cuerpo: [], corazon: [], espiritu: [] })
   const [nuevoHabito, setNuevoHabito] = useState('')
   const [statModal, setStatModal] = useState(null)
+  const [pricing, setPricing] = useState(null)
   const [isRecording, setIsRecording] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
   const chatEndRef = useRef(null)
@@ -106,6 +140,13 @@ export default function Dashboard() {
     const { data: hcomp } = await supabase.from('habitos_completados').select('*').eq('user_id', user.id).eq('fecha', hoy)
     if (hab) setHabitosUsuario(hab)
     if (hcomp) setHabitosCompletados(hcomp.map(c => c.habito_id))
+
+    // Cargar precios según país
+    try {
+      const resPricing = await fetch(`/api/pricing?userId=${user.id}`)
+      const dataPricing = await resPricing.json()
+      if (dataPricing && !dataPricing.error) setPricing(dataPricing)
+    } catch (err) { console.error('Error cargando pricing:', err) }
 
     setLoading(false)
   }
@@ -322,7 +363,7 @@ export default function Dashboard() {
 
   const handleCheckout = async (planId) => {
     try {
-      const res = await fetch('/api/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ planId, userId: user.id, userEmail: user.email }) })
+      const res = await fetch('/api/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ planId, userId: user.id, userEmail: user.email, vertical: 'mujer' }) })
       const data = await res.json()
       if (data.url) { window.location.href = data.url }
     } catch (err) { console.error('Checkout error:', err) }
@@ -403,11 +444,13 @@ export default function Dashboard() {
 
       {view === 'planes' && (
         <div>
-          <Header title="Elige tu coach ✦" subtitle="Cada plan te conecta con una coach diferente" />
+          <Header title="Elige tu coach ✦" subtitle={pricing ? `Precios en ${pricing.pais_nombre}` : 'Cada plan te conecta con una coach diferente'} />
           <div style={{ padding: '20px' }}>
             {planes.map(p => {
               const c = coaches[p.id]
               const isCurrentPlan = plan === p.id
+              const precioInfo = pricing?.precios?.[p.id]
+              const precioMostrado = p.id === 'free' ? '$0' : (precioInfo?.precio_formateado || '...')
               return (
                 <div key={p.id} className="card" style={{ marginBottom: 16, border: p.popular ? '2px solid var(--gold)' : isCurrentPlan ? '2px solid var(--dark)' : '2px solid transparent', position: 'relative' }}>
                   {p.popular && (<div style={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)', background: 'var(--gold)', color: '#fff', padding: '2px 16px', borderRadius: 12, fontSize: 11, fontWeight: 600 }}>Más popular</div>)}
@@ -415,12 +458,44 @@ export default function Dashboard() {
                   <p style={{ fontSize: 13, color: 'var(--text-light)', lineHeight: 1.5, marginBottom: 14 }}>{c.desc}</p>
                   <div style={{ marginBottom: 14 }}>{p.features.map((f, i) => (<p key={i} style={{ fontSize: 13, color: 'var(--text)', marginBottom: 4, paddingLeft: 16, position: 'relative' }}><span style={{ position: 'absolute', left: 0, color: 'var(--gold)' }}>·</span>{f}</p>))}</div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div><span style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 700 }}>{p.precio}</span><span style={{ fontSize: 13, color: 'var(--text-light)' }}>{p.periodo}</span></div>
+                    <div>
+                      <span style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 700 }}>{precioMostrado}</span>
+                      {p.id !== 'free' && <span style={{ fontSize: 13, color: 'var(--text-light)' }}>/mes</span>}
+                    </div>
                     {isCurrentPlan ? (<span style={{ fontSize: 13, color: 'var(--gold)', fontWeight: 600 }}>Plan actual</span>) : p.id === 'free' ? (<span style={{ fontSize: 13, color: 'var(--text-light)' }}>Gratis</span>) : (<button className="btn-primary" style={{ width: 'auto', padding: '10px 24px' }} onClick={() => handleCheckout(p.id)}>Elegir plan</button>)}
                   </div>
                 </div>
               )
             })}
+
+            {/* Sesiones humanas personales */}
+            <div className="card" style={{ marginTop: 24, background: 'var(--warm-dark)' }}>
+              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 18, marginBottom: 8 }}>Sesiones con coach humana</h3>
+              <p style={{ fontSize: 13, color: 'var(--text-light)', lineHeight: 1.5, marginBottom: 14 }}>
+                Complementa tu proceso con una sesión 1:1 con una coach profesional certificada.
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {[
+                  { id: 'sesion_personal_1', label: '1 sesión', desc: '60 minutos' },
+                  { id: 'sesion_personal_4', label: 'Pack 4', desc: 'Ahorras con el pack' },
+                  { id: 'sesion_personal_8', label: 'Pack 8', desc: 'Mejor valor' },
+                ].map(s => {
+                  const precioInfo = pricing?.precios?.[s.id]
+                  return (
+                    <div key={s.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 10, background: '#fff', borderRadius: 10 }}>
+                      <div>
+                        <p style={{ fontSize: 13, fontWeight: 600 }}>{s.label}</p>
+                        <p style={{ fontSize: 11, color: 'var(--text-light)' }}>{s.desc}</p>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <span style={{ fontSize: 14, fontWeight: 700 }}>{precioInfo?.precio_formateado || '...'}</span>
+                        <button onClick={() => handleCheckout(s.id)} style={{ fontSize: 12, padding: '8px 14px', borderRadius: 8, border: '1px solid var(--dark)', background: 'transparent', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Comprar</button>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
           </div>
         </div>
       )}
