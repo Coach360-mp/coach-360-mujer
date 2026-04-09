@@ -52,7 +52,7 @@ export default function HomePage() {
       colorSecondary: '#0d9488',
       colorBg: 'rgba(20, 184, 166, 0.10)',
       colorBorder: 'rgba(20, 184, 166, 0.35)',
-      disponible: false,
+      disponible: true,
     },
     {
       id: 'lideres',
@@ -62,7 +62,7 @@ export default function HomePage() {
       colorSecondary: '#6366f1',
       colorBg: 'rgba(99, 102, 241, 0.10)',
       colorBorder: 'rgba(99, 102, 241, 0.35)',
-      disponible: false,
+      disponible: true,
     },
     {
       id: 'equipos',
