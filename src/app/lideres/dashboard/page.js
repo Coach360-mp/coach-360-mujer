@@ -67,6 +67,7 @@ export default function DashboardLideres() {
   const [habitosSeleccionados, setHabitosSeleccionados] = useState({ mente: [], cuerpo: [], corazon: [], espiritu: [] })
   const [nuevoHabito, setNuevoHabito] = useState('')
   const [statModal, setStatModal] = useState(null)
+  const [pricing, setPricing] = useState(null)
 
   const chatEndRef = useRef(null)
   const router = useRouter()
@@ -107,7 +108,22 @@ export default function DashboardLideres() {
     if (hab) setHabitosUsuario(hab)
     if (hcomp) setHabitosCompletados(hcomp.map(c => c.habito_id))
 
+    // Cargar precios según país
+    try {
+      const resPricing = await fetch(`/api/pricing?userId=${user.id}`)
+      const dataPricing = await resPricing.json()
+      if (dataPricing && !dataPricing.error) setPricing(dataPricing)
+    } catch (err) { console.error('Error cargando pricing:', err) }
+
     setLoading(false)
+  }
+
+  const handleCheckout = async (planId) => {
+    try {
+      const res = await fetch('/api/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ planId, userId: user.id, userEmail: user.email, vertical: 'lideres' }) })
+      const data = await res.json()
+      if (data.url) { window.location.href = data.url }
+    } catch (err) { console.error('Checkout error:', err) }
   }
 
   const handleLogout = async () => { await supabase.auth.signOut(); router.push('/lideres') }
@@ -631,14 +647,96 @@ export default function DashboardLideres() {
                 ))}
               </div>
             </div>
+            <button onClick={() => navigate('planes')} style={{ width: '100%', background: 'linear-gradient(135deg, #818cf8, #6366f1)', color: '#fff', border: 'none', padding: '14px 24px', borderRadius: 30, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', marginBottom: 10 }}>Ver planes y precios</button>
             <button onClick={() => router.push('/')} style={{ width: '100%', background: 'transparent', color: '#c8c8c8', border: '1px solid rgba(255,255,255,0.15)', padding: '14px 24px', borderRadius: 30, fontSize: 14, cursor: 'pointer', fontFamily: 'inherit', marginBottom: 10 }}>Cambiar de vertical</button>
             <button onClick={handleLogout} style={{ width: '100%', background: 'transparent', color: '#a8a8a8', border: '1px solid rgba(255,255,255,0.1)', padding: '14px 24px', borderRadius: 30, fontSize: 14, cursor: 'pointer', fontFamily: 'inherit' }}>Cerrar sesión</button>
           </div>
         </div>
       )}
 
+      {/* Planes */}
+      {view === 'planes' && (
+        <div>
+          <Header title="Planes y precios ✦" subtitle={pricing ? `Precios en ${pricing.pais_nombre}` : 'Coaching ejecutivo con inteligencia artificial'} />
+          <div style={{ padding: '20px' }}>
+            {[
+              { id: 'free', nombre: 'Gratis', features: ['Marco como tu coach', '3 conversaciones por semana', 'Check-in diario', 'Prácticas básicas'] },
+              { id: 'esencial', nombre: 'Esencial', popular: true, features: ['Marco sin límites', 'Conversaciones ilimitadas', 'Todos los diagnósticos ejecutivos', 'Todas las herramientas', 'Acceso solo a Coach 360 Líderes'] },
+              { id: 'premium', nombre: 'Premium', features: ['Todo lo de Esencial', 'Acceso a las 3 verticales (Mujer + General + Líderes)', 'Memoria cruzada entre coaches', 'Acceso anticipado a nuevo contenido', 'Soporte prioritario'] },
+            ].map(p => {
+              const isCurrentPlan = perfil?.plan_actual === p.id || (!perfil?.plan_actual && p.id === 'free')
+              const precioInfo = pricing?.precios?.[p.id]
+              const precioMostrado = p.id === 'free' ? '$0' : (precioInfo?.precio_formateado || '...')
+              return (
+                <div key={p.id} style={{
+                  background: 'rgba(255,255,255,0.04)',
+                  border: p.popular ? '2px solid #818cf8' : isCurrentPlan ? '2px solid #fff' : '1px solid rgba(255,255,255,0.1)',
+                  borderRadius: 16, padding: 20, marginBottom: 16, position: 'relative'
+                }}>
+                  {p.popular && (
+                    <div style={{ position: 'absolute', top: -10, left: '50%', transform: 'translateX(-50%)', background: '#818cf8', color: '#fff', padding: '3px 14px', borderRadius: 12, fontSize: 10, fontWeight: 600, letterSpacing: 1 }}>
+                      MÁS POPULAR
+                    </div>
+                  )}
+                  <h3 style={{ fontFamily: 'Georgia, serif', fontSize: 22, color: '#fff', marginBottom: 14 }}>{p.nombre}</h3>
+                  <div style={{ marginBottom: 16 }}>
+                    {p.features.map((f, i) => (
+                      <p key={i} style={{ fontSize: 13, color: '#c8c8c8', marginBottom: 6, paddingLeft: 16, position: 'relative' }}>
+                        <span style={{ position: 'absolute', left: 0, color: '#818cf8' }}>·</span>{f}
+                      </p>
+                    ))}
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <span style={{ fontFamily: 'Georgia, serif', fontSize: 28, fontWeight: 700, color: '#fff' }}>{precioMostrado}</span>
+                      {p.id !== 'free' && <span style={{ fontSize: 13, color: '#a8a8a8' }}>/mes</span>}
+                    </div>
+                    {isCurrentPlan ? (
+                      <span style={{ fontSize: 13, color: '#818cf8', fontWeight: 600 }}>Plan actual</span>
+                    ) : p.id === 'free' ? (
+                      <span style={{ fontSize: 13, color: '#a8a8a8' }}>Gratis</span>
+                    ) : (
+                      <button onClick={() => handleCheckout(p.id)} style={{ background: 'linear-gradient(135deg, #818cf8, #6366f1)', color: '#fff', border: 'none', padding: '10px 22px', borderRadius: 20, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>Elegir</button>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
+
+            {/* Sesiones ejecutivas (distintas de personal — son más caras) */}
+            <div style={{ background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 16, padding: 20, marginTop: 20 }}>
+              <h3 style={{ fontFamily: 'Georgia, serif', fontSize: 18, color: '#fff', marginBottom: 8 }}>Sesiones ejecutivas 1:1</h3>
+              <p style={{ fontSize: 13, color: '#a8a8a8', lineHeight: 1.5, marginBottom: 14 }}>
+                Coaching ejecutivo con un profesional certificado. Para conversaciones difíciles, decisiones estratégicas o desafíos específicos de liderazgo.
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {[
+                  { id: 'sesion_ejecutiva_1', label: '1 sesión ejecutiva', desc: '60 minutos con coach certificado' },
+                  { id: 'sesion_ejecutiva_4', label: 'Pack 4 sesiones', desc: 'Proceso de 1 mes' },
+                  { id: 'sesion_ejecutiva_8', label: 'Pack 8 sesiones', desc: 'Proceso trimestral completo' },
+                ].map(s => {
+                  const precioInfo = pricing?.precios?.[s.id]
+                  return (
+                    <div key={s.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 12, background: 'rgba(0,0,0,0.3)', borderRadius: 12 }}>
+                      <div>
+                        <p style={{ fontSize: 13, fontWeight: 600, color: '#fff' }}>{s.label}</p>
+                        <p style={{ fontSize: 11, color: '#a8a8a8' }}>{s.desc}</p>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <span style={{ fontSize: 14, fontWeight: 700, color: '#fff' }}>{precioInfo?.precio_formateado || '...'}</span>
+                        <button onClick={() => handleCheckout(s.id)} style={{ fontSize: 12, padding: '8px 14px', borderRadius: 8, border: '1px solid #818cf8', background: 'transparent', color: '#818cf8', cursor: 'pointer', fontFamily: 'inherit' }}>Comprar</button>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Bottom nav */}
-      {!activeTest && !testResult && !activeHerramienta && !['clara', 'equilibrio'].includes(view) && (
+      {!activeTest && !testResult && !activeHerramienta && !['clara', 'equilibrio', 'planes'].includes(view) && (
         <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: '#1e1b4b', borderTop: '1px solid rgba(99,102,241,0.2)', padding: '12px 0', display: 'flex', justifyContent: 'space-around' }}>
           <button onClick={() => setView('inicio')} style={{ background: 'none', border: 'none', color: view === 'inicio' ? '#818cf8' : '#666', fontSize: 11, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
             <span style={{ fontSize: 16 }}>⬡</span>Inicio
