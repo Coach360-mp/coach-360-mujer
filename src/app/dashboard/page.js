@@ -164,7 +164,7 @@ export default function Dashboard() {
     try {
       const history = chatMsgs.map(m => ({ role: m.r === 'a' ? 'assistant' : 'user', content: m.t }))
       history.push({ role: 'user', content: msg })
-      const res = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: history }) })
+      const res = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: history, userId: user?.id }) })
       const data = await res.json()
       setTyping(false)
       const reply = data.reply || 'Cuéntame más ✦'
