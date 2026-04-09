@@ -4,41 +4,40 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 
-const steps = [
-  {
-    title: 'Bienvenida a\nCoach 360 Mujer',
-    subtitle: 'Más claridad. Más poder. Más tú.',
-    desc: 'Un espacio diseñado para que te conozcas mejor, tomes mejores decisiones y vivas más alineada con lo que realmente quieres.',
-    bg: 'linear-gradient(180deg, #1a1a1a 0%, #2d2218 100%)',
-    dark: true,
-  },
-  {
-    title: 'Tu equipo de coaches',
-    subtitle: 'Tres coaches con IA, cada una con su especialidad',
-    desc: 'Clara te escucha con empatía. Sofía te guía con estrategia. Victoria te desafía con neurociencia. Todas disponibles 24/7, con voz, listas para ti.',
-    showCoaches: true,
-  },
-  {
-    title: 'Tests de autoconocimiento',
-    subtitle: 'Descubre cómo piensas, sientes y decides',
-    desc: '6 tests basados en coaching profesional que te revelan patrones que no ves. Tus resultados guían tu camino dentro de la app.',
-  },
-  {
-    title: 'Herramientas prácticas',
-    subtitle: 'Ejercicios con neurociencia aplicada',
-    desc: 'No es teoría — son herramientas que usas en tu día a día para regular tus emociones, tomar mejores decisiones y cuidar tu bienestar integral.',
-  },
-  {
-    title: 'Tu Equilibrio',
-    subtitle: 'Mente · Cuerpo · Corazón · Espíritu',
-    desc: 'Haz seguimiento diario de las 4 dimensiones que impactan tu claridad. Con el tiempo, vas a ver patrones que tu mente sola no detecta.',
-    showDimensions: true,
-  },
-  {
-    title: '¿Cómo te llamas?',
-    subtitle: 'Para que tu coach te conozca',
-    input: true,
-  },
+const momentosVida = [
+  { id: 'transicion', label: 'Estoy en un momento de cambio o transición' },
+  { id: 'crecimiento', label: 'Quiero crecer profesionalmente' },
+  { id: 'equilibrio', label: 'Busco más equilibrio y bienestar' },
+  { id: 'relaciones', label: 'Estoy trabajando en mis relaciones' },
+  { id: 'reconexion', label: 'Quiero reconectarme conmigo misma' },
+  { id: 'empezar', label: 'Estoy empezando algo nuevo' },
+]
+
+const identidades = [
+  { id: 'mama', label: 'Soy mamá' },
+  { id: 'emprendedora', label: 'Soy emprendedora' },
+  { id: 'corporativa', label: 'Trabajo en un entorno corporativo' },
+  { id: 'lidera', label: 'Lidero equipos' },
+  { id: 'minoria', label: 'Soy minoría en mi industria' },
+  { id: 'proposito', label: 'Busco propósito' },
+  { id: 'transicion_rel', label: 'Saliendo de una relación o etapa' },
+  { id: 'ninguna', label: 'Ninguna en particular' },
+]
+
+const focos = [
+  { id: 'estres', label: 'Manejar mejor mi estrés y ansiedad' },
+  { id: 'relaciones', label: 'Mejorar mis relaciones y vínculos' },
+  { id: 'proposito', label: 'Encontrar más propósito y sentido' },
+  { id: 'confianza', label: 'Fortalecer mi confianza y autoestima' },
+  { id: 'cambio', label: 'Navegar un cambio o transición' },
+  { id: 'liderazgo', label: 'Desarrollar mi liderazgo' },
+]
+
+const dimensionesIniciales = [
+  { key: 'mente', label: 'Mente', desc: 'Claridad y enfoque', color: '#6366f1' },
+  { key: 'cuerpo', label: 'Cuerpo', desc: 'Energía y vitalidad', color: '#10b981' },
+  { key: 'corazon', label: 'Corazón', desc: 'Emociones y vínculos', color: '#f59e0b' },
+  { key: 'espiritu', label: 'Espíritu', desc: 'Sentido y calma', color: '#8b5cf6' },
 ]
 
 const coaches = [
@@ -47,195 +46,463 @@ const coaches = [
   { name: 'Victoria', photo: '/victoria.jpg', credential: 'Neurobiología + Mentora' },
 ]
 
-const dims = [
-  { label: 'Mente', color: '#6366f1' },
-  { label: 'Cuerpo', color: '#10b981' },
-  { label: 'Corazón', color: '#f59e0b' },
-  { label: 'Espíritu', color: '#8b5cf6' },
-]
-
 export default function Onboarding() {
   const [step, setStep] = useState(0)
-  const [nombre, setNombre] = useState('')
   const [user, setUser] = useState(null)
+  const [nombre, setNombre] = useState('')
+  const [momentos, setMomentos] = useState([])
+  const [identidadSel, setIdentidadSel] = useState([])
+  const [focoSel, setFocoSel] = useState(null)
+  const [bienestar, setBienestar] = useState({ mente: 5, cuerpo: 5, corazon: 5, espiritu: 5 })
+  const [respuestaLibre, setRespuestaLibre] = useState('')
+  const [guardando, setGuardando] = useState(false)
   const router = useRouter()
 
-  useEffect(() => {
-    checkUser()
-  }, [])
+  useEffect(() => { checkUser() }, [])
 
   const checkUser = async () => {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { router.push('/'); return }
     setUser(user)
 
-    // If already onboarded, go to dashboard
-    const { data: profile } = await supabase.from('perfiles').select('onboarding_completado').eq('id', user.id).single()
+    const { data: profile } = await supabase.from('perfiles').select('onboarding_completado, nombre').eq('id', user.id).single()
     if (profile?.onboarding_completado) {
       router.push('/dashboard')
+      return
     }
+    if (profile?.nombre) {
+      setNombre(profile.nombre)
+    } else if (user.user_metadata?.full_name) {
+      setNombre(user.user_metadata.full_name.split(' ')[0])
+    }
+  }
 
-    // Pre-fill name from Google
-    if (user.user_metadata?.full_name) {
-      setNombre(user.user_metadata.full_name)
-    }
+  const toggleMomento = (id) => {
+    setMomentos(prev => prev.includes(id) ? prev.filter(m => m !== id) : [...prev, id].slice(-2))
+  }
+
+  const toggleIdentidad = (id) => {
+    setIdentidadSel(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id].slice(-3))
   }
 
   const completeOnboarding = async () => {
-    if (user) {
+    if (!user) return
+    setGuardando(true)
+    try {
       await supabase.from('perfiles').update({
         nombre: nombre || user.user_metadata?.full_name || '',
         onboarding_completado: true,
+        current_vertical: 'mujer',
+        active_verticals: ['mujer'],
       }).eq('id', user.id)
+
+      await supabase.from('onboarding_respuestas').upsert({
+        user_id: user.id,
+        vertical: 'mujer',
+        momento_vida: momentos,
+        identidad: identidadSel,
+        foco_inicial: focoSel,
+        bienestar_inicial: bienestar,
+        respuesta_libre: respuestaLibre,
+      }, { onConflict: 'user_id,vertical' })
+
+      // Guardar contexto para que Clara lo use
+      const contextos = [
+        { key: 'momento_vida', value: momentos.join(', ') },
+        { key: 'identidad', value: identidadSel.join(', ') },
+        { key: 'foco_inicial', value: focoSel },
+        { key: 'respuesta_libre', value: respuestaLibre },
+      ].filter(c => c.value)
+
+      if (contextos.length > 0) {
+        await supabase.from('user_context').insert(
+          contextos.map(c => ({
+            user_id: user.id,
+            vertical: 'mujer',
+            context_key: c.key,
+            context_value: c.value,
+            source_coach: 'onboarding',
+          }))
+        )
+      }
+
+      router.push('/dashboard')
+    } catch (err) {
+      console.error('Error guardando onboarding:', err)
+      setGuardando(false)
     }
-    router.push('/dashboard')
   }
 
-  const current = steps[step]
-  const isLast = step === steps.length - 1
+  const next = () => setStep(s => s + 1)
+  const back = () => setStep(s => Math.max(0, s - 1))
+
+  const totalSteps = 8
+  const canContinue = () => {
+    switch (step) {
+      case 1: return nombre.trim().length > 0
+      case 2: return momentos.length > 0
+      case 3: return identidadSel.length > 0
+      case 4: return focoSel !== null
+      default: return true
+    }
+  }
 
   return (
     <div style={{
       minHeight: '100vh',
-      background: current.bg || 'var(--warm)',
+      background: 'linear-gradient(180deg, #1a1410 0%, #0a0a0a 100%)',
+      color: '#fff',
+      fontFamily: 'system-ui, -apple-system, sans-serif',
       display: 'flex',
       flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '40px 24px',
-      color: current.dark ? '#fff' : 'var(--text)',
-      textAlign: 'center',
-      transition: 'background 0.5s ease',
     }}>
-
-      {/* Progress dots */}
-      <div style={{ display: 'flex', gap: 6, marginBottom: 40 }}>
-        {steps.map((_, i) => (
-          <div key={i} style={{
-            width: i === step ? 24 : 8, height: 8, borderRadius: 4,
-            background: i === step ? 'var(--gold)' : (current.dark ? 'rgba(255,255,255,0.3)' : '#e0dbd4'),
-            transition: 'all 0.3s',
-          }} />
-        ))}
+      {/* Header con progreso */}
+      <div style={{ padding: '24px 20px 0' }}>
+        {step > 0 && (
+          <button onClick={back} style={{
+            background: 'transparent', border: 'none', color: '#a8a8a8',
+            fontSize: 14, cursor: 'pointer', marginBottom: 16,
+          }}>← Anterior</button>
+        )}
+        <div style={{ display: 'flex', gap: 6 }}>
+          {Array.from({ length: totalSteps }).map((_, i) => (
+            <div key={i} style={{
+              flex: 1, height: 3, borderRadius: 4,
+              background: i <= step ? '#d4af37' : 'rgba(255,255,255,0.1)',
+              transition: 'all 0.3s',
+            }} />
+          ))}
+        </div>
       </div>
 
-      {/* Star */}
-      {step === 0 && <div style={{ fontSize: 48, marginBottom: 16 }}>✦</div>}
-
-      {/* Title */}
-      <h1 style={{
-        fontFamily: 'var(--font-display)',
-        fontSize: step === 0 ? 36 : 28,
-        fontWeight: 600,
-        lineHeight: 1.2,
-        marginBottom: 8,
-        whiteSpace: 'pre-line',
-        color: current.dark ? '#fff' : 'var(--text)',
+      {/* Contenido */}
+      <div style={{
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        padding: '20px 24px 40px',
+        maxWidth: 560,
+        margin: '0 auto',
+        width: '100%',
       }}>
-        {current.title}
-      </h1>
 
-      {/* Subtitle */}
-      {current.subtitle && (
-        <p style={{
-          fontFamily: 'var(--font-display)',
-          fontSize: 16,
-          color: current.dark ? 'var(--gold-light)' : 'var(--gold)',
-          fontStyle: 'italic',
-          marginBottom: 20,
-        }}>
-          {current.subtitle}
-        </p>
-      )}
-
-      {/* Description */}
-      {current.desc && (
-        <p style={{
-          fontSize: 15,
-          color: current.dark ? 'rgba(255,255,255,0.7)' : 'var(--text-light)',
-          maxWidth: 320,
-          lineHeight: 1.6,
-          marginBottom: 32,
-        }}>
-          {current.desc}
-        </p>
-      )}
-
-      {/* Coaches display */}
-      {current.showCoaches && (
-        <div style={{ display: 'flex', gap: 16, marginBottom: 32, justifyContent: 'center' }}>
-          {coaches.map(c => (
-            <div key={c.name} style={{ textAlign: 'center' }}>
-              <img src={c.photo} alt={c.name} style={{
-                width: 72, height: 72, borderRadius: '50%', objectFit: 'cover',
-                border: '2px solid var(--gold-light)',
-              }} />
-              <p style={{ fontSize: 14, fontWeight: 600, marginTop: 8 }}>{c.name}</p>
-              <p style={{ fontSize: 11, color: 'var(--text-light)' }}>{c.credential}</p>
+        {/* Paso 0: Bienvenida */}
+        {step === 0 && (
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 48, marginBottom: 24, color: '#d4af37' }}>✦</div>
+            <div style={{ fontSize: 11, letterSpacing: 4, color: '#d4af37', textTransform: 'uppercase', marginBottom: 16, fontWeight: 600 }}>
+              Coach 360 Mujer
             </div>
-          ))}
-        </div>
-      )}
+            <h1 style={{
+              fontFamily: 'Georgia, serif',
+              fontSize: 42,
+              fontWeight: 300,
+              lineHeight: 1.2,
+              marginBottom: 20,
+            }}>
+              Más claridad.<br />Más poder.<br /><span style={{ fontStyle: 'italic', color: '#d4af37' }}>Más tú.</span>
+            </h1>
+            <p style={{ fontSize: 16, color: '#c8c8c8', lineHeight: 1.6, maxWidth: 420, margin: '0 auto 40px' }}>
+              Antes de empezar, queremos conocerte. Son pocas preguntas y todas importan — porque tu experiencia se personaliza según tus respuestas.
+            </p>
+          </div>
+        )}
 
-      {/* Dimensions display */}
-      {current.showDimensions && (
-        <div style={{ display: 'flex', gap: 20, marginBottom: 32, justifyContent: 'center' }}>
-          {dims.map(d => (
-            <div key={d.label} style={{ textAlign: 'center' }}>
-              <div style={{ width: 48, height: 48, borderRadius: '50%', background: d.color, opacity: 0.8, margin: '0 auto 8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <div style={{ width: 16, height: 16, borderRadius: '50%', background: '#fff' }} />
+        {/* Paso 1: Nombre */}
+        {step === 1 && (
+          <div>
+            <div style={{ fontSize: 11, letterSpacing: 3, color: '#d4af37', textTransform: 'uppercase', marginBottom: 12, textAlign: 'center' }}>
+              Empecemos
+            </div>
+            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 32, fontWeight: 300, lineHeight: 1.3, marginBottom: 12, textAlign: 'center' }}>
+              ¿Cómo te llamas?
+            </h2>
+            <p style={{ fontSize: 14, color: '#a8a8a8', textAlign: 'center', marginBottom: 40 }}>
+              Tu coach te va a tratar por tu nombre
+            </p>
+            <input
+              type="text"
+              value={nombre}
+              onChange={(e) => setNombre(e.target.value)}
+              placeholder="Tu nombre"
+              autoFocus
+              style={{
+                width: '100%',
+                background: 'rgba(212, 175, 55, 0.06)',
+                border: '1px solid rgba(212, 175, 55, 0.3)',
+                borderRadius: 14,
+                padding: '18px 20px',
+                color: '#fff',
+                fontSize: 18,
+                textAlign: 'center',
+                fontFamily: 'inherit',
+                outline: 'none',
+              }}
+            />
+          </div>
+        )}
+
+        {/* Paso 2: Momento de vida */}
+        {step === 2 && (
+          <div>
+            <div style={{ fontSize: 11, letterSpacing: 3, color: '#d4af37', textTransform: 'uppercase', marginBottom: 12, textAlign: 'center' }}>
+              Paso 1 de 4
+            </div>
+            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 28, fontWeight: 300, lineHeight: 1.3, marginBottom: 12, textAlign: 'center' }}>
+              ¿En qué momento de tu vida estás?
+            </h2>
+            <p style={{ fontSize: 13, color: '#a8a8a8', textAlign: 'center', marginBottom: 28 }}>
+              Elige hasta 2 opciones
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {momentosVida.map(m => {
+                const selected = momentos.includes(m.id)
+                return (
+                  <button key={m.id} onClick={() => toggleMomento(m.id)} style={{
+                    background: selected ? 'rgba(212, 175, 55, 0.15)' : 'rgba(255,255,255,0.03)',
+                    border: `1px solid ${selected ? '#d4af37' : 'rgba(255,255,255,0.1)'}`,
+                    borderRadius: 14,
+                    padding: '16px 18px',
+                    color: '#fff',
+                    fontSize: 14,
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                    fontFamily: 'inherit',
+                    transition: 'all 0.2s',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 12,
+                  }}>
+                    <div style={{
+                      width: 20, height: 20, borderRadius: '50%',
+                      border: `2px solid ${selected ? '#d4af37' : 'rgba(255,255,255,0.3)'}`,
+                      background: selected ? '#d4af37' : 'transparent',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      color: '#0a0a0a', fontSize: 11, fontWeight: 700, flexShrink: 0,
+                    }}>{selected && '✓'}</div>
+                    {m.label}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Paso 3: Identidad */}
+        {step === 3 && (
+          <div>
+            <div style={{ fontSize: 11, letterSpacing: 3, color: '#d4af37', textTransform: 'uppercase', marginBottom: 12, textAlign: 'center' }}>
+              Paso 2 de 4
+            </div>
+            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 28, fontWeight: 300, lineHeight: 1.3, marginBottom: 12, textAlign: 'center' }}>
+              ¿Qué te identifica más?
+            </h2>
+            <p style={{ fontSize: 13, color: '#a8a8a8', textAlign: 'center', marginBottom: 28 }}>
+              Elige hasta 3 opciones
+            </p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+              {identidades.map(i => {
+                const selected = identidadSel.includes(i.id)
+                return (
+                  <button key={i.id} onClick={() => toggleIdentidad(i.id)} style={{
+                    background: selected ? 'rgba(212, 175, 55, 0.15)' : 'rgba(255,255,255,0.03)',
+                    border: `1px solid ${selected ? '#d4af37' : 'rgba(255,255,255,0.1)'}`,
+                    borderRadius: 20,
+                    padding: '12px 18px',
+                    color: '#fff',
+                    fontSize: 13,
+                    cursor: 'pointer',
+                    fontFamily: 'inherit',
+                    transition: 'all 0.2s',
+                    fontWeight: selected ? 600 : 400,
+                  }}>
+                    {selected && '✓ '}{i.label}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Paso 4: Foco */}
+        {step === 4 && (
+          <div>
+            <div style={{ fontSize: 11, letterSpacing: 3, color: '#d4af37', textTransform: 'uppercase', marginBottom: 12, textAlign: 'center' }}>
+              Paso 3 de 4
+            </div>
+            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 28, fontWeight: 300, lineHeight: 1.3, marginBottom: 12, textAlign: 'center' }}>
+              ¿Qué te gustaría trabajar primero?
+            </h2>
+            <p style={{ fontSize: 13, color: '#a8a8a8', textAlign: 'center', marginBottom: 28 }}>
+              Elige una opción
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {focos.map(f => {
+                const selected = focoSel === f.id
+                return (
+                  <button key={f.id} onClick={() => setFocoSel(f.id)} style={{
+                    background: selected ? 'rgba(212, 175, 55, 0.15)' : 'rgba(255,255,255,0.03)',
+                    border: `1px solid ${selected ? '#d4af37' : 'rgba(255,255,255,0.1)'}`,
+                    borderRadius: 14,
+                    padding: '16px 18px',
+                    color: '#fff',
+                    fontSize: 14,
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                    fontFamily: 'inherit',
+                    transition: 'all 0.2s',
+                  }}>
+                    {f.label}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Paso 5: Bienestar inicial */}
+        {step === 5 && (
+          <div>
+            <div style={{ fontSize: 11, letterSpacing: 3, color: '#d4af37', textTransform: 'uppercase', marginBottom: 12, textAlign: 'center' }}>
+              Paso 4 de 4
+            </div>
+            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 28, fontWeight: 300, lineHeight: 1.3, marginBottom: 12, textAlign: 'center' }}>
+              ¿Cómo estás hoy en cada dimensión?
+            </h2>
+            <p style={{ fontSize: 13, color: '#a8a8a8', textAlign: 'center', marginBottom: 32 }}>
+              Esta es tu línea base. La vas a ver evolucionar.
+            </p>
+            {dimensionesIniciales.map(d => (
+              <div key={d.key} style={{ marginBottom: 24 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                  <div>
+                    <span style={{ fontSize: 15, color: '#fff', fontWeight: 600 }}>{d.label}</span>
+                    <span style={{ fontSize: 12, color: '#a8a8a8', marginLeft: 8 }}>{d.desc}</span>
+                  </div>
+                  <span style={{ fontSize: 18, color: d.color, fontWeight: 700, fontFamily: 'Georgia, serif' }}>{bienestar[d.key]}</span>
+                </div>
+                <input
+                  type="range"
+                  min="1"
+                  max="10"
+                  value={bienestar[d.key]}
+                  onChange={(e) => setBienestar(prev => ({ ...prev, [d.key]: parseInt(e.target.value) }))}
+                  style={{
+                    width: '100%',
+                    accentColor: d.color,
+                    height: 6,
+                  }}
+                />
               </div>
-              <p style={{ fontSize: 12, color: 'var(--text-light)' }}>{d.label}</p>
+            ))}
+          </div>
+        )}
+
+        {/* Paso 6: Respuesta libre */}
+        {step === 6 && (
+          <div>
+            <div style={{ fontSize: 11, letterSpacing: 3, color: '#d4af37', textTransform: 'uppercase', marginBottom: 12, textAlign: 'center' }}>
+              Una última cosa
             </div>
-          ))}
-        </div>
-      )}
+            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 28, fontWeight: 300, lineHeight: 1.3, marginBottom: 12, textAlign: 'center' }}>
+              ¿Qué te gustaría que fuera diferente en tu vida dentro de 90 días?
+            </h2>
+            <p style={{ fontSize: 13, color: '#a8a8a8', textAlign: 'center', marginBottom: 28 }}>
+              No necesitas la respuesta perfecta — solo la honesta. (Opcional)
+            </p>
+            <textarea
+              value={respuestaLibre}
+              onChange={(e) => setRespuestaLibre(e.target.value)}
+              placeholder="Escribe lo primero que sientas..."
+              style={{
+                width: '100%',
+                minHeight: 160,
+                background: 'rgba(212, 175, 55, 0.06)',
+                border: '1px solid rgba(212, 175, 55, 0.3)',
+                borderRadius: 14,
+                padding: 18,
+                color: '#fff',
+                fontSize: 15,
+                lineHeight: 1.6,
+                fontFamily: 'inherit',
+                resize: 'vertical',
+                outline: 'none',
+              }}
+            />
+          </div>
+        )}
 
-      {/* Name input */}
-      {current.input && (
-        <div style={{ width: '100%', maxWidth: 320, marginBottom: 32 }}>
-          <input
-            className="input-field"
-            type="text"
-            placeholder="Tu nombre"
-            value={nombre}
-            onChange={(e) => setNombre(e.target.value)}
-            style={{ textAlign: 'center', fontSize: 18 }}
-          />
-        </div>
-      )}
+        {/* Paso 7: Cierre */}
+        {step === 7 && (
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 48, marginBottom: 24, color: '#d4af37' }}>✦</div>
+            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 34, fontWeight: 300, lineHeight: 1.3, marginBottom: 16 }}>
+              Todo listo, {nombre || 'bienvenida'}
+            </h2>
+            <p style={{ fontSize: 16, color: '#c8c8c8', lineHeight: 1.6, maxWidth: 420, margin: '0 auto 32px' }}>
+              Tu coach ya sabe quién eres y qué buscas. Cuando entres a conversar, va a tratarte como alguien que ya conoce.
+            </p>
+            <div style={{ display: 'flex', gap: 20, justifyContent: 'center', marginBottom: 32 }}>
+              {coaches.map(c => (
+                <div key={c.name} style={{ textAlign: 'center' }}>
+                  <img src={c.photo} alt={c.name} style={{
+                    width: 60, height: 60, borderRadius: '50%', objectFit: 'cover',
+                    border: '2px solid rgba(212, 175, 55, 0.4)',
+                  }} />
+                  <p style={{ fontSize: 12, color: '#d4af37', marginTop: 8, fontWeight: 600 }}>{c.name}</p>
+                </div>
+              ))}
+            </div>
+            <p style={{ fontSize: 13, color: '#888', lineHeight: 1.5, maxWidth: 360, margin: '0 auto' }}>
+              Empiezas con Clara. Puedes subir a Sofía o Victoria cuando quieras desde tu perfil.
+            </p>
+          </div>
+        )}
 
-      {/* Buttons */}
-      <div style={{ width: '100%', maxWidth: 320, display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {isLast ? (
+      </div>
+
+      {/* Botón inferior */}
+      <div style={{ padding: '0 24px 32px', maxWidth: 560, margin: '0 auto', width: '100%' }}>
+        {step < totalSteps - 1 ? (
           <button
-            className="btn-primary"
-            style={{ background: 'var(--gold)' }}
-            onClick={completeOnboarding}
-            disabled={!nombre.trim()}
+            onClick={next}
+            disabled={!canContinue()}
+            style={{
+              width: '100%',
+              background: canContinue() ? 'linear-gradient(135deg, #d4af37, #f5c842)' : 'rgba(212, 175, 55, 0.2)',
+              color: canContinue() ? '#0a0a0a' : '#a8a8a8',
+              border: 'none',
+              padding: '18px 24px',
+              borderRadius: 30,
+              fontSize: 15,
+              fontWeight: 600,
+              cursor: canContinue() ? 'pointer' : 'default',
+              fontFamily: 'inherit',
+              transition: 'all 0.2s',
+            }}
           >
-            Comenzar mi viaje ✦
+            {step === 0 ? 'Empezar ✦' : 'Siguiente →'}
           </button>
         ) : (
           <button
-            className="btn-primary"
-            style={current.dark ? { background: 'var(--gold)', color: '#fff' } : {}}
-            onClick={() => setStep(step + 1)}
-          >
-            Siguiente
-          </button>
-        )}
-
-        {step > 0 && (
-          <button
-            onClick={() => setStep(step - 1)}
+            onClick={completeOnboarding}
+            disabled={guardando}
             style={{
-              background: 'none', border: 'none',
-              color: current.dark ? 'rgba(255,255,255,0.5)' : 'var(--text-light)',
-              fontSize: 14, cursor: 'pointer',
+              width: '100%',
+              background: 'linear-gradient(135deg, #d4af37, #f5c842)',
+              color: '#0a0a0a',
+              border: 'none',
+              padding: '18px 24px',
+              borderRadius: 30,
+              fontSize: 15,
+              fontWeight: 600,
+              cursor: guardando ? 'default' : 'pointer',
+              fontFamily: 'inherit',
+              opacity: guardando ? 0.6 : 1,
             }}
           >
-            ← Anterior
+            {guardando ? 'Guardando...' : 'Comenzar mi viaje ✦'}
           </button>
         )}
       </div>
