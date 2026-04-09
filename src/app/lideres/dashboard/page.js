@@ -97,8 +97,8 @@ export default function DashboardLideres() {
 
     setChatMsgs([{ r: 'a', t: `${profile?.nombre || 'Hola'}.\n\nSoy Marco. No soy un coach que te va a escuchar con paciencia infinita — soy alguien que te va a hacer preguntas incómodas para que veas lo que estás evitando ver.\n\n¿Qué está pasando en tu equipo hoy?` }])
 
-    const { data: t } = await supabase.from('tests').select('*').eq('activo', true).order('orden')
-    const { data: h } = await supabase.from('templates').select('*').eq('activo', true).order('orden')
+    const { data: t } = await supabase.from('tests').select('*').eq('activo', true).eq('vertical', 'lideres').order('orden')
+    const { data: h } = await supabase.from('templates').select('*').eq('activo', true).eq('vertical', 'lideres').order('orden')
     if (t) setTests(t)
     if (h) setHerramientas(h)
 

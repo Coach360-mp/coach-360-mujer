@@ -103,8 +103,8 @@ export default function DashboardGeneral() {
 
     // Cargar tests, herramientas, módulos filtrados por vertical general
     // Si no existe la columna vertical todavía, carga todo
-    const { data: t } = await supabase.from('tests').select('*').eq('activo', true).order('orden')
-    const { data: h } = await supabase.from('templates').select('*').eq('activo', true).order('orden')
+    const { data: t } = await supabase.from('tests').select('*').eq('activo', true).eq('vertical', 'general').order('orden')
+    const { data: h } = await supabase.from('templates').select('*').eq('activo', true).eq('vertical', 'general').order('orden')
     const { data: m } = await supabase.from('modulos').select('*').eq('activo', true).order('orden')
     if (t) setTests(t)
     if (h) setHerramientas(h)
