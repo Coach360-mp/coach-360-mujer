@@ -36,104 +36,169 @@ export default function HomePage() {
   const verticales = [
     {
       id: 'mujer',
-      nombre: 'Coach 360 Mujer',
+      label: 'Mujer',
       frase: 'Más claridad. Más poder. Más tú.',
-      descripcion: 'Crecimiento personal para mujeres. Autoconocimiento, bienestar emocional y decisiones alineadas.',
       color: '#d4af37',
       colorSecondary: '#f5c842',
       colorBg: 'rgba(212, 175, 55, 0.12)',
-      colorBorder: 'rgba(212, 175, 55, 0.35)',
+      colorBorder: 'rgba(212, 175, 55, 0.4)',
       disponible: true,
-      badge: null,
     },
     {
       id: 'general',
-      nombre: 'Coach 360',
+      label: 'General',
       frase: 'Hábitos, propósito, resultados.',
-      descripcion: 'Desarrollo personal integral. Hábitos, enfoque, productividad y mentalidad de crecimiento.',
       color: '#14b8a6',
       colorSecondary: '#0d9488',
       colorBg: 'rgba(20, 184, 166, 0.10)',
-      colorBorder: 'rgba(20, 184, 166, 0.30)',
+      colorBorder: 'rgba(20, 184, 166, 0.35)',
       disponible: false,
-      badge: 'Próximamente',
     },
     {
       id: 'lideres',
-      nombre: 'Coach 360 Líderes',
+      label: 'Líderes',
       frase: 'Lidera con claridad. Decide con evidencia.',
-      descripcion: 'Coaching ejecutivo para jefaturas. Feedback, acuerdos, delegación y conversaciones difíciles.',
       color: '#818cf8',
       colorSecondary: '#6366f1',
       colorBg: 'rgba(99, 102, 241, 0.10)',
-      colorBorder: 'rgba(99, 102, 241, 0.30)',
+      colorBorder: 'rgba(99, 102, 241, 0.35)',
       disponible: false,
-      badge: 'Próximamente',
     },
     {
       id: 'equipos',
-      nombre: 'Coach 360 Equipos',
+      label: 'Equipos',
       frase: 'Alineación, confianza, resultados.',
-      descripcion: 'Coaching grupal para equipos completos. Confianza, comunicación y alto rendimiento.',
       color: '#f472b6',
       colorSecondary: '#ec4899',
       colorBg: 'rgba(244, 114, 182, 0.10)',
-      colorBorder: 'rgba(244, 114, 182, 0.30)',
+      colorBorder: 'rgba(244, 114, 182, 0.35)',
       disponible: false,
-      badge: 'Próximamente',
     },
   ]
 
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(180deg, #0a0a0a 0%, #1a1410 100%)',
+      background: 'radial-gradient(ellipse at top, #1a1410 0%, #0a0a0a 60%)',
       color: '#fff',
       fontFamily: 'system-ui, -apple-system, sans-serif',
-      padding: '60px 20px 80px',
+      padding: '40px 20px 60px',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
     }}>
-      <div style={{ textAlign: 'center', maxWidth: 720, margin: '0 auto 56px' }}>
-        <div style={{ fontSize: 12, letterSpacing: 5, color: '#d4af37', textTransform: 'uppercase', marginBottom: 20, fontWeight: 500 }}>
-          ✦ Coach 360 ✦
+      {/* Logo Coach 360 grande en el centro */}
+      <div style={{ textAlign: 'center', marginBottom: 48, position: 'relative' }}>
+        {/* Estrella decorativa arriba */}
+        <div style={{
+          fontSize: 14,
+          letterSpacing: 6,
+          color: '#d4af37',
+          marginBottom: 24,
+          opacity: 0.7,
+        }}>
+          ✦
         </div>
-        <h1 style={{ fontSize: 40, fontWeight: 300, lineHeight: 1.15, marginBottom: 20, fontFamily: 'Georgia, serif', letterSpacing: -0.5 }}>
-          Coaching para cada<br /><span style={{ fontStyle: 'italic', color: '#d4af37' }}>versión de ti.</span>
-        </h1>
-        <p style={{ fontSize: 16, color: '#a8a8a8', lineHeight: 1.6, maxWidth: 520, margin: '0 auto' }}>
-          Cuatro plataformas especializadas con inteligencia artificial. Elige el camino que mejor se adapta a ti hoy.
+
+        {/* Logo principal */}
+        <div style={{
+          fontFamily: 'Georgia, serif',
+          fontSize: 72,
+          fontWeight: 300,
+          lineHeight: 0.95,
+          marginBottom: 8,
+          background: 'linear-gradient(135deg, #f5e6a8 0%, #d4af37 50%, #b8941f 100%)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          backgroundClip: 'text',
+          letterSpacing: -2,
+        }}>
+          Coach
+        </div>
+        <div style={{
+          fontFamily: 'Georgia, serif',
+          fontSize: 96,
+          fontWeight: 300,
+          lineHeight: 0.95,
+          background: 'linear-gradient(135deg, #f5e6a8 0%, #d4af37 50%, #b8941f 100%)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          backgroundClip: 'text',
+          letterSpacing: -3,
+          fontStyle: 'italic',
+          marginBottom: 16,
+        }}>
+          360
+        </div>
+
+        {/* Estrella decorativa abajo */}
+        <div style={{
+          fontSize: 14,
+          letterSpacing: 6,
+          color: '#d4af37',
+          marginBottom: 28,
+          opacity: 0.7,
+        }}>
+          ✦
+        </div>
+
+        {/* Frase transversal */}
+        <p style={{
+          fontSize: 17,
+          color: '#d4d4d4',
+          lineHeight: 1.5,
+          maxWidth: 460,
+          margin: '0 auto 8px',
+          fontFamily: 'Georgia, serif',
+          fontStyle: 'italic',
+          fontWeight: 300,
+        }}>
+          Coaching para cada versión de ti.
+        </p>
+        <p style={{
+          fontSize: 13,
+          color: '#888',
+          lineHeight: 1.5,
+          maxWidth: 400,
+          margin: '0 auto',
+          letterSpacing: 0.3,
+        }}>
+          Elige tu camino
         </p>
       </div>
 
+      {/* Grid de 4 verticales */}
       <div style={{
-        maxWidth: 720,
-        margin: '0 auto',
+        width: '100%',
+        maxWidth: 760,
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-        gap: 16,
+        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+        gap: 14,
       }}>
         {verticales.map((v) => (
           <div
             key={v.id}
             onClick={() => v.disponible && goToVertical(v.id)}
             style={{
-              background: `linear-gradient(135deg, ${v.colorBg}, rgba(0,0,0,0.2))`,
+              background: `linear-gradient(135deg, ${v.colorBg}, rgba(0,0,0,0.25))`,
               border: `1px solid ${v.colorBorder}`,
-              borderRadius: 20,
-              padding: 28,
+              borderRadius: 18,
+              padding: '28px 24px',
               cursor: v.disponible ? 'pointer' : 'default',
               transition: 'all 0.25s ease',
               position: 'relative',
-              minHeight: 240,
+              textAlign: 'center',
+              minHeight: 200,
               display: 'flex',
               flexDirection: 'column',
-              justifyContent: 'space-between',
-              opacity: v.disponible ? 1 : 0.85,
+              justifyContent: 'center',
+              opacity: v.disponible ? 1 : 0.75,
             }}
             onMouseEnter={(e) => {
               if (v.disponible) {
                 e.currentTarget.style.transform = 'translateY(-4px)'
                 e.currentTarget.style.borderColor = v.color
-                e.currentTarget.style.boxShadow = `0 12px 40px ${v.colorBg}`
+                e.currentTarget.style.boxShadow = `0 16px 48px ${v.colorBg}`
               }
             }}
             onMouseLeave={(e) => {
@@ -142,97 +207,105 @@ export default function HomePage() {
               e.currentTarget.style.boxShadow = 'none'
             }}
           >
-            {v.badge && (
+            {/* Badge próximamente */}
+            {!v.disponible && (
               <div style={{
                 position: 'absolute',
-                top: 16,
-                right: 16,
-                fontSize: 10,
+                top: 14,
+                right: 14,
+                fontSize: 9,
                 letterSpacing: 1.5,
                 color: v.color,
-                background: v.colorBg,
-                padding: '5px 12px',
-                borderRadius: 12,
+                background: 'rgba(0,0,0,0.5)',
+                padding: '4px 10px',
+                borderRadius: 10,
                 textTransform: 'uppercase',
                 fontWeight: 600,
                 border: `1px solid ${v.colorBorder}`,
               }}>
-                {v.badge}
+                Pronto
               </div>
             )}
 
-            <div>
+            {/* Label pequeño arriba */}
+            <div style={{
+              fontSize: 10,
+              letterSpacing: 3,
+              color: v.color,
+              textTransform: 'uppercase',
+              marginBottom: 8,
+              fontWeight: 600,
+              opacity: 0.9,
+            }}>
+              Coach 360
+            </div>
+
+            {/* Nombre grande de la vertical */}
+            <h2 style={{
+              fontFamily: 'Georgia, serif',
+              fontSize: 36,
+              fontWeight: 300,
+              lineHeight: 1,
+              color: '#fff',
+              marginBottom: 16,
+              letterSpacing: -0.5,
+            }}>
+              {v.label}
+            </h2>
+
+            {/* Frase */}
+            <p style={{
+              fontSize: 13,
+              color: '#c8c8c8',
+              lineHeight: 1.5,
+              marginBottom: 20,
+              fontStyle: 'italic',
+              fontFamily: 'Georgia, serif',
+              minHeight: 40,
+            }}>
+              {v.frase}
+            </p>
+
+            {/* CTA */}
+            {v.disponible ? (
+              <div style={{
+                display: 'inline-block',
+                fontSize: 12,
+                color: v.color,
+                fontWeight: 600,
+                letterSpacing: 1,
+                textTransform: 'uppercase',
+                paddingTop: 12,
+                borderTop: `1px solid ${v.colorBorder}`,
+              }}>
+                Entrar →
+              </div>
+            ) : (
               <div style={{
                 fontSize: 11,
-                letterSpacing: 2.5,
-                color: v.color,
+                color: '#666',
+                letterSpacing: 1,
                 textTransform: 'uppercase',
-                marginBottom: 10,
-                fontWeight: 600,
+                paddingTop: 12,
+                borderTop: `1px solid rgba(255,255,255,0.08)`,
               }}>
-                {v.nombre}
+                Disponible pronto
               </div>
-
-              <h2 style={{
-                fontFamily: 'Georgia, serif',
-                fontSize: 24,
-                fontWeight: 300,
-                lineHeight: 1.3,
-                color: '#fff',
-                marginBottom: 14,
-                fontStyle: 'italic',
-              }}>
-                {v.frase}
-              </h2>
-
-              <p style={{
-                fontSize: 13,
-                color: '#b8b8b8',
-                lineHeight: 1.55,
-                marginBottom: 20,
-              }}>
-                {v.descripcion}
-              </p>
-            </div>
-
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              paddingTop: 16,
-              borderTop: `1px solid ${v.colorBorder}`,
-            }}>
-              <span style={{
-                fontSize: 13,
-                color: v.disponible ? v.color : '#666',
-                fontWeight: 600,
-                letterSpacing: 0.5,
-              }}>
-                {v.disponible ? 'Explorar →' : 'Disponible pronto'}
-              </span>
-              {v.disponible && (
-                <div style={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: '50%',
-                  background: `linear-gradient(135deg, ${v.color}, ${v.colorSecondary})`,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#0a0a0a',
-                  fontSize: 16,
-                  fontWeight: 700,
-                }}>
-                  →
-                </div>
-              )}
-            </div>
+            )}
           </div>
         ))}
       </div>
 
-      <div style={{ textAlign: 'center', marginTop: 60, color: '#666', fontSize: 12, letterSpacing: 1 }}>
-        Coach 360 · Coaching con inteligencia artificial
+      {/* Footer */}
+      <div style={{
+        textAlign: 'center',
+        marginTop: 56,
+        color: '#555',
+        fontSize: 11,
+        letterSpacing: 2,
+        textTransform: 'uppercase',
+      }}>
+        Coaching con Inteligencia Artificial
       </div>
     </div>
   )
