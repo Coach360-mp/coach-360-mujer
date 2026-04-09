@@ -71,6 +71,7 @@ export default function Dashboard() {
   const [configDimension, setConfigDimension] = useState(0)
   const [habitosSeleccionados, setHabitosSeleccionados] = useState({ mente: [], cuerpo: [], corazon: [], espiritu: [] })
   const [nuevoHabito, setNuevoHabito] = useState('')
+  const [statModal, setStatModal] = useState(null)
   const [isRecording, setIsRecording] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
   const chatEndRef = useRef(null)
@@ -341,7 +342,16 @@ export default function Dashboard() {
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 24 }}>
-            {[{ label: 'Racha', val: perfil?.racha_dias || 0 }, { label: 'Nivel', val: perfil?.nivel || 1 }, { label: 'Puntos', val: perfil?.puntos_totales || 0 }].map(s => (<div key={s.label} className="card" style={{ textAlign: 'center', padding: 16 }}><p style={{ fontSize: 24, fontWeight: 700, color: 'var(--gold)' }}>{s.val}</p><p style={{ fontSize: 11, color: 'var(--text-light)' }}>{s.label}</p></div>))}
+            {[
+              { label: 'Racha', val: perfil?.racha_dias || 0, key: 'racha' },
+              { label: 'Nivel', val: perfil?.nivel || 1, key: 'nivel' },
+              { label: 'Puntos', val: perfil?.puntos_totales || 0, key: 'puntos' }
+            ].map(s => (
+              <div key={s.label} className="card" onClick={() => setStatModal(s.key)} style={{ textAlign: 'center', padding: 16, cursor: 'pointer', transition: 'all 0.2s' }}>
+                <p style={{ fontSize: 24, fontWeight: 700, color: 'var(--gold)' }}>{s.val}</p>
+                <p style={{ fontSize: 11, color: 'var(--text-light)' }}>{s.label}</p>
+              </div>
+            ))}
           </div>
 
           <div className="card" style={{ marginBottom: 24, cursor: 'pointer' }} onClick={() => navigate('planes')}>
@@ -700,6 +710,173 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+
+      {/* === MODAL STATS INTERACTIVAS === */}
+      {statModal && (() => {
+        const racha = perfil?.racha_dias || 0
+        const mejorRacha = perfil?.mejor_racha || 0
+        const nivel = perfil?.nivel || 1
+        const puntos = perfil?.puntos_totales || 0
+        const niveles = [
+          { n: 1, nombre: 'Exploradora', min: 0, max: 100 },
+          { n: 2, nombre: 'Buscadora', min: 100, max: 300 },
+          { n: 3, nombre: 'Descubridora', min: 300, max: 600 },
+          { n: 4, nombre: 'Reveladora', min: 600, max: 1000 },
+          { n: 5, nombre: 'Transformadora', min: 1000, max: 1500 },
+          { n: 6, nombre: 'Creadora', min: 1500, max: 2200 },
+          { n: 7, nombre: 'Guía', min: 2200, max: 3000 },
+          { n: 8, nombre: 'Maestra', min: 3000, max: Infinity },
+        ]
+        const nivelActual = niveles[Math.min(nivel - 1, niveles.length - 1)]
+        const siguienteNivel = niveles[Math.min(nivel, niveles.length - 1)]
+        const progresoNivel = nivelActual.max === Infinity ? 100 : ((puntos - nivelActual.min) / (nivelActual.max - nivelActual.min)) * 100
+
+        return (
+          <div onClick={() => setStatModal(null)} style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+            background: 'rgba(0,0,0,0.7)', zIndex: 2000, display: 'flex',
+            alignItems: 'flex-end', justifyContent: 'center',
+          }}>
+            <div onClick={(e) => e.stopPropagation()} style={{
+              background: 'linear-gradient(180deg, #1a1410 0%, #0a0a0a 100%)',
+              borderTopLeftRadius: 28, borderTopRightRadius: 28,
+              width: '100%', maxWidth: 560, maxHeight: '85vh', overflowY: 'auto',
+              padding: '24px 24px 40px', border: '1px solid rgba(212, 175, 55, 0.25)',
+              borderBottom: 'none',
+            }}>
+              <div style={{ width: 40, height: 4, background: 'rgba(255,255,255,0.2)', borderRadius: 4, margin: '0 auto 24px' }} />
+
+              {statModal === 'racha' && (
+                <>
+                  <div style={{ textAlign: 'center', marginBottom: 24 }}>
+                    <div style={{ fontSize: 11, letterSpacing: 3, color: '#d4af37', textTransform: 'uppercase', marginBottom: 12 }}>Tu racha</div>
+                    <div style={{ fontSize: 72, fontFamily: 'Georgia, serif', fontWeight: 300, color: '#d4af37', lineHeight: 1 }}>{racha}</div>
+                    <div style={{ fontSize: 14, color: '#a8a8a8', marginTop: 4 }}>días consecutivos</div>
+                  </div>
+
+                  <div style={{ background: 'rgba(212, 175, 55, 0.08)', border: '1px solid rgba(212, 175, 55, 0.2)', borderRadius: 16, padding: 20, marginBottom: 16 }}>
+                    <div style={{ fontSize: 11, letterSpacing: 2, color: '#d4af37', textTransform: 'uppercase', marginBottom: 8, fontWeight: 600 }}>Tu mejor racha</div>
+                    <div style={{ fontSize: 28, color: '#fff', fontFamily: 'Georgia, serif', fontWeight: 300 }}>{mejorRacha} días</div>
+                  </div>
+
+                  <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: 20, marginBottom: 16 }}>
+                    <div style={{ fontSize: 11, letterSpacing: 2, color: '#d4af37', textTransform: 'uppercase', marginBottom: 14, fontWeight: 600 }}>Rachas que puedes completar</div>
+                    {[
+                      { dias: 3, nombre: 'Primer impulso', completado: racha >= 3 },
+                      { dias: 7, nombre: 'Una semana', completado: racha >= 7 },
+                      { dias: 14, nombre: 'Consistencia', completado: racha >= 14 },
+                      { dias: 30, nombre: 'Un mes entero', completado: racha >= 30 },
+                      { dias: 60, nombre: 'Transformación', completado: racha >= 60 },
+                      { dias: 100, nombre: 'Leyenda', completado: racha >= 100 },
+                    ].map(r => (
+                      <div key={r.dias} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                          <div style={{
+                            width: 28, height: 28, borderRadius: '50%',
+                            border: `2px solid ${r.completado ? '#d4af37' : 'rgba(255,255,255,0.2)'}`,
+                            background: r.completado ? '#d4af37' : 'transparent',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            color: r.completado ? '#0a0a0a' : '#666', fontSize: 12, fontWeight: 700,
+                          }}>{r.completado ? '✓' : r.dias}</div>
+                          <span style={{ color: r.completado ? '#fff' : '#a8a8a8', fontSize: 14 }}>{r.nombre}</span>
+                        </div>
+                        <span style={{ fontSize: 12, color: '#666' }}>{r.dias} días</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <p style={{ fontSize: 12, color: '#888', lineHeight: 1.6, textAlign: 'center', marginTop: 16 }}>
+                    Tu racha crece cada día que haces check-in, completas un hábito, una herramienta o conversas con tu coach.
+                  </p>
+                </>
+              )}
+
+              {statModal === 'nivel' && (
+                <>
+                  <div style={{ textAlign: 'center', marginBottom: 24 }}>
+                    <div style={{ fontSize: 11, letterSpacing: 3, color: '#d4af37', textTransform: 'uppercase', marginBottom: 12 }}>Tu nivel</div>
+                    <div style={{ fontSize: 72, fontFamily: 'Georgia, serif', fontWeight: 300, color: '#d4af37', lineHeight: 1 }}>{nivel}</div>
+                    <div style={{ fontSize: 18, color: '#fff', marginTop: 8, fontStyle: 'italic', fontFamily: 'Georgia, serif' }}>{nivelActual.nombre}</div>
+                  </div>
+
+                  {nivelActual.max !== Infinity && (
+                    <div style={{ background: 'rgba(212, 175, 55, 0.08)', border: '1px solid rgba(212, 175, 55, 0.2)', borderRadius: 16, padding: 20, marginBottom: 16 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
+                        <span style={{ fontSize: 12, color: '#a8a8a8' }}>Progreso al siguiente nivel</span>
+                        <span style={{ fontSize: 12, color: '#d4af37', fontWeight: 600 }}>{puntos} / {nivelActual.max}</span>
+                      </div>
+                      <div style={{ background: 'rgba(0,0,0,0.4)', borderRadius: 12, height: 8, overflow: 'hidden' }}>
+                        <div style={{ background: 'linear-gradient(90deg, #d4af37, #f5c842)', height: '100%', width: `${Math.min(progresoNivel, 100)}%`, transition: 'width 0.5s' }} />
+                      </div>
+                      <p style={{ fontSize: 12, color: '#a8a8a8', marginTop: 12, lineHeight: 1.5 }}>
+                        Te faltan <strong style={{ color: '#d4af37' }}>{nivelActual.max - puntos} puntos</strong> para ser <em style={{ color: '#fff' }}>{siguienteNivel.nombre}</em>
+                      </p>
+                    </div>
+                  )}
+
+                  <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: 20 }}>
+                    <div style={{ fontSize: 11, letterSpacing: 2, color: '#d4af37', textTransform: 'uppercase', marginBottom: 14, fontWeight: 600 }}>Todos los niveles</div>
+                    {niveles.map(n => (
+                      <div key={n.n} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,0.05)', opacity: n.n <= nivel ? 1 : 0.5 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                          <div style={{
+                            width: 28, height: 28, borderRadius: '50%',
+                            background: n.n <= nivel ? '#d4af37' : 'rgba(255,255,255,0.1)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            color: n.n <= nivel ? '#0a0a0a' : '#666', fontSize: 12, fontWeight: 700,
+                          }}>{n.n}</div>
+                          <span style={{ color: '#fff', fontSize: 14, fontStyle: n.n === nivel ? 'italic' : 'normal' }}>{n.nombre}</span>
+                        </div>
+                        <span style={{ fontSize: 11, color: '#666' }}>{n.min}{n.max !== Infinity ? `-${n.max}` : '+'} pts</span>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {statModal === 'puntos' && (
+                <>
+                  <div style={{ textAlign: 'center', marginBottom: 24 }}>
+                    <div style={{ fontSize: 11, letterSpacing: 3, color: '#d4af37', textTransform: 'uppercase', marginBottom: 12 }}>Tus puntos</div>
+                    <div style={{ fontSize: 72, fontFamily: 'Georgia, serif', fontWeight: 300, color: '#d4af37', lineHeight: 1 }}>{puntos}</div>
+                    <div style={{ fontSize: 14, color: '#a8a8a8', marginTop: 4 }}>puntos totales</div>
+                  </div>
+
+                  <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: 20, marginBottom: 16 }}>
+                    <div style={{ fontSize: 11, letterSpacing: 2, color: '#d4af37', textTransform: 'uppercase', marginBottom: 14, fontWeight: 600 }}>Cómo ganar puntos</div>
+                    {[
+                      { accion: 'Check-in diario', puntos: 5 },
+                      { accion: 'Completar un hábito', puntos: 3 },
+                      { accion: 'Hacer un test', puntos: 20 },
+                      { accion: 'Completar una herramienta', puntos: 15 },
+                      { accion: 'Conversar con tu coach', puntos: 5 },
+                      { accion: 'Completar una lección de módulo', puntos: 10 },
+                      { accion: 'Racha de 7 días', puntos: 30 },
+                      { accion: 'Racha de 30 días', puntos: 100 },
+                    ].map(a => (
+                      <div key={a.accion} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                        <span style={{ color: '#e5e5e5', fontSize: 14 }}>{a.accion}</span>
+                        <span style={{ color: '#d4af37', fontSize: 13, fontWeight: 600 }}>+{a.puntos}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <p style={{ fontSize: 12, color: '#888', lineHeight: 1.6, textAlign: 'center', marginTop: 16 }}>
+                    Los puntos reflejan tu compromiso contigo misma. No compiten con nadie — solo contigo misma.
+                  </p>
+                </>
+              )}
+
+              <button onClick={() => setStatModal(null)} style={{
+                width: '100%', background: 'transparent', color: '#a8a8a8',
+                border: '1px solid rgba(255,255,255,0.15)', padding: '14px 24px',
+                borderRadius: 30, fontSize: 14, cursor: 'pointer', fontFamily: 'inherit',
+                marginTop: 20,
+              }}>Cerrar</button>
+            </div>
+          </div>
+        )
+      })()}
 
       {!activeTest && !testResult && !activeHerramienta && !['clara', 'equilibrio', 'herramienta_activa', 'planes'].includes(view) && (
         <div className="bottom-nav">
