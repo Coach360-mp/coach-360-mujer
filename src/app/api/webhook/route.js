@@ -11,7 +11,7 @@ export async function POST(request) {
     const body = await request.json()
 
     if (body.type === 'payment' && body.data?.id) {
-      const accessToken = process.env.MERCADOPAGO_ACCESS_TOKEN
+      const accessToken = process.env.MERCADOPAGO_ACCESS_TOKEN_CL || process.env.MERCADOPAGO_ACCESS_TOKEN
 
       // Obtener detalles del pago
       const paymentRes = await fetch(
