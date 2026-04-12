@@ -439,6 +439,25 @@ export default function Dashboard() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
             {tests.slice(0, 3).map(t => (<div key={t.id} className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }} onClick={() => canAccess(t.plan_requerido) && startTest(t)}><div><p style={{ fontWeight: 600, fontSize: 14, marginBottom: 2 }}>{t.titulo}</p><p style={{ fontSize: 12, color: 'var(--text-light)' }}>{t.numero_preguntas} preguntas · {t.categoria}</p></div>{!canAccess(t.plan_requerido) && <span style={{ fontSize: 11, background: 'var(--warm-dark)', padding: '4px 10px', borderRadius: 8, color: 'var(--text-light)' }}>Premium</span>}</div>))}
           </div>
+
+          {modulos.length > 0 && (
+            <>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 22, marginBottom: 12 }}>Módulos</h2>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
+                {modulos.slice(0, 3).map(m => (
+                  <div key={m.id} className="card" style={{ cursor: canAccess(m.plan_requerido) ? 'pointer' : 'default', opacity: canAccess(m.plan_requerido) ? 1 : 0.6 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div>
+                        <p style={{ fontWeight: 600, fontSize: 14, marginBottom: 2 }}>{m.titulo}</p>
+                        <p style={{ fontSize: 12, color: 'var(--text-light)' }}>{m.numero_semanas} semanas</p>
+                      </div>
+                      {!canAccess(m.plan_requerido) ? <span style={{ fontSize: 11, background: 'var(--warm-dark)', padding: '4px 10px', borderRadius: 8, color: 'var(--text-light)' }}>Premium</span> : <span style={{ fontSize: 14, color: 'var(--gold)' }}>→</span>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
         </div>
       )}
 
