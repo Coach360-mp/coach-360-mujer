@@ -129,7 +129,7 @@ export default function Dashboard() {
     setChatMsgs([{ r: 'a', t: `Hola, bienvenida ✦\n\nSoy ${currentCoach.name}, ${currentCoach.credential.toLowerCase()}. Estoy aquí para ayudarte a ver con más claridad.\n\n¿Qué te trae hoy?` }])
     const { data: t } = await supabase.from('tests').select('*').eq('activo', true).eq('vertical', 'mujer').order('orden')
     const { data: h } = await supabase.from('templates').select('*').eq('activo', true).eq('vertical', 'mujer').order('orden')
-    const { data: m } = await supabase.from('modulos').select('*').eq('activo', true).order('orden')
+    const { data: m } = await supabase.from('modulos').select('*').eq("activo", true).eq("vertical", "mujer").order("orden")
     if (t) setTests(t)
     if (h) setHerramientas(h)
     if (m) setModulos(m)
