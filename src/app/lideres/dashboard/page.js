@@ -515,7 +515,7 @@ export default function DashboardLideres() {
         <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
           <div style={{ padding: '48px 20px 12px', borderBottom: '1px solid rgba(99,102,241,0.2)', background: '#1e1b4b', display: 'flex', alignItems: 'center', gap: 12 }}>
             <button onClick={goBack} style={{ background: 'none', border: 'none', fontSize: 24, cursor: 'pointer', color: '#fff', padding: '4px 8px' }}>←</button>
-            <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'linear-gradient(135deg, #818cf8, #6366f1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontFamily: 'Georgia, serif', fontSize: 18, fontWeight: 600 }}>M</div>
+            <img src="/marco.jpg" alt="Marco" style={{ width: 40, height: 40, borderRadius: "50%", objectFit: "cover" }} />
             <div>
               <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 20, margin: 0, color: '#fff' }}>Marco ✦</h2>
               <p style={{ fontSize: 11, color: '#a8a8a8', margin: 0 }}>{marco.credential}</p>
@@ -524,13 +524,13 @@ export default function DashboardLideres() {
           <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
             {chatMsgs.map((m, i) => (
               <div key={i} style={{ display: 'flex', gap: 8, alignSelf: m.r === 'u' ? 'flex-end' : 'flex-start', maxWidth: '85%', flexDirection: m.r === 'u' ? 'row-reverse' : 'row' }}>
-                {m.r === 'a' && <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'linear-gradient(135deg, #818cf8, #6366f1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontFamily: 'Georgia, serif', fontSize: 13, fontWeight: 600, marginTop: 4, flexShrink: 0 }}>M</div>}
+                {m.r === 'a' && <img src="/marco.jpg" alt="Marco" style={{ width: 28, height: 28, borderRadius: "50%", objectFit: "cover", marginTop: 4, flexShrink: 0 }} />}
                 <div style={{ padding: '12px 16px', borderRadius: m.r === 'u' ? '16px 16px 4px 16px' : '16px 16px 16px 4px', background: m.r === 'u' ? '#818cf8' : 'rgba(255,255,255,0.06)', color: '#fff', fontSize: 14, lineHeight: 1.5, whiteSpace: 'pre-wrap' }}>{m.t}</div>
               </div>
             ))}
             {typing && (
               <div style={{ display: 'flex', gap: 8, alignSelf: 'flex-start' }}>
-                <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'linear-gradient(135deg, #818cf8, #6366f1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 13, fontWeight: 600, marginTop: 4 }}>M</div>
+                <img src="/marco.jpg" alt="Marco" style={{ width: 28, height: 28, borderRadius: "50%", objectFit: "cover", marginTop: 4 }} />
                 <div style={{ padding: '12px 16px', borderRadius: '16px 16px 16px 4px', background: 'rgba(255,255,255,0.06)', color: '#a8a8a8', fontSize: 14 }}>Marco está pensando ✦</div>
               </div>
             )}
