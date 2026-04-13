@@ -531,33 +531,43 @@ export default function DashboardGeneral() {
 
       {/* ── CHAT CON LEO ── */}
       {!activeTest && view === 'clara' && (
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-          <div style={{ padding: '48px 20px 12px', borderBottom: '1px solid rgba(20,184,166,0.2)', background: '#042f2e', display: 'flex', alignItems: 'center', gap: 12 }}>
-            <button onClick={goBack} style={{ background: 'none', border: 'none', fontSize: 24, cursor: 'pointer', color: '#fff', padding: '4px 8px' }}>←</button>
-            <img src="/leo.jpg" alt="Leo" style={{ width: 40, height: 40, borderRadius: "50%", objectFit: "cover" }} />
-            <div>
-              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 20, margin: 0, color: '#fff' }}>Leo ✦</h2>
-              <p style={{ fontSize: 11, color: '#a8a8a8', margin: 0 }}>{leo.credential}</p>
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#021a19' }}>
+          <div style={{ padding: '48px 20px 16px', borderBottom: '1px solid rgba(20,184,166,0.15)', background: '#042f2e', display: 'flex', alignItems: 'center', gap: 14 }}>
+            <button onClick={goBack} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#fff', padding: '4px 8px', display: 'flex', alignItems: 'center' }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <div style={{ position: 'relative' }}>
+              <img src="/leo.jpg" alt="Leo" style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', border: '2px solid #14b8a6' }} />
+              <div style={{ position: 'absolute', bottom: 1, right: 1, width: 10, height: 10, borderRadius: '50%', background: '#22c55e', border: '2px solid #042f2e' }} />
+            </div>
+            <div style={{ flex: 1 }}>
+              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 18, margin: 0, color: '#fff' }}>Leo</h2>
+              <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', margin: 0, marginTop: 1 }}>{leo.credential}</p>
             </div>
           </div>
-          <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div style={{ flex: 1, overflowY: 'auto', padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: 16 }}>
             {chatMsgs.map((m, i) => (
-              <div key={i} style={{ display: 'flex', gap: 8, alignSelf: m.r === 'u' ? 'flex-end' : 'flex-start', maxWidth: '85%', flexDirection: m.r === 'u' ? 'row-reverse' : 'row' }}>
-                {m.r === 'a' && <img src="/leo.jpg" alt="Leo" style={{ width: 28, height: 28, borderRadius: "50%", objectFit: "cover", marginTop: 4, flexShrink: 0 }} />}
-                <div style={{ padding: '12px 16px', borderRadius: m.r === 'u' ? '16px 16px 4px 16px' : '16px 16px 16px 4px', background: m.r === 'u' ? '#14b8a6' : 'rgba(255,255,255,0.06)', color: '#fff', fontSize: 14, lineHeight: 1.5, whiteSpace: 'pre-wrap' }}>{m.t}</div>
+              <div key={i} style={{ display: 'flex', gap: 10, alignSelf: m.r === 'u' ? 'flex-end' : 'flex-start', maxWidth: '82%', flexDirection: m.r === 'u' ? 'row-reverse' : 'row', alignItems: 'flex-end' }}>
+                {m.r === 'a' && <img src="/leo.jpg" alt="Leo" style={{ width: 30, height: 30, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, marginBottom: 2 }} />}
+                <div style={{ padding: '12px 16px', borderRadius: m.r === 'u' ? '20px 20px 4px 20px' : '20px 20px 20px 4px', background: m.r === 'u' ? '#14b8a6' : 'rgba(255,255,255,0.08)', color: '#fff', fontSize: 14, lineHeight: 1.6, whiteSpace: 'pre-wrap', boxShadow: '0 1px 6px rgba(0,0,0,0.2)' }}>{m.t}</div>
               </div>
             ))}
             {typing && (
-              <div style={{ display: 'flex', gap: 8, alignSelf: 'flex-start' }}>
-                <img src="/leo.jpg" alt="Leo" style={{ width: 28, height: 28, borderRadius: "50%", objectFit: "cover", marginTop: 4 }} />
-                <div style={{ padding: '12px 16px', borderRadius: '16px 16px 16px 4px', background: 'rgba(255,255,255,0.06)', color: '#a8a8a8', fontSize: 14 }}>Leo está pensando ✦</div>
+              <div style={{ display: 'flex', gap: 10, alignSelf: 'flex-start', alignItems: 'flex-end' }}>
+                <img src="/leo.jpg" alt="Leo" style={{ width: 30, height: 30, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, marginBottom: 2 }} />
+                <div style={{ padding: '14px 18px', borderRadius: '20px 20px 20px 4px', background: 'rgba(255,255,255,0.08)', display: 'flex', gap: 5, alignItems: 'center' }}>
+                  <style>{`@keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}}`}</style>
+                  {[0,1,2].map(i => <div key={i} style={{ width: 7, height: 7, borderRadius: '50%', background: '#14b8a6', animation: `bounce 1.2s ease-in-out ${i * 0.15}s infinite` }} />)}
+                </div>
               </div>
             )}
             <div ref={chatEndRef} />
           </div>
-          <div style={{ padding: '12px 20px 32px', background: '#042f2e', borderTop: '1px solid rgba(20,184,166,0.2)', display: 'flex', gap: 8 }}>
-            <input placeholder="Escríbele a Leo..." value={chatInput} onChange={e => setChatInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && sendMessage()} style={{ flex: 1, padding: '12px 16px', borderRadius: 12, border: '1px solid rgba(20,184,166,0.3)', background: 'rgba(255,255,255,0.06)', color: '#fff', fontSize: 14, fontFamily: 'inherit', outline: 'none' }} />
-            <button onClick={sendMessage} style={{ padding: '12px 20px', borderRadius: 12, border: 'none', background: 'linear-gradient(135deg, #14b8a6, #0d9488)', color: '#fff', fontSize: 16, cursor: 'pointer' }}>→</button>
+          <div style={{ padding: '12px 16px 32px', background: '#042f2e', borderTop: '1px solid rgba(20,184,166,0.15)', display: 'flex', gap: 10, alignItems: 'center' }}>
+            <input placeholder="Escríbele a Leo..." value={chatInput} onChange={e => setChatInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && sendMessage()} style={{ flex: 1, padding: '12px 18px', borderRadius: 24, border: '1.5px solid rgba(20,184,166,0.3)', background: 'rgba(255,255,255,0.06)', color: '#fff', fontSize: 14, fontFamily: 'inherit', outline: 'none' }} />
+            <button onClick={sendMessage} style={{ width: 44, height: 44, borderRadius: '50%', border: 'none', flexShrink: 0, background: chatInput.trim() ? '#14b8a6' : 'rgba(255,255,255,0.08)', color: '#fff', cursor: chatInput.trim() ? 'pointer' : 'default', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            </button>
           </div>
         </div>
       )}
