@@ -173,14 +173,62 @@ export default function Dashboard() {
     setTestAnswers(newAnswers)
     if (testStep + 1 < testQuestions.length) { setTestStep(testStep + 1) }
     else {
-      const counts = { 1: 0, 2: 0, 3: 0, 4: 0 }
-      newAnswers.forEach(a => { counts[a] = (counts[a] || 0) + 1 })
-      const dominant = Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0]
-      const profile = elementProfiles[dominant] || { nombre: 'Explorador', desc: 'Tienes una combinación única de elementos.' }
+      const puntaje = newAnswers.reduce((a, b) => a + b, 0)
+
+      // Test 4 (Coherencia) usa suma de puntaje con rangos
+      // Todos los demás usan valor dominante (1=primero, 2=segundo, etc.)
+      const esTestDeRango = activeTest.id === '11111111-1111-1111-1111-111111111104'
+
+      let perfilData = null
+      if (esTestDeRango) {
+        const { data } = await supabase
+          .from('perfiles_resultado')
+          .select('*')
+          .eq('test_id', activeTest.id)
+          .lte('rango_min', puntaje)
+          .gte('rango_max', puntaje)
+          .single()
+        perfilData = data
+      } else {
+        const counts = { 1: 0, 2: 0, 3: 0, 4: 0 }
+        newAnswers.forEach(a => { counts[a] = (counts[a] || 0) + 1 })
+        const dominant = parseInt(Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0])
+        const { data } = await supabase
+          .from('perfiles_resultado')
+          .select('*')
+          .eq('test_id', activeTest.id)
+          .eq('rango_min', dominant)
+          .eq('rango_max', dominant)
+          .single()
+        perfilData = data
+      }
+
+      const profile = perfilData ? {
+        nombre: perfilData.perfil,
+        titulo_perfil: perfilData.titulo_perfil,
+        descLarga: perfilData.descripcion,
+        desc: perfilData.descripcion,
+        fortalezas: perfilData.fortalezas ? perfilData.fortalezas.split('. ').filter(Boolean) : [],
+        sombras: perfilData.desafios ? perfilData.desafios.split('. ').filter(Boolean) : [],
+        recomendaciones: perfilData.recomendacion ? [perfilData.recomendacion] : [],
+        proximoPaso: perfilData.recomendacion || '',
+        promptClara: `Acabo de hacer el test "${activeTest.titulo}" y mi resultado es "${perfilData.titulo_perfil}". Quiero hablarlo contigo.`,
+        color: '#d4af37',
+        colorBg: 'rgba(212, 175, 55, 0.12)',
+        icono: '✦',
+      } : { nombre: 'Explorador', desc: 'Tienes una combinación única.', descLarga: 'Clara te va a ayudar a interpretarlo.', icono: '✦', color: '#d4af37', colorBg: 'rgba(212,175,55,0.12)', fortalezas: [], sombras: [], recomendaciones: [], promptClara: `Acabo de hacer el test "${activeTest?.titulo}". Quiero hablarlo contigo.` }
+
       setTestResult(profile)
       if (user) {
-        await supabase.from('resultados_test').insert({ usuario_id: user.id, test_id: activeTest.id, puntaje_total: newAnswers.reduce((a, b) => a + b, 0), perfil_resultado: profile.nombre, respuestas: newAnswers })
+        await supabase.from('resultados_test').insert({ usuario_id: user.id, test_id: activeTest.id, puntaje_total: puntaje, perfil_resultado: profile.nombre, respuestas: newAnswers })
         await sumarPuntos('test_completado', 20, `Test: ${activeTest.titulo}`)
+        try {
+          await supabase.from('user_context').upsert({
+            user_id: user.id, vertical: 'mujer', context_key: 'ultimo_test_resultado',
+            context_value: `Test: ${activeTest.titulo} | Perfil: ${profile.nombre} | ${profile.descLarga?.slice(0, 200)}`,
+            source_coach: 'clara', cross_coach: false,
+          }, { onConflict: 'user_id,context_key,vertical' })
+        } catch (e) { console.error('Error guardando contexto:', e) }
       }
     }
   }
