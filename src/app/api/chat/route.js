@@ -34,82 +34,242 @@ const focoLabels = {
   liderazgo: 'desarrollar su liderazgo',
 }
 
-async function construirContextoUsuario(userId, esPremium) {
+async function construirMemoriaCompleta(userId, esPremium) {
   if (!userId) return ''
   try {
-    const { data: perfil } = await supabaseAdmin.from('perfiles').select('nombre').eq('id', userId).single()
-    const { data: onboarding } = await supabaseAdmin.from('onboarding_respuestas').select('*').eq('user_id', userId).eq('vertical', 'mujer').maybeSingle()
-    const { data: tests } = await supabaseAdmin.from('resultados_test').select('perfil_resultado, completado_at').eq('usuario_id', userId).order('completado_at', { ascending: false }).limit(5)
-    const { data: habitos } = await supabaseAdmin.from('habitos_usuario').select('dimension, nombre').eq('user_id', userId).eq('activo', true)
+    // 1. Perfil base
+    const { data: perfil } = await supabaseAdmin
+      .from('perfiles')
+      .select('nombre, racha_dias, mejor_racha, nivel, puntos_totales')
+      .eq('id', userId).single()
 
-    let contexto = '\n\nCONTEXTO DE LA PERSONA CON LA QUE ESTÁS HABLANDO:\n'
-    if (perfil?.nombre) contexto += `\nNombre: ${perfil.nombre}`
+    // 2. Onboarding
+    const { data: onboarding } = await supabaseAdmin
+      .from('onboarding_respuestas')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('vertical', 'mujer')
+      .maybeSingle()
 
-    if (onboarding) {
-      if (onboarding.momento_vida?.length > 0) {
-        const momentos = onboarding.momento_vida.map(m => momentosLabels[m]).filter(Boolean).join(' y ')
-        if (momentos) contexto += `\nMomento de vida: está ${momentos}`
-      }
-      if (onboarding.identidad?.length > 0) {
-        const ids = onboarding.identidad.map(i => identidadLabels[i]).filter(Boolean).join(', ')
-        if (ids) contexto += `\nSe identifica como: ${ids}`
-      }
-      if (onboarding.foco_inicial) {
-        const foco = focoLabels[onboarding.foco_inicial]
-        if (foco) contexto += `\nLo que quiere trabajar primero: ${foco}`
-      }
-      if (onboarding.bienestar_inicial) {
-        const b = onboarding.bienestar_inicial
-        contexto += `\nBienestar inicial (1-10): Mente ${b.mente}, Cuerpo ${b.cuerpo}, Corazón ${b.corazon}, Espíritu ${b.espiritu}`
-      }
-      if (onboarding.respuesta_libre) contexto += `\nLo que quiere diferente en 90 días: "${onboarding.respuesta_libre}"`
-    }
+    // 3. Todos los resultados de tests
+    const { data: tests } = await supabaseAdmin
+      .from('resultados_test')
+      .select('perfil_resultado, puntaje_total, fecha_realizacion, test_id')
+      .eq('usuario_id', userId)
+      .order('fecha_realizacion', { ascending: false })
+      .limit(20)
 
-    if (tests?.length > 0) {
-      const perfiles = tests.map(t => t.perfil_resultado).filter(p => p && !p.startsWith('Herramienta:')).slice(0, 3)
-      if (perfiles.length > 0) contexto += `\nResultados recientes de tests: ${perfiles.join(', ')}`
-    }
+    // 4. Nombres de tests
+    const { data: testsCatalogo } = await supabaseAdmin
+      .from('tests')
+      .select('id, titulo')
+      .eq('vertical', 'mujer')
 
-    if (habitos?.length > 0) {
-      const porDim = { mente: [], cuerpo: [], corazon: [], espiritu: [] }
-      habitos.forEach(h => { if (porDim[h.dimension]) porDim[h.dimension].push(h.nombre) })
-      const dimsActivas = Object.entries(porDim).filter(([_, arr]) => arr.length > 0)
-      if (dimsActivas.length > 0) {
-        contexto += '\nHábitos que está cultivando:'
-        dimsActivas.forEach(([dim, arr]) => { contexto += `\n  - ${dim}: ${arr.join(', ')}` })
-      }
-    }
+    const testsMap = {}
+    testsCatalogo?.forEach(t => { testsMap[t.id] = t.titulo })
 
-    // MEMORIA CRUZADA: solo Premium
+    // 5. Hábitos configurados y cumplimiento esta semana
+    const { data: habitos } = await supabaseAdmin
+      .from('habitos_usuario')
+      .select('id, dimension, nombre')
+      .eq('user_id', userId)
+      .eq('activo', true)
+
+    const hace7dias = new Date()
+    hace7dias.setDate(hace7dias.getDate() - 7)
+    const { data: habitosCompletados } = await supabaseAdmin
+      .from('habitos_completados')
+      .select('habito_id, fecha')
+      .eq('user_id', userId)
+      .gte('fecha', hace7dias.toISOString().split('T')[0])
+
+    // 6. Check-ins últimos 7 días
+    const { data: checkins } = await supabaseAdmin
+      .from('daily_checkins')
+      .select('mood, energy, clarity, created_at')
+      .eq('user_id', userId)
+      .eq('vertical', 'mujer')
+      .gte('created_at', hace7dias.toISOString())
+      .order('created_at', { ascending: false })
+
+    // 7. Progreso en módulos
+    const { data: progreso } = await supabaseAdmin
+      .from('progreso_modulos')
+      .select('modulo_id, porcentaje_avance, completado, fecha_completado')
+      .eq('usuario_id', userId)
+
+    const { data: modulosCatalogo } = await supabaseAdmin
+      .from('modulos')
+      .select('id, titulo')
+      .eq('vertical', 'mujer')
+
+    const modulosMap = {}
+    modulosCatalogo?.forEach(m => { modulosMap[m.id] = m.titulo })
+
+    // 8. Insights y compromisos guardados
+    const { data: contextos } = await supabaseAdmin
+      .from('user_context')
+      .select('context_key, context_value, created_at, source_coach')
+      .eq('user_id', userId)
+      .eq('vertical', 'mujer')
+      .order('created_at', { ascending: false })
+      .limit(20)
+
+    // 9. Memoria cruzada (solo Premium)
+    let crossContext = []
     if (esPremium) {
-      const { data: crossContext } = await supabaseAdmin
+      const { data } = await supabaseAdmin
         .from('user_context')
-        .select('vertical, context_value, source_coach')
+        .select('vertical, context_value, source_coach, created_at')
         .eq('user_id', userId)
         .neq('vertical', 'mujer')
         .eq('cross_coach', true)
         .order('created_at', { ascending: false })
         .limit(10)
+      crossContext = data || []
+    }
 
-      if (crossContext?.length > 0) {
-        contexto += '\n\nLO QUE SABES DE SUS CONVERSACIONES CON OTRAS COACHES (memoria Premium):'
-        const porVertical = {}
-        crossContext.forEach(c => {
-          if (!porVertical[c.vertical]) porVertical[c.vertical] = []
-          porVertical[c.vertical].push(c.context_value)
+    // ── CONSTRUIR CONTEXTO ──
+    let ctx = '\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nMEMORIA DE COACHING — LEE ESTO ANTES DE RESPONDER\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
+
+    // Perfil
+    if (perfil?.nombre) ctx += `\n👤 PERSONA: ${perfil.nombre}`
+    if (perfil) ctx += ` | Racha: ${perfil.racha_dias || 0} días | Nivel ${perfil.nivel || 1} | ${perfil.puntos_totales || 0} pts`
+
+    // Onboarding
+    if (onboarding) {
+      ctx += '\n\n📋 PERFIL DE INICIO:'
+      if (onboarding.momento_vida?.length > 0) {
+        const momentos = onboarding.momento_vida.map(m => momentosLabels[m]).filter(Boolean).join(' y ')
+        if (momentos) ctx += `\n• Momento de vida: está ${momentos}`
+      }
+      if (onboarding.identidad?.length > 0) {
+        const ids = onboarding.identidad.map(i => identidadLabels[i]).filter(Boolean).join(', ')
+        if (ids) ctx += `\n• Se identifica como: ${ids}`
+      }
+      if (onboarding.foco_inicial) {
+        const foco = focoLabels[onboarding.foco_inicial]
+        if (foco) ctx += `\n• Quiere trabajar en: ${foco}`
+      }
+      if (onboarding.respuesta_libre) ctx += `\n• Lo que quiere diferente en 90 días: "${onboarding.respuesta_libre}"`
+      if (onboarding.bienestar_inicial) {
+        const b = onboarding.bienestar_inicial
+        ctx += `\n• Bienestar inicial: Mente ${b.mente}/10, Cuerpo ${b.cuerpo}/10, Corazón ${b.corazon}/10, Espíritu ${b.espiritu}/10`
+      }
+    }
+
+    // Tests
+    if (tests?.length > 0) {
+      const testsFiltrados = tests.filter(t => t.perfil_resultado && !t.perfil_resultado.startsWith('Herramienta:'))
+      if (testsFiltrados.length > 0) {
+        ctx += '\n\n🧪 RESULTADOS DE TESTS:'
+        testsFiltrados.forEach(t => {
+          const titulo = testsMap[t.test_id] || 'Test'
+          const fecha = t.fecha_realizacion ? new Date(t.fecha_realizacion).toLocaleDateString('es-CL', { day: 'numeric', month: 'short' }) : ''
+          ctx += `\n• ${titulo}: "${t.perfil_resultado}"${fecha ? ` (${fecha})` : ''}`
         })
-        Object.entries(porVertical).forEach(([v, items]) => {
-          const coachName = v === 'general' ? 'Leo (coach de hábitos y propósito)' : v === 'lideres' ? 'Marco (coach ejecutivo)' : v
-          contexto += `\n  Con ${coachName}:`
-          items.forEach(i => { contexto += `\n    - ${i}` })
+      }
+      // Herramientas completadas
+      const herramientas = tests.filter(t => t.perfil_resultado?.startsWith('Herramienta:'))
+      if (herramientas.length > 0) {
+        ctx += '\n\n🛠 HERRAMIENTAS COMPLETADAS:'
+        herramientas.slice(0, 5).forEach(h => {
+          const nombre = h.perfil_resultado.replace('Herramienta: ', '')
+          ctx += `\n• ${nombre}`
         })
       }
     }
 
-    contexto += '\n\nUSA ESTE CONTEXTO CON SUTILEZA: no lo recites como una lista. Refleja que la conoces sin ser intrusiva. Si tiene Premium y sabes cosas de sus conversaciones con Leo o Marco, puedes hacer conexiones sutiles ("sé que también estás trabajando en eso"), pero nunca lo uses como autoridad ni menciones que "lees" otros chats. Tú simplemente la conoces.'
-    return contexto
+    // Hábitos
+    if (habitos?.length > 0) {
+      ctx += '\n\n💚 HÁBITOS CONFIGURADOS:'
+      const completadosIds = new Set(habitosCompletados?.map(h => h.habito_id) || [])
+      const porDim = {}
+      habitos.forEach(h => {
+        if (!porDim[h.dimension]) porDim[h.dimension] = []
+        porDim[h.dimension].push(h)
+      })
+      Object.entries(porDim).forEach(([dim, arr]) => {
+        const completados = arr.filter(h => completadosIds.has(h.id)).length
+        ctx += `\n• ${dim}: ${arr.map(h => h.nombre).join(', ')} (${completados}/${arr.length} esta semana)`
+      })
+    }
+
+    // Check-ins
+    if (checkins?.length > 0) {
+      const promedioMood = Math.round(checkins.reduce((a, c) => a + (c.mood || 0), 0) / checkins.length)
+      const promedioEnergy = Math.round(checkins.reduce((a, c) => a + (c.energy || 0), 0) / checkins.length)
+      const promedioClarity = Math.round(checkins.reduce((a, c) => a + (c.clarity || 0), 0) / checkins.length)
+      const moodLabel = promedioMood <= 2 ? 'difícil' : promedioMood <= 3 ? 'regular' : promedioMood <= 4 ? 'bien' : 'muy bien'
+      ctx += `\n\n📊 ESTADO ESTA SEMANA (${checkins.length} check-ins):`
+      ctx += `\n• Ánimo promedio: ${promedioMood}/5 (${moodLabel})`
+      if (promedioEnergy) ctx += ` | Energía: ${promedioEnergy}/5`
+      if (promedioClarity) ctx += ` | Claridad: ${promedioClarity}/5`
+    }
+
+    // Progreso módulos
+    if (progreso?.length > 0) {
+      ctx += '\n\n📚 PROGRESO EN MÓDULOS:'
+      progreso.forEach(p => {
+        const titulo = modulosMap[p.modulo_id] || 'Módulo'
+        if (p.completado) {
+          ctx += `\n• ✓ ${titulo} — completado`
+        } else if (p.porcentaje_avance > 0) {
+          ctx += `\n• ${titulo} — ${p.porcentaje_avance}% avanzado`
+        }
+      })
+    }
+
+    // Insights y compromisos de conversaciones anteriores
+    if (contextos?.length > 0) {
+      const insights = contextos.filter(c => c.context_key === 'insight_conversacion')
+      const compromisos = contextos.filter(c => c.context_key === 'compromiso_pendiente')
+      const ultimoTest = contextos.find(c => c.context_key === 'ultimo_test_resultado')
+
+      if (ultimoTest) {
+        ctx += `\n\n🎯 ÚLTIMO TEST COMPARTIDO:\n• ${ultimoTest.context_value}`
+      }
+
+      if (compromisos.length > 0) {
+        ctx += '\n\n⚡ COMPROMISOS PENDIENTES (lo que dijo que iba a hacer):'
+        compromisos.slice(0, 3).forEach(c => { ctx += `\n• ${c.context_value}` })
+        ctx += '\n→ Si aparece en la conversación, pregúntale cómo le fue.'
+      }
+
+      if (insights.length > 0) {
+        ctx += '\n\n💬 TEMAS DE CONVERSACIONES ANTERIORES:'
+        insights.slice(0, 5).forEach(i => { ctx += `\n• ${i.context_value}` })
+      }
+    }
+
+    // Memoria cruzada Premium
+    if (esPremium && crossContext.length > 0) {
+      ctx += '\n\n🔗 LO QUE SABES DE SUS OTRAS VERTICALES (memoria Premium):'
+      const porVertical = {}
+      crossContext.forEach(c => {
+        if (!porVertical[c.vertical]) porVertical[c.vertical] = []
+        porVertical[c.vertical].push(c.context_value)
+      })
+      Object.entries(porVertical).forEach(([v, items]) => {
+        const coachName = v === 'general' ? 'Leo (hábitos y propósito)' : v === 'lideres' ? 'Marco (liderazgo ejecutivo)' : v
+        ctx += `\n  Con ${coachName}:`
+        items.slice(0, 3).forEach(i => { ctx += `\n    - ${i}` })
+      })
+    }
+
+    ctx += '\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
+    ctx += '\nUSA ESTA MEMORIA CON PROFESIONALISMO:'
+    ctx += '\n• No recites esta información como lista — intégrala naturalmente en la conversación'
+    ctx += '\n• Si tiene compromisos pendientes, pregúntale cómo le fue cuando sea oportuno'
+    ctx += '\n• Si lleva una semana difícil en los check-ins, reconócelo con empatía'
+    ctx += '\n• Si completó algo, reconócelo ("vi que terminaste el módulo X")'
+    ctx += '\n• Si sus tests muestran un patrón, puedes nombrarlo sutilmente'
+    ctx += '\n• Nunca digas "según tu perfil" ni menciones que tienes datos — tú simplemente la conoces'
+    ctx += '\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
+
+    return ctx
   } catch (err) {
-    console.error('Error construyendo contexto:', err)
+    console.error('Error construyendo memoria:', err)
     return ''
   }
 }
@@ -117,28 +277,48 @@ async function construirContextoUsuario(userId, esPremium) {
 async function extraerInsightYGuardar(userId, messages, vertical, sourceCoach) {
   try {
     const conversacion = messages.slice(-10).map(m => `${m.role === 'user' ? 'Usuario' : 'Coach'}: ${m.content}`).join('\n')
+
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
-        max_tokens: 150,
-        system: 'Tu tarea es extraer UN solo insight relevante de esta conversación que sirva para que otras coaches conozcan mejor a esta persona. Responde SOLO con una frase de máximo 20 palabras, en tercera persona, factual. No saludes, no expliques. Si no hay nada relevante, responde exactamente: null',
+        max_tokens: 300,
+        system: `Analiza esta conversación de coaching y extrae:
+1. UN insight sobre la persona (máx 20 palabras, tercera persona, factual)
+2. UN compromiso que asumió (si existe, máx 15 palabras, empieza con "Dijo que iba a...")
+
+Responde SOLO en este formato JSON exacto:
+{"insight": "texto o null", "compromiso": "texto o null"}
+
+Si no hay nada relevante en algún campo, usa null.`,
         messages: [{ role: 'user', content: conversacion }],
       }),
     })
     const data = await response.json()
-    const insight = data.content?.[0]?.text?.trim()
-    if (insight && insight !== 'null' && insight.length > 10 && insight.length < 250) {
-      await supabaseAdmin.from('user_context').insert({
-        user_id: userId,
-        vertical: vertical,
-        context_key: 'insight_conversacion',
-        context_value: insight,
-        source_coach: sourceCoach,
-        cross_coach: true,
-      })
+    const raw = data.content?.[0]?.text?.trim()
+    if (!raw) return
+
+    let parsed
+    try { parsed = JSON.parse(raw) } catch { return }
+
+    const saves = []
+
+    if (parsed.insight && parsed.insight !== 'null' && parsed.insight.length > 10) {
+      saves.push(supabaseAdmin.from('user_context').insert({
+        user_id: userId, vertical, context_key: 'insight_conversacion',
+        context_value: parsed.insight, source_coach: sourceCoach, cross_coach: true,
+      }))
     }
+
+    if (parsed.compromiso && parsed.compromiso !== 'null' && parsed.compromiso.length > 10) {
+      saves.push(supabaseAdmin.from('user_context').upsert({
+        user_id: userId, vertical, context_key: 'compromiso_pendiente',
+        context_value: parsed.compromiso, source_coach: sourceCoach, cross_coach: false,
+      }, { onConflict: 'user_id,context_key,vertical' }))
+    }
+
+    await Promise.all(saves)
   } catch (err) {
     console.error('Error extrayendo insight:', err)
   }
@@ -148,10 +328,11 @@ export async function POST(request) {
   try {
     const { messages, userId } = await request.json()
 
-    const { data: perfil } = await supabaseAdmin.from('perfiles').select('plan_actual').eq('id', userId).single()
+    const { data: perfil } = await supabaseAdmin
+      .from('perfiles').select('plan_actual').eq('id', userId).single()
     const esPremium = perfil?.plan_actual === 'premium'
 
-    const contexto = await construirContextoUsuario(userId, esPremium)
+    const memoria = await construirMemoriaCompleta(userId, esPremium)
 
     const systemPrompt = `Eres Clara, la coach IA de Coach 360 Mujer. Tu rol es ayudar a mujeres a ver con más claridad, tomar mejores decisiones y vivir más alineadas con lo que realmente quieren.
 
@@ -173,7 +354,7 @@ CÓMO TRABAJAS:
 PROTOCOLO DE CRISIS:
 Si la usuaria expresa ideas de autolesión, suicidio o violencia, responde con empatía inmediata y comparte:
 - Línea de crisis Chile: 600 360 7777
-- Línea de la mujer: 1455${contexto}`
+- Línea de la mujer: 1455${memoria}`
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -184,9 +365,9 @@ Si la usuaria expresa ideas de autolesión, suicidio o violencia, responde con e
     const data = await response.json()
     const reply = data.content?.map(c => c.text || '').join('') || 'Cuéntame más ✦'
 
-    // Guardar insight cada 10 mensajes del usuario (solo Premium)
+    // Guardar insight y compromiso cada 5 mensajes del usuario
     const userMessages = messages.filter(m => m.role === 'user').length
-    if (esPremium && userMessages > 0 && userMessages % 10 === 0) {
+    if (userMessages > 0 && userMessages % 5 === 0) {
       extraerInsightYGuardar(userId, [...messages, { role: 'assistant', content: reply }], 'mujer', 'clara')
     }
 
