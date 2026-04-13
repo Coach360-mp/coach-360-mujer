@@ -473,7 +473,7 @@ export default function DashboardGeneral() {
           )}
 
           <div onClick={() => navigate('clara')} style={{ background: 'linear-gradient(135deg, rgba(20,184,166,0.15), rgba(20,184,166,0.05))', border: '1px solid rgba(20,184,166,0.3)', borderRadius: 16, padding: 20, marginBottom: 16, cursor: 'pointer', display: 'flex', gap: 16, alignItems: 'center' }}>
-            <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'linear-gradient(135deg, #14b8a6, #0d9488)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontFamily: 'Georgia, serif', fontSize: 24, fontWeight: 600, flexShrink: 0 }}>L</div>
+            <img src="/leo.jpg" alt="Leo" style={{ width: 56, height: 56, borderRadius: "50%", objectFit: "cover", flexShrink: 0 }} />
             <div>
               <p style={{ fontSize: 11, color: '#14b8a6', marginBottom: 2, textTransform: 'uppercase', letterSpacing: 1 }}>{leo.credential}</p>
               <h3 style={{ fontFamily: 'Georgia, serif', fontSize: 20, color: '#fff', marginBottom: 4 }}>Habla con Leo</h3>

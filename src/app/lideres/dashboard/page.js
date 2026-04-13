@@ -467,7 +467,7 @@ export default function DashboardLideres() {
           )}
 
           <div onClick={() => navigate('clara')} style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.15), rgba(99,102,241,0.05))', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 16, padding: 20, marginBottom: 16, cursor: 'pointer', display: 'flex', gap: 16, alignItems: 'center' }}>
-            <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'linear-gradient(135deg, #818cf8, #6366f1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontFamily: 'Georgia, serif', fontSize: 24, fontWeight: 600, flexShrink: 0 }}>M</div>
+            <img src="/marco.jpg" alt="Marco" style={{ width: 56, height: 56, borderRadius: "50%", objectFit: "cover", flexShrink: 0 }} />
             <div>
               <p style={{ fontSize: 11, color: '#818cf8', marginBottom: 2, textTransform: 'uppercase', letterSpacing: 1 }}>{marco.credential}</p>
               <h3 style={{ fontFamily: 'Georgia, serif', fontSize: 20, color: '#fff', marginBottom: 4 }}>Habla con Marco</h3>
