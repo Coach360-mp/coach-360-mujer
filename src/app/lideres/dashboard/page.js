@@ -507,6 +507,19 @@ export default function DashboardLideres() {
               </div>
             </>
           )}
+          {modulos.length > 0 && (
+            <>
+              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 22, marginBottom: 12, color: '#fff' }}>Módulos</h2>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
+                {modulos.slice(0, 3).map(m => (
+                  <div key={m.id} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(99,102,241,0.15)', borderRadius: 14, padding: 16, cursor: 'pointer' }}>
+                    <p style={{ fontWeight: 600, fontSize: 14, marginBottom: 2, color: '#fff' }}>{m.titulo}</p>
+                    <p style={{ fontSize: 12, color: '#a8a8a8' }}>{m.numero_lecciones || 0} lecciones · {m.categoria}</p>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
         </div>
       )}
 
