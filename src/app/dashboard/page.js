@@ -559,8 +559,16 @@ export default function Dashboard() {
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 24 }}>
+            {/* Card Racha especial */}
+            <div className="card" onClick={() => setStatModal('racha')} style={{ textAlign: 'center', padding: 16, cursor: 'pointer', transition: 'all 0.2s', background: (perfil?.racha_dias || 0) >= 7 ? 'linear-gradient(135deg, rgba(212,175,55,0.15), rgba(212,175,55,0.05))' : undefined, border: (perfil?.racha_dias || 0) >= 7 ? '1px solid rgba(212,175,55,0.3)' : undefined }}>
+              <div style={{ fontSize: (perfil?.racha_dias || 0) >= 3 ? 22 : 18, marginBottom: 2 }}>
+                {(perfil?.racha_dias || 0) === 0 ? '○' : (perfil?.racha_dias || 0) < 3 ? '🔥' : (perfil?.racha_dias || 0) < 7 ? '🔥' : '⚡'}
+              </div>
+              <p style={{ fontSize: 22, fontWeight: 700, color: 'var(--gold)', lineHeight: 1 }}>{perfil?.racha_dias || 0}</p>
+              <p style={{ fontSize: 11, color: 'var(--text-light)', marginTop: 2 }}>días</p>
+            </div>
+            {/* Nivel y Puntos */}
             {[
-              { label: 'Racha', val: perfil?.racha_dias || 0, key: 'racha' },
               { label: 'Nivel', val: perfil?.nivel || 1, key: 'nivel' },
               { label: 'Puntos', val: perfil?.puntos_totales || 0, key: 'puntos' }
             ].map(s => (
