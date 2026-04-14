@@ -107,6 +107,11 @@ export default function Dashboard() {
   const [statModal, setStatModal] = useState(null)
   const [pricing, setPricing] = useState(null)
   const [isRecording, setIsRecording] = useState(false)
+  const [primerasSesion, setPrimeraSesion] = useState(false)
+  const [sesionPaso, setSesionPaso] = useState(0)
+  const [sesionAnimo, setSesionAnimo] = useState(null)
+  const [sesionTourPaso, setSesionTourPaso] = useState(0)
+  const [sesionMostrarTour, setSesionMostrarTour] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
   const chatEndRef = useRef(null)
   const mediaRecorderRef = useRef(null)
@@ -125,6 +130,7 @@ export default function Dashboard() {
     setUser(user)
     const { data: profile } = await supabase.from('perfiles').select('*').eq('id', user.id).single()
     setPerfil(profile)
+    if (!profile?.primera_sesion_completada) { setPrimeraSesion(true) }
     const currentCoach = coaches[profile?.plan_actual || 'free']
     setChatMsgs([{ r: 'a', t: `Hola, bienvenida ✦\n\nSoy ${currentCoach.name}, ${currentCoach.credential.toLowerCase()}. Estoy aquí para ayudarte a ver con más claridad.\n\n¿Qué te trae hoy?` }])
     const { data: t } = await supabase.from('tests').select('*').eq('activo', true).eq('vertical', 'mujer').order('orden')
