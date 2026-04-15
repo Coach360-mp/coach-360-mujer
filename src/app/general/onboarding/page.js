@@ -120,6 +120,11 @@ export default function OnboardingGeneral() {
         )
       }
 
+      // Enviar email de bienvenida Leo
+      try {
+        const { data: { user: u } } = await supabase.auth.getUser()
+        if (u) await fetch('/api/emails/bienvenida', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: u.id, vertical: 'general' }) })
+      } catch (e) { console.error('Error email bienvenida:', e) }
       router.push('/general/dashboard')
     } catch (err) {
       console.error('Error guardando onboarding:', err)
