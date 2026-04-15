@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { solicitarPermisoNotificaciones } from '@/lib/firebase'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 
@@ -158,6 +159,11 @@ export default function Dashboard() {
       const dataPricing = await resPricing.json()
       if (dataPricing && !dataPricing.error) setPricing(dataPricing)
     } catch (err) { console.error('Error cargando pricing:', err) }
+
+    // Notificaciones FCM
+    try {
+      setTimeout(() => solicitarPermisoNotificaciones(user.id, supabase), 3000)
+    } catch (e) { console.error('Error FCM:', e) }
 
     setLoading(false)
   }
