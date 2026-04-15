@@ -107,6 +107,7 @@ export default function Dashboard() {
   const [statModal, setStatModal] = useState(null)
   const [pricing, setPricing] = useState(null)
   const [isRecording, setIsRecording] = useState(false)
+  const [progresoModulos, setProgresoModulos] = useState([])
   const [primerasSesion, setPrimeraSesion] = useState(false)
   const [sesionPaso, setSesionPaso] = useState(0)
   const [sesionAnimo, setSesionAnimo] = useState(null)
@@ -139,6 +140,10 @@ export default function Dashboard() {
     if (t) setTests(t)
     if (h) setHerramientas(h)
     if (m) setModulos(m)
+
+    // Cargar progreso de módulos
+    const { data: prog } = await supabase.from('progreso_modulos').select('*').eq('usuario_id', user.id)
+    if (prog) setProgresoModulos(prog)
 
     // Cargar hábitos personalizados y completados del día
     const hoy = new Date().toISOString().split('T')[0]
@@ -596,17 +601,39 @@ export default function Dashboard() {
             <>
               <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 22, marginBottom: 12 }}>Módulos</h2>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
-                {modulos.slice(0, 3).map(m => (
+                {modulos.slice(0, 3).map(m => {
+                  const prog = progresoModulos?.find(p => p.modulo_id === m.id)
+                  const pct = prog?.porcentaje_avance || 0
+                  const completado = prog?.completado || false
+                  return (
                   <div key={m.id} className="card" style={{ cursor: canAccess(m.plan_requerido) ? 'pointer' : 'default', opacity: canAccess(m.plan_requerido) ? 1 : 0.6 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: pct > 0 ? 10 : 0 }}>
                       <div>
                         <p style={{ fontWeight: 600, fontSize: 14, marginBottom: 2 }}>{m.titulo}</p>
-                        <p style={{ fontSize: 12, color: 'var(--text-light)' }}>{m.numero_semanas} semanas</p>
+                        <p style={{ fontSize: 12, color: 'var(--text-light)' }}>
+                          {completado ? '✓ Completado' : pct > 0 ? `${pct}% avanzado · ` : ''}{m.numero_semanas} semanas
+                        </p>
                       </div>
-                      {!canAccess(m.plan_requerido) ? <span style={{ fontSize: 11, background: 'var(--warm-dark)', padding: '4px 10px', borderRadius: 8, color: 'var(--text-light)' }}>Premium</span> : <span style={{ fontSize: 14, color: 'var(--gold)' }}>→</span>}
+                      {!canAccess(m.plan_requerido) ? (
+                        <span style={{ fontSize: 11, background: 'var(--warm-dark)', padding: '4px 10px', borderRadius: 8, color: 'var(--text-light)' }}>Premium</span>
+                      ) : completado ? (
+                        <span style={{ fontSize: 14, color: 'var(--gold)' }}>✦</span>
+                      ) : (
+                        <span style={{ fontSize: 14, color: 'var(--gold)' }}>→</span>
+                      )}
                     </div>
+                    {pct > 0 && !completado && (
+                      <div style={{ height: 4, background: 'var(--warm-dark)', borderRadius: 4, overflow: 'hidden' }}>
+                        <div style={{ height: '100%', width: `${pct}%`, background: 'var(--gold)', borderRadius: 4, transition: 'width 0.5s ease' }} />
+                      </div>
+                    )}
+                    {completado && (
+                      <div style={{ height: 4, background: 'rgba(212,175,55,0.2)', borderRadius: 4, overflow: 'hidden' }}>
+                        <div style={{ height: '100%', width: '100%', background: 'var(--gold)', borderRadius: 4 }} />
+                      </div>
+                    )}
                   </div>
-                ))}
+                )})}
               </div>
             </>
           )}
