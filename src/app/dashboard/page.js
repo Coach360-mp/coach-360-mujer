@@ -240,6 +240,10 @@ export default function Dashboard() {
             source_coach: 'clara', cross_coach: false,
           }, { onConflict: 'user_id,context_key,vertical' })
         } catch (e) { console.error('Error guardando contexto:', e) }
+        // Email resultado test
+        try {
+          fetch('/api/emails/resultado-test', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: user.id, vertical: 'mujer', testTitulo: activeTest.titulo, perfilResultado: profile.nombre }) })
+        } catch (e) { console.error('Error email resultado-test:', e) }
       }
     }
   }
