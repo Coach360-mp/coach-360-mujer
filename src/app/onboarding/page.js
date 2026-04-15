@@ -47,6 +47,7 @@ const coaches = [
 ]
 
 export default function Onboarding() {
+  const [consentimientoAceptado, setConsentimientoAceptado] = useState(false)
   const [step, setStep] = useState(0)
   const [user, setUser] = useState(null)
   const [nombre, setNombre] = useState('')
@@ -151,6 +152,23 @@ export default function Onboarding() {
       default: return true
     }
   }
+
+  if (!consentimientoAceptado) return (
+    <div style={{ minHeight: '100vh', background: 'linear-gradient(180deg, #1a1410 0%, #0a0a0a 100%)', color: '#fff', fontFamily: 'system-ui, sans-serif', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 24px' }}>
+      <div style={{ fontSize: 32, color: '#d4af37', marginBottom: 16 }}>✦</div>
+      <div style={{ fontSize: 11, letterSpacing: 4, color: '#d4af37', textTransform: 'uppercase', marginBottom: 32, fontWeight: 600 }}>Coach 360</div>
+      <div style={{ maxWidth: 480, width: '100%' }}>
+        <h1 style={{ fontFamily: 'Georgia, serif', fontSize: 26, fontWeight: 300, marginBottom: 16, textAlign: 'center' }}>Antes de empezar</h1>
+        <p style={{ fontSize: 14, color: '#c8c8c8', lineHeight: 1.7, marginBottom: 24, textAlign: 'center' }}>Coach 360 recopila datos sobre tu bienestar emocional, estado de ánimo y resultados de tests de autoconocimiento. Estos son <strong style={{ color: '#d4af37' }}>datos sensibles</strong> según la Ley N° 19.628 de Chile y requieren tu consentimiento explícito.</p>
+        <div style={{ background: 'rgba(212,175,55,0.06)', border: '1px solid rgba(212,175,55,0.2)', borderRadius: 16, padding: '20px 24px', marginBottom: 24 }}>
+          <p style={{ fontSize: 13, color: '#c8c8c8', lineHeight: 1.8, margin: 0 }}>Al continuar, autorizas a Coach 360 a recopilar y procesar tus datos personales y sensibles para personalizar tu experiencia de coaching. Tus datos no se venden a terceros. Puedes revocar este consentimiento en cualquier momento escribiendo a privacidad@micoach360.com.</p>
+        </div>
+        <p style={{ fontSize: 12, color: '#888', textAlign: 'center', marginBottom: 28 }}>Lee nuestra <a href='/privacidad' target='_blank' style={{ color: '#d4af37', textDecoration: 'none' }}>Política de Privacidad completa</a> para más detalles.</p>
+        <button onClick={() => setConsentimientoAceptado(true)} style={{ width: '100%', background: 'linear-gradient(135deg, #d4af37, #f5c842)', color: '#0a0a0a', border: 'none', padding: '18px 24px', borderRadius: 30, fontSize: 15, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', marginBottom: 12 }}>Acepto y quiero continuar ✦</button>
+        <a href='/' style={{ display: 'block', textAlign: 'center', fontSize: 13, color: '#888', textDecoration: 'none' }}>No acepto — volver al inicio</a>
+      </div>
+    </div>
+  )
 
   return (
     <div style={{
