@@ -1,22 +1,43 @@
 {
-  "name": "Coach 360 Mujer",
-  "short_name": "Coach360",
+  "name": "Coach 360",
+  "short_name": "Coach 360",
   "description": "Más claridad. Más poder. Más tú.",
   "start_url": "/dashboard",
   "display": "standalone",
-  "background_color": "#f9f6f1",
-  "theme_color": "#1a1a1a",
+  "background_color": "#1a1410",
+  "theme_color": "#1a1410",
   "orientation": "portrait",
+  "lang": "es",
+  "categories": [
+    "health",
+    "lifestyle",
+    "education"
+  ],
   "icons": [
     {
       "src": "/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "/icon-512.png",
       "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
       "type": "image/png"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/bg-landing.jpg",
+      "sizes": "1080x1920",
+      "type": "image/jpeg",
+      "form_factor": "narrow"
     }
   ]
 }
