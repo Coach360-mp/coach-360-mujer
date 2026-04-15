@@ -31,14 +31,6 @@ export default function Home() {
     if (signUpError) { setError(signUpError.message); setLoading(false); return }
     if (data.user) {
       await supabase.from('perfiles').update({ nombre }).eq('id', data.user.id)
-      // Enviar email de bienvenida
-      try {
-        await fetch('/api/emails/bienvenida', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId: data.user.id, vertical: 'mujer' })
-        })
-      } catch (e) { console.error('Error enviando bienvenida:', e) }
     }
     setLoading(false)
     router.push('/onboarding')
