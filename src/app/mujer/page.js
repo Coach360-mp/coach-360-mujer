@@ -246,6 +246,8 @@ export default function Home() {
         </button>
       </form>
 
+      {mode === 'login' && <a href='/forgot-password' style={{ display: 'block', textAlign: 'center', marginTop: 12, fontSize: 13, color: '#a8a8a8', textDecoration: 'none' }}>¿Olvidaste tu contraseña?</a>}
+
       <button onClick={() => { setMode(mode === 'register' ? 'login' : 'register'); setError('') }}
         style={{ marginTop: 24, background: 'none', border: 'none', color: 'var(--gold)', fontSize: 14, cursor: 'pointer' }}>
         {mode === 'register' ? '¿Ya tienes cuenta? Ingresa aquí' : '¿No tienes cuenta? Créala aquí'}
