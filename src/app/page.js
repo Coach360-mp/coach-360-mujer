@@ -13,7 +13,20 @@ export default function HomePage() {
 
   async function checkUser() {
     const { data: { session } } = await supabase.auth.getSession()
-    if (session?.user) setUser(session.user)
+    if (session?.user) {
+      setUser(session.user)
+      // Si ya tiene sesion, redirigir al dashboard de su vertical
+      const { data: perfil } = await supabase.from('perfiles').select('current_vertical, onboarding_completado').eq('id', session.user.id).single()
+      if (perfil) {
+        const vertical = perfil.current_vertical || 'mujer'
+        if (vertical === 'mujer') {
+          router.push(perfil.onboarding_completado ? '/dashboard' : '/onboarding')
+        } else {
+          router.push(perfil.onboarding_completado ? `/${vertical}/dashboard` : `/${vertical}/onboarding`)
+        }
+        return
+      }
+    }
     setLoading(false)
   }
 
