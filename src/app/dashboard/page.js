@@ -109,6 +109,7 @@ export default function Dashboard() {
   const [pricing, setPricing] = useState(null)
   const [isRecording, setIsRecording] = useState(false)
   const [progresoModulos, setProgresoModulos] = useState([])
+  const [activeModulo, setActiveModulo] = useState(null)
   const [primerasSesion, setPrimeraSesion] = useState(false)
   const [sesionPaso, setSesionPaso] = useState(0)
   const [sesionAnimo, setSesionAnimo] = useState(null)
@@ -616,7 +617,7 @@ export default function Dashboard() {
                   const pct = prog?.porcentaje_avance || 0
                   const completado = prog?.completado || false
                   return (
-                  <div key={m.id} className="card" style={{ cursor: canAccess(m.plan_requerido) ? 'pointer' : 'default', opacity: canAccess(m.plan_requerido) ? 1 : 0.6 }}>
+                  <div key={m.id} className="card" onClick={() => { if (canAccess(m.plan_requerido)) { setActiveModulo(m); navigate('modulo') } else { navigate('planes') } }} style={{ cursor: canAccess(m.plan_requerido) ? 'pointer' : 'default', opacity: canAccess(m.plan_requerido) ? 1 : 0.6 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: pct > 0 ? 10 : 0 }}>
                       <div>
                         <p style={{ fontWeight: 600, fontSize: 14, marginBottom: 2 }}>{m.titulo}</p>
@@ -647,6 +648,47 @@ export default function Dashboard() {
               </div>
             </>
           )}
+        </div>
+      )}
+
+      {view === 'modulo' && activeModulo && (
+        <div>
+          <Header title={activeModulo.titulo} subtitle={`${activeModulo.numero_semanas} semanas`} />
+          <div style={{ padding: '20px' }}>
+            <div className="card" style={{ marginBottom: 16 }}>
+              <p style={{ fontSize: 14, color: 'var(--text-light)', lineHeight: 1.7, marginBottom: 16 }}>{activeModulo.descripcion}</p>
+              {activeModulo.objetivo && (
+                <div style={{ background: 'rgba(212,175,55,0.08)', borderRadius: 12, padding: '14px 16px', marginBottom: 16 }}>
+                  <p style={{ fontSize: 12, color: 'var(--gold)', fontWeight: 600, marginBottom: 6, textTransform: 'uppercase', letterSpacing: 1 }}>Objetivo</p>
+                  <p style={{ fontSize: 14, color: 'var(--text)', lineHeight: 1.6 }}>{activeModulo.objetivo}</p>
+                </div>
+              )}
+              {progresoModulos?.find(p => p.modulo_id === activeModulo.id)?.porcentaje_avance > 0 && (
+                <div style={{ marginBottom: 16 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                    <p style={{ fontSize: 12, color: 'var(--text-light)' }}>Progreso</p>
+                    <p style={{ fontSize: 12, color: 'var(--gold)', fontWeight: 600 }}>{progresoModulos.find(p => p.modulo_id === activeModulo.id)?.porcentaje_avance}%</p>
+                  </div>
+                  <div style={{ height: 6, background: 'var(--warm-dark)', borderRadius: 4, overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: `${progresoModulos.find(p => p.modulo_id === activeModulo.id)?.porcentaje_avance}%`, background: 'var(--gold)', borderRadius: 4, transition: 'width 0.5s ease' }} />
+                  </div>
+                </div>
+              )}
+            </div>
+            <button onClick={async () => {
+              const prog = progresoModulos?.find(p => p.modulo_id === activeModulo.id)
+              const nuevoPct = Math.min(100, (prog?.porcentaje_avance || 0) + 25)
+              const completado = nuevoPct >= 100
+              await supabase.from('progreso_modulos').upsert({ usuario_id: user.id, modulo_id: activeModulo.id, porcentaje_avance: nuevoPct, completado, fecha_completado: completado ? new Date().toISOString() : null }, { onConflict: 'usuario_id,modulo_id' })
+              setProgresoModulos(prev => { const filtered = prev.filter(p => p.modulo_id !== activeModulo.id); return [...filtered, { modulo_id: activeModulo.id, porcentaje_avance: nuevoPct, completado }] })
+              if (completado) { await sumarPuntos('modulo_completado', 50, `Módulo: ${activeModulo.titulo}`) }
+            }} style={{ width: '100%', background: 'linear-gradient(135deg, #d4af37, #f5c842)', color: '#0a0a0a', border: 'none', padding: '16px 24px', borderRadius: 30, fontSize: 15, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', marginBottom: 12 }}>
+              {progresoModulos?.find(p => p.modulo_id === activeModulo.id)?.completado ? 'Módulo completado ✦' : progresoModulos?.find(p => p.modulo_id === activeModulo.id)?.porcentaje_avance > 0 ? 'Continuar módulo →' : 'Comenzar módulo →'}
+            </button>
+            <button onClick={() => { setChatMsgs([{ r: 'u', t: `Quiero hablar sobre el módulo "${activeModulo.titulo}". ¿Cómo me ayudas a aprovecharlo mejor?` }]); navigate('clara') }} style={{ width: '100%', background: 'transparent', border: '1px solid var(--gold-light)', color: 'var(--text)', padding: '14px 24px', borderRadius: 30, fontSize: 14, cursor: 'pointer', fontFamily: 'inherit' }}>
+              Hablar con Clara sobre este módulo ✦
+            </button>
+          </div>
         </div>
       )}
 
