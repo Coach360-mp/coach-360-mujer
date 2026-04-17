@@ -1,10 +1,7 @@
+export const dynamic = 'force-dynamic'
+
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-)
 
 const coaches = {
   mujer:   { nombre: 'Clara', color: '#d4af37' },
@@ -13,6 +10,10 @@ const coaches = {
 }
 
 export async function POST(request) {
+  const supabaseAdmin = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY
+  )
   try {
     const { userId, vertical, tipo } = await request.json()
 
