@@ -1,0 +1,13 @@
+import { createClient } from '@supabase/supabase-js'
+
+export function getSupabaseAdmin() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY
+  )
+}
+
+export function getResend() {
+  const { Resend } = require('resend')
+  return new Resend(process.env.RESEND_API_KEY)
+}

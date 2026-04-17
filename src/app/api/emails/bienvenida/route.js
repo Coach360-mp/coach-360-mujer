@@ -1,15 +1,12 @@
 export const dynamic = 'force-dynamic'
 
 import { NextResponse } from 'next/server'
-import { Resend } from 'resend'
-import { createClient } from '@supabase/supabase-js'
+import { getResend } from '@/lib/clients'
+import { getSupabaseAdmin } from '@/lib/clients'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+const resend = getResend()
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-)
+const supabaseAdmin = getSupabaseAdmin()
 
 const COACHES = {
   mujer: {

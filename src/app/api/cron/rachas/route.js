@@ -1,12 +1,9 @@
 export const dynamic = 'force-dynamic'
 
 import { NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { getSupabaseAdmin } from '@/lib/clients'
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-)
+const supabaseAdmin = getSupabaseAdmin()
 
 // Este endpoint lo llama Vercel Cron cada día a las 9am
 // Configurar en vercel.json: { "crons": [{ "path": "/api/cron/rachas", "schedule": "0 12 * * *" }] }
