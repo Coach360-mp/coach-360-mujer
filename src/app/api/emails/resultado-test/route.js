@@ -4,9 +4,11 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 
+const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 )
+const resend = new Resend(process.env.RESEND_API_KEY)
 
 const coaches = {
   mujer:   { nombre: 'Clara', email: 'clara@micoach360.com', color: '#d4af37', firma: 'Clara ✦\nCoach 360 Mujer' },
@@ -15,8 +17,6 @@ const coaches = {
 }
 
 export async function POST(request) {
-  const supabase = createClient(
-  const resend = new Resend(process.env.RESEND_API_KEY)
   try {
     const { userId, vertical, testTitulo, perfilResultado } = await request.json()
     if (!userId || !vertical || !perfilResultado) {

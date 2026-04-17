@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
+const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 )
@@ -11,7 +12,6 @@ import { createClient } from '@supabase/supabase-js'
 // Configurar en vercel.json: { "crons": [{ "path": "/api/cron/rachas", "schedule": "0 12 * * *" }] }
 
 export async function GET(request) {
-  const supabaseAdmin = createClient(
   try {
     const authHeader = request.headers.get('authorization')
     if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
