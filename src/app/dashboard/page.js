@@ -540,114 +540,239 @@ export default function Dashboard() {
   )
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--warm)', paddingBottom: 80 }}>
+    <div style={{ minHeight: '100vh', background: '#0f0d0b', paddingBottom: 80, position: 'relative' }}>
 
-      {view === 'inicio' && (
-        <div style={{ padding: '48px 20px 20px' }}>
-          <p style={{ fontSize: 14, color: 'var(--text-light)' }}>Hola,</p>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, marginBottom: 20 }}>{nombre} ✦</h1>
-          {!checkinDone ? (
-            <div className="card" style={{ marginBottom: 20, textAlign: 'center' }}>
-              <p style={{ fontSize: 14, fontWeight: 600, marginBottom: 12 }}>¿Cómo te sientes hoy?</p>
-              <div style={{ display: 'flex', justifyContent: 'center', gap: 6 }}>
-                {animos.map(a => (<button key={a.value} onClick={() => { setAnimoHoy(a.value); setCheckinDone(true); sumarPuntos('checkin', 5, `Check-in: ${a.label}`) }} style={{ background: animoHoy === a.value ? 'var(--gold)' : 'var(--warm-dark)', border: 'none', borderRadius: 12, padding: '10px 14px', cursor: 'pointer', fontSize: 12, fontWeight: 600, color: animoHoy === a.value ? '#fff' : 'var(--text)', transition: 'all 0.2s', fontFamily: 'var(--font-body)' }}>{a.label}</button>))}
-              </div>
+      {/* MENU LATERAL */}
+      {menuAbierto && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex' }}>
+          <div onClick={() => setMenuAbierto(false)} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.7)' }} />
+          <div style={{ position: 'relative', width: 280, background: '#120f0a', height: '100%', overflowY: 'auto', borderRight: '1px solid rgba(212,175,55,0.12)', zIndex: 201 }}>
+            {/* Perfil */}
+            <div style={{ padding: '52px 20px 20px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+              <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'rgba(212,175,55,0.1)', border: '1.5px solid rgba(212,175,55,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Georgia,serif', fontSize: 20, color: '#d4af37', marginBottom: 10 }}>{(perfil?.nombre || 'U')[0]}</div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: '#fff', marginBottom: 4 }}>{perfil?.nombre || 'Bienvenida'}</div>
+              <div style={{ fontSize: 9, color: 'rgba(212,175,55,0.6)', background: 'rgba(212,175,55,0.07)', border: '1px solid rgba(212,175,55,0.15)', padding: '2px 8px', borderRadius: 6, display: 'inline-block', letterSpacing: 1, textTransform: 'uppercase' }}>{plan || 'Free'}</div>
             </div>
-          ) : (<div className="card" style={{ marginBottom: 20, textAlign: 'center', padding: 16 }}><p style={{ fontSize: 13, color: 'var(--gold)' }}>Check-in completado ✦</p></div>)}
-
-          <div className="card" style={{ marginBottom: 16, background: 'var(--dark)', color: '#fff', cursor: 'pointer', display: 'flex', gap: 16, alignItems: 'center' }} onClick={() => navigate('clara')}>
-            <img src={coach.photo} alt={coach.name} style={{ width: 56, height: 56, borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--gold-light)' }} />
-            <div>
-              <p style={{ fontSize: 11, color: 'var(--gold-light)', marginBottom: 2 }}>{coach.credential}</p>
-              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 20, color: '#fff', marginBottom: 4 }}>Habla con {coach.name}</h3>
-              <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>Tu coach personal con IA ✦</p>
-            </div>
-          </div>
-
-          <div className="card" style={{ marginBottom: 20, cursor: 'pointer' }} onClick={() => navigate('equilibrio')}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 18, margin: 0 }}>Mi Equilibrio</h3>
-              <span style={{ fontSize: 14, color: 'var(--gold)' }}>→</span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-around' }}>
-              {dimensiones.map(d => (<div key={d.key} style={{ textAlign: 'center' }}><div style={{ width: 8, height: 8, borderRadius: '50%', background: d.color, margin: '0 auto 6px' }} /><p style={{ fontSize: 10, color: 'var(--text-light)' }}>{d.label}</p></div>))}
-            </div>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 24 }}>
-            {/* Card Racha especial */}
-            <div className="card" onClick={() => setStatModal('racha')} style={{ textAlign: 'center', padding: 16, cursor: 'pointer', transition: 'all 0.2s', background: (perfil?.racha_dias || 0) >= 7 ? 'linear-gradient(135deg, rgba(212,175,55,0.15), rgba(212,175,55,0.05))' : undefined, border: (perfil?.racha_dias || 0) >= 7 ? '1px solid rgba(212,175,55,0.3)' : undefined }}>
-              <div style={{ fontSize: (perfil?.racha_dias || 0) >= 3 ? 22 : 18, marginBottom: 2 }}>
-                {(perfil?.racha_dias || 0) === 0 ? '○' : (perfil?.racha_dias || 0) < 3 ? '🔥' : (perfil?.racha_dias || 0) < 7 ? '🔥' : '⚡'}
-              </div>
-              <p style={{ fontSize: 22, fontWeight: 700, color: 'var(--gold)', lineHeight: 1 }}>{perfil?.racha_dias || 0}</p>
-              <p style={{ fontSize: 11, color: 'var(--text-light)', marginTop: 2 }}>días</p>
-            </div>
-            {/* Nivel y Puntos */}
+            {/* Items menu */}
             {[
-              { label: 'Nivel', val: perfil?.nivel || 1, key: 'nivel' },
-              { label: 'Puntos', val: perfil?.puntos_totales || 0, key: 'puntos' }
-            ].map(s => (
-              <div key={s.label} className="card" onClick={() => setStatModal(s.key)} style={{ textAlign: 'center', padding: 16, cursor: 'pointer', transition: 'all 0.2s' }}>
-                <p style={{ fontSize: 24, fontWeight: 700, color: 'var(--gold)' }}>{s.val}</p>
-                <p style={{ fontSize: 11, color: 'var(--text-light)' }}>{s.label}</p>
+              { sec: 'MI CUENTA', items: [
+                { label: 'Mi perfil', action: () => {} },
+                { label: 'Planes y facturación', action: () => { navigate('planes'); setMenuAbierto(false) } },
+                { label: 'Notificaciones', action: () => {} },
+              ]},
+              { sec: 'COLOR DEL DASHBOARD', custom: (
+                <div style={{ display: 'flex', gap: 10, padding: '8px 12px' }}>
+                  {['#d4af37','#14b8a6','#7C3AED','#e07b39'].map(c => (
+                    <div key={c} onClick={() => {}} style={{ width: 24, height: 24, borderRadius: '50%', background: c, cursor: 'pointer', border: c === '#d4af37' ? '2.5px solid rgba(255,255,255,0.5)' : '2px solid transparent' }} />
+                  ))}
+                </div>
+              )},
+              { sec: 'EXPLORAR', items: [
+                { label: 'Comunidad', badge: 'Próximamente', action: () => {} },
+                { label: 'Agenda de coaches', action: () => {} },
+                { label: 'Mis logros', action: () => {} },
+                { label: 'Mi progreso', action: () => navigate('equilibrio') },
+                { label: 'Referidos', action: () => {} },
+              ]},
+            ].map((grupo, gi) => (
+              <div key={gi} style={{ padding: '14px 0 4px' }}>
+                <div style={{ fontSize: 7, letterSpacing: 2, color: 'rgba(255,255,255,0.2)', textTransform: 'uppercase', padding: '0 20px', marginBottom: 6 }}>{grupo.sec}</div>
+                {grupo.custom || grupo.items.map((item, ii) => (
+                  <div key={ii} onClick={item.action} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 20px', cursor: 'pointer', borderRadius: 0 }}>
+                    <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)' }}>{item.label}</span>
+                    {item.badge && <span style={{ fontSize: 8, background: 'rgba(212,175,55,0.12)', color: 'rgba(212,175,55,0.7)', padding: '2px 7px', borderRadius: 5, letterSpacing: 0.5 }}>{item.badge}</span>}
+                  </div>
+                ))}
               </div>
             ))}
-          </div>
-
-          <div className="card" style={{ marginBottom: 24, cursor: 'pointer' }} onClick={() => navigate('planes')}>
-            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 18, marginBottom: 12 }}>Conoce a tu equipo de coaches</h3>
-            <div style={{ display: 'flex', justifyContent: 'center', gap: 12 }}>
-              {Object.values(coaches).map(c => (<div key={c.name} style={{ textAlign: 'center' }}><img src={c.photo} alt={c.name} style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover', border: plan === Object.keys(coaches).find(k => coaches[k].name === c.name) ? '2px solid var(--gold)' : '2px solid #e0dbd4' }} /><p style={{ fontSize: 11, color: 'var(--text-light)', marginTop: 4 }}>{c.name}</p></div>))}
+            <div style={{ height: 1, background: 'rgba(255,255,255,0.04)', margin: '8px 20px' }} />
+            {/* Conversaciones */}
+            <div style={{ padding: '14px 0 4px' }}>
+              <div style={{ fontSize: 7, letterSpacing: 2, color: 'rgba(255,255,255,0.2)', textTransform: 'uppercase', padding: '0 20px', marginBottom: 10 }}>Conversaciones recientes</div>
+              {[
+                { fecha: 'Hoy', resumen: 'Hablamos sobre claridad en decisiones importantes y cómo distinguir intuición de ansiedad.' },
+                { fecha: 'Hace 2 días', resumen: 'Exploraste tu relación con el tiempo y por qué sientes que nunca alcanza.' },
+                { fecha: 'Hace 4 días', resumen: 'Reflexionamos sobre tus límites en el trabajo y cómo decir no sin culpa.' },
+              ].map((c, ci) => (
+                <div key={ci} onClick={() => navigate('clara')} style={{ margin: '0 12px 8px', background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 10, padding: '10px 12px', cursor: 'pointer' }}>
+                  <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.2)', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 4 }}>{c.fecha} · Clara ✦</div>
+                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', lineHeight: 1.5 }}>{c.resumen}</div>
+                </div>
+              ))}
             </div>
-            <p style={{ fontSize: 12, color: 'var(--gold)', textAlign: 'center', marginTop: 8 }}>Ver planes →</p>
+            <div style={{ height: 1, background: 'rgba(255,255,255,0.04)', margin: '8px 20px' }} />
+            {/* Soporte */}
+            <div style={{ padding: '14px 0 4px' }}>
+              <div style={{ fontSize: 7, letterSpacing: 2, color: 'rgba(255,255,255,0.2)', textTransform: 'uppercase', padding: '0 20px', marginBottom: 6 }}>SOPORTE</div>
+              {['Centro de ayuda', 'Privacidad y datos'].map((l, li) => (
+                <div key={li} style={{ padding: '10px 20px', fontSize: 13, color: 'rgba(255,255,255,0.4)', cursor: 'pointer' }}>{l}</div>
+              ))}
+              <div onClick={() => supabase.auth.signOut()} style={{ padding: '10px 20px', fontSize: 13, color: 'rgba(220,38,38,0.6)', cursor: 'pointer' }}>Cerrar sesión</div>
+            </div>
+            <div style={{ height: 40 }} />
+          </div>
+        </div>
+      )}
+
+      {view === 'inicio' && (
+        <div>
+          {/* HERO */}
+          <div style={{ position: 'relative', padding: '52px 20px 20px', background: '#0f0d0b', overflow: 'hidden', marginBottom: 0 }}>
+            <div style={{ position: 'absolute', top: -60, right: -60, width: 200, height: 200, borderRadius: '50%', background: 'radial-gradient(circle, rgba(212,175,55,0.16) 0%, transparent 70%)', pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', bottom: -30, left: -30, width: 130, height: 130, borderRadius: '50%', background: 'radial-gradient(circle, rgba(212,175,55,0.07) 0%, transparent 70%)', pointerEvents: 'none' }} />
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative', marginBottom: 14 }}>
+              <div>
+                <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 4 }}>
+                  {new Date().toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' })}
+                </div>
+                <h1 style={{ fontFamily: 'Georgia,serif', fontSize: 28, fontWeight: 300, color: '#fff', marginBottom: 0 }}>
+                  {perfil?.nombre || 'Bienvenida'} <span style={{ color: '#d4af37' }}>✦</span>
+                </h1>
+              </div>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', position: 'relative' }}>
+                  <div style={{ width: 10, height: 10, borderRadius: '50%', border: '1.5px solid #d4af37', position: 'absolute', top: 5, right: 5 }}>
+                    <div style={{ width: 4, height: 4, background: '#d4af37', borderRadius: '50%', position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)' }} />
+                  </div>
+                </div>
+                <div onClick={() => setMenuAbierto(true)} style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(212,175,55,0.1)', border: '1.5px solid rgba(212,175,55,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Georgia,serif', fontSize: 15, color: '#d4af37', cursor: 'pointer' }}>
+                  {(perfil?.nombre || 'U')[0]}
+                </div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 6, position: 'relative', flexWrap: 'wrap' }}>
+              {[
+                { dot: true, txt: `${perfil?.racha_dias || 0} días` },
+                { dot: true, txt: `Nivel ${perfil?.nivel || 1}` },
+                { dot: true, txt: `${perfil?.puntos_totales || 0} pts` },
+              ].map((s, si) => (
+                <div key={si} style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.18)', borderRadius: 20, padding: '4px 10px' }}>
+                  <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#d4af37' }} />
+                  <span style={{ fontSize: 10, color: 'rgba(212,175,55,0.9)', letterSpacing: 0.5 }}>{s.txt}</span>
+                </div>
+              ))}
+            </div>
+            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 1, background: 'linear-gradient(90deg, transparent, rgba(212,175,55,0.15), transparent)' }} />
           </div>
 
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 22, marginBottom: 12 }}>Tests</h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
-            {tests.slice(0, 3).map(t => (<div key={t.id} className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }} onClick={() => canAccess(t.plan_requerido) && startTest(t)}><div><p style={{ fontWeight: 600, fontSize: 14, marginBottom: 2 }}>{t.titulo}</p><p style={{ fontSize: 12, color: 'var(--text-light)' }}>{t.numero_preguntas} preguntas · {t.categoria}</p></div>{!canAccess(t.plan_requerido) && <span style={{ fontSize: 11, background: 'var(--warm-dark)', padding: '4px 10px', borderRadius: 8, color: 'var(--text-light)' }}>Premium</span>}</div>))}
-          </div>
+          <div style={{ padding: '16px 16px 0' }}>
 
-          {modulos.length > 0 && (
-            <>
-              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 22, marginBottom: 12 }}>Módulos</h2>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
-                {modulos.slice(0, 3).map(m => {
-                  const prog = progresoModulos?.find(p => p.modulo_id === m.id)
-                  const pct = prog?.porcentaje_avance || 0
-                  const completado = prog?.completado || false
-                  return (
-                  <div key={m.id} className="card" onClick={() => { if (canAccess(m.plan_requerido)) { setActiveModulo(m); navigate('modulo') } else { navigate('planes') } }} style={{ cursor: canAccess(m.plan_requerido) ? 'pointer' : 'default', opacity: canAccess(m.plan_requerido) ? 1 : 0.6 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: pct > 0 ? 10 : 0 }}>
-                      <div>
-                        <p style={{ fontWeight: 600, fontSize: 14, marginBottom: 2 }}>{m.titulo}</p>
-                        <p style={{ fontSize: 12, color: 'var(--text-light)' }}>
-                          {completado ? '✓ Completado' : pct > 0 ? `${pct}% avanzado · ` : ''}{m.numero_semanas} semanas
-                        </p>
-                      </div>
-                      {!canAccess(m.plan_requerido) ? (
-                        <span style={{ fontSize: 11, background: 'var(--warm-dark)', padding: '4px 10px', borderRadius: 8, color: 'var(--text-light)' }}>Premium</span>
-                      ) : completado ? (
-                        <span style={{ fontSize: 14, color: 'var(--gold)' }}>✦</span>
-                      ) : (
-                        <span style={{ fontSize: 14, color: 'var(--gold)' }}>→</span>
-                      )}
+            {/* QUOTE */}
+            <div style={{ background: 'rgba(212,175,55,0.04)', border: '1px solid rgba(212,175,55,0.13)', borderRadius: 16, padding: 16, marginBottom: 12 }}>
+              <div style={{ fontSize: 8, letterSpacing: 2.5, color: 'rgba(212,175,55,0.45)', textTransform: 'uppercase', marginBottom: 10 }}>Reflexión del día</div>
+              <div style={{ width: 24, height: 1.5, background: 'rgba(212,175,55,0.4)', marginBottom: 10 }} />
+              <div style={{ fontFamily: 'Georgia,serif', fontSize: 13, color: 'rgba(255,255,255,0.72)', lineHeight: 1.7, fontStyle: 'italic', marginBottom: 10 }}>
+                No es lo que nos sucede, sino cómo reaccionamos a ello lo que importa.
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ width: 4, height: 4, borderRadius: '50%', background: 'rgba(212,175,55,0.5)' }} />
+                <div style={{ fontSize: 10, color: 'rgba(212,175,55,0.6)', letterSpacing: 0.5 }}>Epicteto · Filósofo estoico</div>
+              </div>
+            </div>
+
+            {/* COACH */}
+            <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 16, padding: 14, marginBottom: 12 }}>
+              <div style={{ fontSize: 8, letterSpacing: 2.5, color: 'rgba(255,255,255,0.25)', textTransform: 'uppercase', marginBottom: 12 }}>Tu coach</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{ position: 'relative' }}>
+                  <img src={coach.photo} alt={coach.name} style={{ width: 46, height: 46, borderRadius: '50%', objectFit: 'cover', border: '1.5px solid rgba(212,175,55,0.3)' }} />
+                  <div style={{ position: 'absolute', bottom: 1, right: 1, width: 9, height: 9, background: '#10b981', borderRadius: '50%', border: '2px solid #0f0d0b' }} />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 15, fontWeight: 500, color: '#fff', marginBottom: 2 }}>{coach.name}</div>
+                  <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>{coach.credential}</div>
+                </div>
+                <button onClick={() => navigate('clara')} style={{ background: 'linear-gradient(135deg, #d4af37, #f5c842)', color: '#0a0a0a', border: 'none', borderRadius: 10, padding: '8px 16px', fontSize: 11, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', letterSpacing: 0.3 }}>
+                  Conversar
+                </button>
+              </div>
+            </div>
+
+            {/* CHECK-IN */}
+            <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 16, padding: 14, marginBottom: 12 }}>
+              <div style={{ fontSize: 8, letterSpacing: 2.5, color: 'rgba(255,255,255,0.25)', textTransform: 'uppercase', marginBottom: 12 }}>Check-in de hoy</div>
+              {!checkinDone ? (
+                <div style={{ display: 'flex', gap: 6 }}>
+                  {animos.map(a => (
+                    <button key={a.value} onClick={() => { setAnimoHoy(a.value); setCheckinDone(true); sumarPuntos('checkin', 5, `Check-in: ${a.label}`) }} style={{ flex: 1, padding: '10px 4px', borderRadius: 10, border: '1px solid rgba(255,255,255,0.07)', background: animoHoy === a.value ? 'rgba(212,175,55,0.15)' : 'rgba(255,255,255,0.03)', color: animoHoy === a.value ? '#d4af37' : 'rgba(255,255,255,0.5)', fontSize: 11, cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s', textAlign: 'center' }}>{a.label}</button>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ textAlign: 'center', fontSize: 13, color: 'rgba(212,175,55,0.7)' }}>Check-in completado ✦</div>
+              )}
+            </div>
+
+            {/* EQUILIBRIO */}
+            <div onClick={() => navigate('equilibrio')} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 16, padding: 14, marginBottom: 12, cursor: 'pointer' }}>
+              <div style={{ fontSize: 8, letterSpacing: 2.5, color: 'rgba(255,255,255,0.25)', textTransform: 'uppercase', marginBottom: 12 }}>Equilibrio esta semana</div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 7, marginBottom: 12 }}>
+                {dimensiones.map(d => (
+                  <div key={d.key} style={{ background: 'rgba(255,255,255,0.025)', borderRadius: 10, padding: '10px 10px 8px' }}>
+                    <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.28)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 7 }}>{d.label}</div>
+                    <div style={{ height: 3, background: 'rgba(255,255,255,0.06)', borderRadius: 2, marginBottom: 6, overflow: 'hidden' }}>
+                      <div style={{ height: '100%', width: '65%', background: d.color, borderRadius: 2 }} />
                     </div>
-                    {pct > 0 && !completado && (
-                      <div style={{ height: 4, background: 'var(--warm-dark)', borderRadius: 4, overflow: 'hidden' }}>
-                        <div style={{ height: '100%', width: `${pct}%`, background: 'var(--gold)', borderRadius: 4, transition: 'width 0.5s ease' }} />
+                    <div style={{ fontSize: 18, fontWeight: 300, fontFamily: 'Georgia,serif', color: d.color }}>6.5</div>
+                  </div>
+                ))}
+              </div>
+              <svg width="100%" height="36" viewBox="0 0 260 36" preserveAspectRatio="none">
+                <path d="M0,30 C50,26 90,14 130,17 C170,20 210,8 260,4" fill="none" stroke="rgba(212,175,55,0.4)" strokeWidth="1.5"/>
+                <circle cx="260" cy="4" r="2.5" fill="#d4af37"/>
+              </svg>
+            </div>
+
+            {/* MODULO EN CURSO */}
+            {modulos.length > 0 && (() => {
+              const m = modulos[0]
+              const prog = progresoModulos?.find(p => p.modulo_id === m.id)
+              const pct = prog?.porcentaje_avance || 0
+              return (
+                <div onClick={() => { if (canAccess(m.plan_requerido)) { setActiveModulo(m); navigate('modulo') } else { navigate('planes') } }} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 16, padding: 14, marginBottom: 12, cursor: 'pointer' }}>
+                  <div style={{ fontSize: 8, letterSpacing: 2.5, color: 'rgba(255,255,255,0.25)', textTransform: 'uppercase', marginBottom: 12 }}>Módulo en curso</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <div style={{ width: 38, height: 38, borderRadius: 10, background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.18)', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                        <rect x="2" y="2" width="6" height="6" rx="1" fill="#d4af37"/>
+                        <rect x="10" y="2" width="6" height="6" rx="1" fill="rgba(212,175,55,0.4)"/>
+                        <rect x="2" y="10" width="6" height="6" rx="1" fill="rgba(212,175,55,0.4)"/>
+                        <rect x="10" y="10" width="6" height="6" rx="1" fill="rgba(212,175,55,0.2)"/>
+                      </svg>
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.85)', marginBottom: 6 }}>{m.titulo}</div>
+                      <div style={{ height: 3, background: 'rgba(255,255,255,0.07)', borderRadius: 2, overflow: 'hidden', marginBottom: 4 }}>
+                        <div style={{ height: '100%', width: `${pct || 10}%`, background: 'linear-gradient(90deg, #d4af37, #f5c842)', borderRadius: 2 }} />
                       </div>
-                    )}
-                    {completado && (
-                      <div style={{ height: 4, background: 'rgba(212,175,55,0.2)', borderRadius: 4, overflow: 'hidden' }}>
-                        <div style={{ height: '100%', width: '100%', background: 'var(--gold)', borderRadius: 4 }} />
-                      </div>
+                      <div style={{ fontSize: 9, color: 'rgba(212,175,55,0.5)', letterSpacing: 0.5 }}>{pct}% · {m.numero_semanas} semanas</div>
+                    </div>
+                    <div style={{ fontSize: 14, color: 'rgba(212,175,55,0.4)' }}>→</div>
+                  </div>
+                </div>
+              )
+            })()}
+
+            {/* TESTS */}
+            <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 16, padding: 14, marginBottom: 12 }}>
+              <div style={{ fontSize: 8, letterSpacing: 2.5, color: 'rgba(255,255,255,0.25)', textTransform: 'uppercase', marginBottom: 12 }}>Tests disponibles</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+                {tests.slice(0, 3).map((t, ti) => (
+                  <div key={t.id} onClick={() => canAccess(t.plan_requerido) && startTest(t)} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: ti < 2 ? '1px solid rgba(255,255,255,0.04)' : 'none', cursor: canAccess(t.plan_requerido) ? 'pointer' : 'default' }}>
+                    <div>
+                      <div style={{ fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.8)', marginBottom: 2 }}>{t.titulo}</div>
+                      <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>{t.numero_preguntas} preguntas · {t.categoria}</div>
+                    </div>
+                    {!canAccess(t.plan_requerido) ? (
+                      <span style={{ fontSize: 9, background: 'rgba(255,255,255,0.05)', padding: '3px 8px', borderRadius: 6, color: 'rgba(255,255,255,0.3)', letterSpacing: 0.5 }}>Premium</span>
+                    ) : (
+                      <span style={{ fontSize: 13, color: 'rgba(212,175,55,0.4)' }}>→</span>
                     )}
                   </div>
-                )})}
+                ))}
               </div>
-            </>
-          )}
+            </div>
+
+          </div>
         </div>
       )}
 
