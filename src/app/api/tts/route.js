@@ -3,14 +3,14 @@ import { NextResponse } from 'next/server'
 // Voces estándar de Google Cloud TTS que SIEMPRE están disponibles
 // Cada coach tiene una voz distinta para diferenciarse
 const voiceMap = {
-  clara:    { name: 'es-US-Neural2-A', pitch: 2.0,  speakingRate: 1.0  },
-  sofia:    { name: 'es-US-Neural2-A', pitch: 0.0,  speakingRate: 0.95 },
-  victoria: { name: 'es-US-Neural2-A', pitch: -2.0, speakingRate: 0.9  },
+  clara:    { name: 'es-US-Neural2-C', languageCode: 'es-US', pitch: -2.0, speakingRate: 0.92 },
+  leo:      { name: 'es-US-Neural2-B', languageCode: 'es-US', pitch: 1.0,  speakingRate: 1.05 },
+  marco:    { name: 'es-US-Neural2-B', languageCode: 'es-US', pitch: -3.0, speakingRate: 0.88 },
+  sofia:    { name: 'es-US-Neural2-C', languageCode: 'es-US', pitch: 0.0,  speakingRate: 0.95 },
+  victoria: { name: 'es-US-Neural2-C', languageCode: 'es-US', pitch: -2.0, speakingRate: 0.9  },
 }
 
 export async function POST(request) {
-  const supabaseAdmin = getSupabaseAdmin()
-  const resend = getResend()
   try {
     const { text, coach = 'clara' } = await request.json()
 
@@ -29,9 +29,8 @@ export async function POST(request) {
     const requestBody = {
       input: { text: text.substring(0, 5000) },
       voice: {
-        languageCode: 'es-US',
+        languageCode: voice.languageCode || 'es-US',
         name: voice.name,
-        ssmlGender: 'FEMALE',
       },
       audioConfig: {
         audioEncoding: 'MP3',

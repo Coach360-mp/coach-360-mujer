@@ -311,24 +311,24 @@ export default function Dashboard() {
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-      const mediaRecorder = new MediaRecorder(stream)
+      const mediaRecorder = new MediaRecorder(stream, { mimeType: MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4' })
       mediaRecorderRef.current = mediaRecorder
       audioChunksRef.current = []
-      mediaRecorder.ondataavailable = (event) => { audioChunksRef.current.push(event.data) }
-      mediaRecorder.onstop = async () => { stream.getTracks().forEach(track => track.stop()) }
+      mediaRecorder.ondataavailable = (event) => { if (event.data.size > 0) audioChunksRef.current.push(event.data) }
+      mediaRecorder.onstop = async () => {
+        stream.getTracks().forEach(track => track.stop())
+        const mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4'
+        const audioBlob = new Blob(audioChunksRef.current, { type: mimeType })
+        const formData = new FormData()
+        formData.append('audio', audioBlob, `audio.${mimeType.includes('webm') ? 'webm' : 'mp4'}`)
+        try {
+          const res = await fetch('/api/transcribir', { method: 'POST', body: formData })
+          const data = await res.json()
+          if (data.transcripcion) { setChatInput(data.transcripcion) }
+        } catch (e) { console.error('Transcripcion error:', e) }
+      }
       mediaRecorder.start()
       setIsRecording(true)
-      if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
-        const recognition = new SpeechRecognition()
-        recognition.lang = 'es-CL'
-        recognition.interimResults = false
-        recognition.maxAlternatives = 1
-        recognition.onresult = (event) => { const transcript = event.results[0][0].transcript; setChatInput(transcript); setIsRecording(false) }
-        recognition.onerror = () => { setIsRecording(false) }
-        recognition.onend = () => { setIsRecording(false); if (mediaRecorderRef.current?.state === 'recording') { mediaRecorderRef.current.stop() } }
-        recognition.start()
-      }
     } catch (err) { console.error('Microphone error:', err); setIsRecording(false) }
   }
 
