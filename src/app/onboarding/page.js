@@ -57,6 +57,7 @@ export default function Onboarding() {
   const [bienestar, setBienestar] = useState({ mente: 5, cuerpo: 5, corazon: 5, espiritu: 5 })
   const [respuestaLibre, setRespuestaLibre] = useState('')
   const [guardando, setGuardando] = useState(false)
+  const [planSel, setPlanSel] = useState("free")
   const router = useRouter()
 
   useEffect(() => { checkUser() }, [])
@@ -142,7 +143,7 @@ export default function Onboarding() {
   const next = () => setStep(s => s + 1)
   const back = () => setStep(s => Math.max(0, s - 1))
 
-  const totalSteps = 8
+  const totalSteps = 9
   const canContinue = () => {
     switch (step) {
       case 1: return nombre.trim().length > 0
@@ -458,6 +459,27 @@ export default function Onboarding() {
 
         {/* Paso 7: Cierre */}
         {step === 7 && (
+          <div>
+            <div style={{ fontSize: 11, letterSpacing: 3, color: '#d4af37', textTransform: 'uppercase', marginBottom: 12, textAlign: 'center', fontWeight: 600 }}>Elige tu plan</div>
+            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 28, fontWeight: 300, lineHeight: 1.3, marginBottom: 8, textAlign: 'center' }}>Con que nivel quieres empezar</h2>
+            <p style={{ fontSize: 13, color: '#a8a8a8', textAlign: 'center', marginBottom: 28, lineHeight: 1.6 }}>Puedes cambiar tu plan cuando quieras</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {[{id:'free',nombre:'Gratuito',precio:'$0',desc:'Conversaciones basicas. Ideal para conocer la plataforma.',features:['5 mensajes por dia','Tests de autoconocimiento','Check-in diario']},{id:'esencial',nombre:'Esencial',precio:'$9.990/mes',desc:'Conversaciones ilimitadas, todos los tests y modulos.',features:['Conversaciones ilimitadas','Todos los tests y herramientas','Memoria completa del coach','Modulos de desarrollo'],destacado:true},{id:'premium',nombre:'Premium',precio:'$19.990/mes',desc:'Los 3 coaches te conocen y coordinan tu acompanamiento.',features:['Todo lo de Esencial','Clara Leo y Marco te conocen','Memoria cruzada entre coaches','Acompanamiento 360']}].map(p => (
+                <button key={p.id} onClick={() => setPlanSel(p.id)} style={{ background: planSel === p.id ? 'rgba(212,175,55,0.12)' : 'rgba(255,255,255,0.03)', border: planSel === p.id ? '1.5px solid #d4af37' : '1.5px solid rgba(255,255,255,0.1)', borderRadius: 16, padding: '18px 20px', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left', transition: 'all 0.2s', position: 'relative' }}>
+                  {p.destacado && <div style={{ position: 'absolute', top: -10, right: 16, background: '#d4af37', color: '#0a0a0a', fontSize: 10, fontWeight: 700, padding: '3px 10px', borderRadius: 10 }}>POPULAR</div>}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                    <span style={{ color: '#fff', fontWeight: 600, fontSize: 15 }}>{p.nombre}</span>
+                    <span style={{ color: '#d4af37', fontWeight: 700, fontSize: 14 }}>{p.precio}</span>
+                  </div>
+                  <p style={{ fontSize: 12, color: '#a8a8a8', marginBottom: 10, lineHeight: 1.5 }}>{p.desc}</p>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>{p.features.map(f => <span key={f} style={{ fontSize: 11, color: '#888' }}>v {f}</span>)}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {step === 8 && (
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: 48, marginBottom: 24, color: '#d4af37' }}>✦</div>
             <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 34, fontWeight: 300, lineHeight: 1.3, marginBottom: 16 }}>
