@@ -4,8 +4,6 @@ import { NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/clients'
 import { getResend } from '@/lib/clients'
 
-const supabaseAdmin = getSupabaseAdmin()
-const resend = getResend()
 
 const coaches = {
   mujer:   { nombre: 'Clara', email: 'clara@micoach360.com', color: '#d4af37', firma: 'Clara ✦\nCoach 360 Mujer' },
@@ -14,6 +12,8 @@ const coaches = {
 }
 
 export async function POST(request) {
+  const supabaseAdmin = getSupabaseAdmin()
+  const resend = getResend()
   try {
     const { userId, vertical, testTitulo, perfilResultado } = await request.json()
     if (!userId || !vertical || !perfilResultado) {

@@ -4,9 +4,7 @@ import { NextResponse } from 'next/server'
 import { getResend } from '@/lib/clients'
 import { getSupabaseAdmin } from '@/lib/clients'
 
-const resend = getResend()
 
-const supabaseAdmin = getSupabaseAdmin()
 
 const COACHES = {
   mujer: {
@@ -130,6 +128,8 @@ function emailBienvenida({ nombre, coach, vertical }) {
 }
 
 export async function POST(request) {
+  const supabaseAdmin = getSupabaseAdmin()
+  const resend = getResend()
   try {
     const { userId, vertical = 'mujer' } = await request.json()
 

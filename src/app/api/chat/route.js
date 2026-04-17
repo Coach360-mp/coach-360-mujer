@@ -3,7 +3,6 @@ export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/clients'
 
-const supabaseAdmin = getSupabaseAdmin()
 
 const momentosLabels = {
   transicion: 'en un momento de cambio o transición',
@@ -324,6 +323,8 @@ Si no hay nada relevante en algún campo, usa null.`,
 }
 
 export async function POST(request) {
+  const supabaseAdmin = getSupabaseAdmin()
+  const resend = getResend()
   try {
     const { messages, userId } = await request.json()
 

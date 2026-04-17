@@ -3,7 +3,6 @@ export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/clients'
 
-const supabaseAdmin = getSupabaseAdmin()
 
 const PAISES_SOPORTADOS = ['CL', 'AR', 'CO']
 const PAIS_DEFAULT = 'CL'
@@ -70,6 +69,8 @@ function getMercadoPagoConfig(paisCodigo) {
 }
 
 export async function POST(request) {
+  const supabaseAdmin = getSupabaseAdmin()
+  const resend = getResend()
   try {
     const { planId, userId, userEmail, vertical } = await request.json()
 

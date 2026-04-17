@@ -3,7 +3,6 @@ export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/clients'
 
-const supabaseAdmin = getSupabaseAdmin()
 
 const PAISES_SOPORTADOS = ['CL', 'AR', 'CO']
 const PAIS_DEFAULT = 'CL'
@@ -43,6 +42,8 @@ async function detectarPaisPorIP(request) {
 }
 
 export async function GET(request) {
+  const supabaseAdmin = getSupabaseAdmin()
+  const resend = getResend()
   try {
     const { searchParams } = new URL(request.url)
     const userId = searchParams.get('userId')

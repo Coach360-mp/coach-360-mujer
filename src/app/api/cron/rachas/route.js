@@ -3,12 +3,13 @@ export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/clients'
 
-const supabaseAdmin = getSupabaseAdmin()
 
 // Este endpoint lo llama Vercel Cron cada día a las 9am
 // Configurar en vercel.json: { "crons": [{ "path": "/api/cron/rachas", "schedule": "0 12 * * *" }] }
 
 export async function GET(request) {
+  const supabaseAdmin = getSupabaseAdmin()
+  const resend = getResend()
   try {
     const authHeader = request.headers.get('authorization')
     if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {

@@ -9,6 +9,8 @@ const voiceMap = {
 }
 
 export async function POST(request) {
+  const supabaseAdmin = getSupabaseAdmin()
+  const resend = getResend()
   try {
     const { text, coach = 'clara' } = await request.json()
 

@@ -4,9 +4,7 @@ import { NextResponse } from 'next/server'
 import { getResend } from '@/lib/clients'
 import { getSupabaseAdmin } from '@/lib/clients'
 
-const resend = getResend()
 
-const supabaseAdmin = getSupabaseAdmin()
 
 const COACHES = {
   mujer: { nombre: 'Clara', email: 'clara@micoach360.com', color: '#d4af37', colorText: '#1a1a1a' },
@@ -137,6 +135,8 @@ function emailHTML({ nombre, vertical, tipo }) {
 }
 
 export async function POST(request) {
+  const supabaseAdmin = getSupabaseAdmin()
+  const resend = getResend()
   try {
     const { userId, vertical = 'mujer', tipo = 'dia3' } = await request.json()
     if (!userId) return NextResponse.json({ error: 'userId requerido' }, { status: 400 })

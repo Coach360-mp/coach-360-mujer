@@ -9,6 +9,8 @@ const supabaseAdmin = createClient(
 )
 
 export async function POST(request) {
+  const supabaseAdmin = getSupabaseAdmin()
+  const resend = getResend()
   try {
     const body = await request.json()
 
