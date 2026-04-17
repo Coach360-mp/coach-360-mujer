@@ -723,12 +723,8 @@ export default function Dashboard() {
             </div>
 
             {/* MODULO EN CURSO */}
-            {modulos.length > 0 && (() => {
-              const m = modulos[0]
-              const prog = progresoModulos?.find(p => p.modulo_id === m.id)
-              const pct = prog?.porcentaje_avance || 0
-              return (
-                <div onClick={() => { if (canAccess(m.plan_requerido)) { setActiveModulo(m); navigate('modulo') } else { navigate('planes') } }} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 16, padding: 14, marginBottom: 12, cursor: 'pointer' }}>
+            {modulos.length > 0 && (
+                <div onClick={() => { if (canAccess(modulos[0].plan_requerido)) { setActiveModulo(modulos[0]); navigate('modulo') } else { navigate('planes') } }} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 16, padding: 14, marginBottom: 12, cursor: 'pointer' }}>
                   <div style={{ fontSize: 8, letterSpacing: 2.5, color: 'rgba(255,255,255,0.25)', textTransform: 'uppercase', marginBottom: 12 }}>Módulo en curso</div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <div style={{ width: 38, height: 38, borderRadius: 10, background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.18)', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -740,17 +736,16 @@ export default function Dashboard() {
                       </svg>
                     </div>
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.85)', marginBottom: 6 }}>{m.titulo}</div>
+                      <div style={{ fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.85)', marginBottom: 6 }}>{modulos[0].titulo}</div>
                       <div style={{ height: 3, background: 'rgba(255,255,255,0.07)', borderRadius: 2, overflow: 'hidden', marginBottom: 4 }}>
-                        <div style={{ height: '100%', width: `${pct || 10}%`, background: 'linear-gradient(90deg, #d4af37, #f5c842)', borderRadius: 2 }} />
+                        <div style={{ height: '100%', width: `${progresoModulos?.find(p => p.modulo_id === modulos[0].id)?.porcentaje_avance || 10}%`, background: 'linear-gradient(90deg, #d4af37, #f5c842)', borderRadius: 2 }} />
                       </div>
-                      <div style={{ fontSize: 9, color: 'rgba(212,175,55,0.5)', letterSpacing: 0.5 }}>{pct}% · {m.numero_semanas} semanas</div>
+                      <div style={{ fontSize: 9, color: 'rgba(212,175,55,0.5)', letterSpacing: 0.5 }}>{progresoModulos?.find(p => p.modulo_id === modulos[0].id)?.porcentaje_avance || 0}% · {modulos[0].numero_semanas} semanas</div>
                     </div>
                     <div style={{ fontSize: 14, color: 'rgba(212,175,55,0.4)' }}>→</div>
                   </div>
                 </div>
-              )
-            })()}
+            )}
 
             {/* TESTS */}
             <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 16, padding: 14, marginBottom: 12 }}>
