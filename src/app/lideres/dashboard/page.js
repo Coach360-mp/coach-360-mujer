@@ -88,7 +88,7 @@ export default function DashboardLideres() {
 
     if (!onboarding) { router.push('/lideres/onboarding'); return }
 
-    setChatMsgs([{ r: 'a', t: `${profile?.nombre || 'Hola'}.\n\nSoy Marco. No soy un coach que te va a escuchar con paciencia infinita — soy alguien que te va a hacer preguntas incómodas para que veas lo que estás evitando ver.\n\n¿Qué está pasando en tu equipo hoy?` }])
+    setChatMsgs([{ r: 'a', t: `${profile?.nombre ? profile.nombre + '.' : 'Hola.'}\n\nSoy Marco, tu coach ejecutivo. Estoy aquí para ayudarte a tomar mejores decisiones, liderar con claridad y tener las conversaciones que estás postergando.\n\n¿Qué tienes sobre la mesa hoy?` }])
 
     const { data: t } = await supabase.from('tests').select('*').eq('activo', true).eq('vertical', 'lideres').order('orden')
     const { data: h } = await supabase.from('templates').select('*').eq('activo', true).eq('vertical', 'lideres').order('orden')

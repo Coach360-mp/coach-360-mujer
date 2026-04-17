@@ -93,7 +93,7 @@ export default function DashboardGeneral() {
 
     if (!onboarding) { router.push('/general/onboarding'); return }
 
-    setChatMsgs([{ r: 'a', t: `Hola, ${profile?.nombre || 'bienvenido'}.\n\nSoy Leo. Voy directo al grano: no estoy aquí para escucharte quejarte — estoy aquí para ayudarte a actuar.\n\n¿Qué tienes entre manos hoy?` }])
+    setChatMsgs([{ r: 'a', t: `${profile?.nombre ? profile.nombre + '.' : 'Hola.'}\n\nSoy Leo. Trabajo contigo para pasar del saber al hacer — hábitos, decisiones, resultados concretos.\n\n¿Qué quieres resolver hoy?` }])
 
     const { data: t } = await supabase.from('tests').select('*').eq('activo', true).eq('vertical', 'general').order('orden')
     const { data: h } = await supabase.from('templates').select('*').eq('activo', true).eq('vertical', 'general').order('orden')

@@ -134,7 +134,7 @@ export default function Dashboard() {
     setPerfil(profile)
     if (!profile?.primera_sesion_completada) { setPrimeraSesion(true) }
     const currentCoach = coaches[profile?.plan_actual || 'free']
-    setChatMsgs([{ r: 'a', t: `Hola, bienvenida ✦\n\nSoy ${currentCoach.name}, ${currentCoach.credential.toLowerCase()}. Estoy aquí para ayudarte a ver con más claridad.\n\n¿Qué te trae hoy?` }])
+    setChatMsgs([{ r: 'a', t: `Hola${perfil?.nombre ? ', ' + perfil.nombre : ''} ✦\n\nSoy Clara. Estoy aquí para acompañarte — no a darte respuestas, sino a ayudarte a encontrar las tuyas.\n\n¿De qué quieres que hablemos hoy?` }])
     const { data: t } = await supabase.from('tests').select('*').eq('activo', true).eq('vertical', 'mujer').order('orden')
     const { data: h } = await supabase.from('templates').select('*').eq('activo', true).eq('vertical', 'mujer').order('orden')
     const { data: m } = await supabase.from('modulos').select('*').eq("activo", true).eq("vertical", "mujer").order("orden")
@@ -433,7 +433,7 @@ export default function Dashboard() {
         await supabase.from('daily_checkins').insert({ user_id: user.id, vertical: 'mujer', mood: sesionAnimo, created_at: new Date().toISOString() })
       }
       const currentCoach = coaches[perfil?.plan_actual || 'free']
-      setChatMsgs([{ r: 'a', t: `Hola, ${perfil?.nombre || 'bienvenida'} ✦\n\nYa sé un poco sobre ti y estoy lista para acompañarte. ¿Qué quieres explorar hoy?` }])
+      setChatMsgs([{ r: 'a', t: `${perfil?.nombre ? perfil.nombre + ', bienvenida' : 'Bienvenida'} ✦\n\nYa sé quién eres y qué buscas. Estoy aquí.\n\n¿De qué quieres que hablemos hoy?` }])
     }
     setPrimeraSesion(false)
     setView('clara')
