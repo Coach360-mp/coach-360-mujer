@@ -110,6 +110,7 @@ export default function Dashboard() {
   const [isRecording, setIsRecording] = useState(false)
   const [progresoModulos, setProgresoModulos] = useState([])
   const [activeModulo, setActiveModulo] = useState(null)
+  const [menuAbierto, setMenuAbierto] = useState(false)
   const [primerasSesion, setPrimeraSesion] = useState(false)
   const [sesionPaso, setSesionPaso] = useState(0)
   const [sesionAnimo, setSesionAnimo] = useState(null)
