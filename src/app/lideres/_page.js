@@ -15,15 +15,18 @@ export default function LideresPage() {
   async function checkUser() {
     const { data: { session } } = await supabase.auth.getSession()
     if (session?.user) {
-      const { data: onboarding } = await supabase
-        .from('onboarding_respuestas')
-        .select('id')
-        .eq('user_id', session.user.id)
-        .eq('vertical', 'lideres')
-        .maybeSingle()
-
-      if (onboarding) {
-        router.push('/lideres/dashboard')
+      const { data: perfil } = await supabase
+        .from('perfiles')
+        .select('current_vertical, onboarding_completado')
+        .eq('id', session.user.id)
+        .single()
+      if (perfil) {
+        const vertical = perfil.current_vertical || 'lideres'
+        if (vertical === 'mujer') {
+          router.push(perfil.onboarding_completado ? '/dashboard' : '/onboarding')
+        } else {
+          router.push(perfil.onboarding_completado ? `/${vertical}/dashboard` : `/${vertical}/onboarding`)
+        }
       } else {
         router.push('/lideres/onboarding')
       }

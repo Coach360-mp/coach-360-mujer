@@ -15,16 +15,18 @@ export default function GeneralPage() {
   async function checkUser() {
     const { data: { session } } = await supabase.auth.getSession()
     if (session?.user) {
-      // Ya está autenticado, verifica si hizo el onboarding de general
-      const { data: onboarding } = await supabase
-        .from('onboarding_respuestas')
-        .select('id')
-        .eq('user_id', session.user.id)
-        .eq('vertical', 'general')
-        .maybeSingle()
-
-      if (onboarding) {
-        router.push('/general/dashboard')
+      const { data: perfil } = await supabase
+        .from('perfiles')
+        .select('current_vertical, onboarding_completado')
+        .eq('id', session.user.id)
+        .single()
+      if (perfil) {
+        const vertical = perfil.current_vertical || 'general'
+        if (vertical === 'mujer') {
+          router.push(perfil.onboarding_completado ? '/dashboard' : '/onboarding')
+        } else {
+          router.push(perfil.onboarding_completado ? `/${vertical}/dashboard` : `/${vertical}/onboarding`)
+        }
       } else {
         router.push('/general/onboarding')
       }

@@ -17,7 +17,7 @@ export default function Home() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/onboarding`,
+        redirectTo: `${window.location.origin}/`,
       },
     })
     if (error) setError(error.message)
@@ -40,10 +40,20 @@ export default function Home() {
     e.preventDefault()
     setLoading(true)
     setError('')
-    const { error: loginError } = await supabase.auth.signInWithPassword({ email, password })
+    const { data, error: loginError } = await supabase.auth.signInWithPassword({ email, password })
     if (loginError) { setError(loginError.message); setLoading(false); return }
+    const { data: perfil } = await supabase
+      .from('perfiles')
+      .select('current_vertical, onboarding_completado')
+      .eq('id', data.user.id)
+      .single()
     setLoading(false)
-    router.push('/dashboard')
+    const vertical = perfil?.current_vertical || 'mujer'
+    if (vertical === 'mujer') {
+      router.push(perfil?.onboarding_completado ? '/dashboard' : '/onboarding')
+    } else {
+      router.push(perfil?.onboarding_completado ? `/${vertical}/dashboard` : `/${vertical}/onboarding`)
+    }
   }
 
   if (mode === 'landing') {
