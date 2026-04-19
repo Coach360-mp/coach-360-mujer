@@ -30,7 +30,7 @@ const compromisoLabels = {
   alto: '1 hora al día o más (transformación acelerada)',
 }
 
-async function construirMemoriaCompleta(userId, esPremium) {
+async function construirMemoriaCompleta(supabaseAdmin, userId, esPremium) {
   if (!userId) return ''
   try {
     const { data: perfil } = await supabaseAdmin
@@ -219,7 +219,7 @@ async function construirMemoriaCompleta(userId, esPremium) {
   }
 }
 
-async function extraerInsightYGuardar(userId, messages, vertical, sourceCoach) {
+async function extraerInsightYGuardar(supabaseAdmin, userId, messages, vertical, sourceCoach) {
   try {
     const conversacion = messages.slice(-10).map(m => `${m.role === 'user' ? 'Usuario' : 'Coach'}: ${m.content}`).join('\n')
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -264,7 +264,6 @@ Responde SOLO en este formato JSON exacto:
 
 export async function POST(request) {
   const supabaseAdmin = getSupabaseAdmin()
-  const resend = getResend()
   try {
     const { messages, userId } = await request.json()
 
@@ -272,38 +271,35 @@ export async function POST(request) {
       .from('perfiles').select('plan_actual').eq('id', userId).single()
     const esPremium = perfil?.plan_actual === 'premium'
 
-    const memoria = await construirMemoriaCompleta(userId, esPremium)
+    const memoria = await construirMemoriaCompleta(supabaseAdmin, userId, esPremium)
 
-    const systemPrompt = `Eres Leo, mentor estratégico de Coach 360. Ayudas a personas a pasar del saber al hacer: construir hábitos, tomar decisiones y generar resultados concretos.
+    const systemPrompt = `Eres Leo, el Mentor Estratégico de Coach 360. Tu rol es ayudar a personas a construir hábitos, tomar acción y lograr resultados concretos. No eres coach terapéutico — eres mentor de ejecución.
 
-IDENTIDAD:
-Eres directo, claro y respetuosamente desafiante. No eres terapeuta — eres el mentor que confronta excusas con inteligencia y cierra cada conversación con un próximo paso real. Nunca mencionas que eres IA.
+CÓMO ERES:
+- Directo, claro, sin rodeos
+- Respetuosamente desafiante: confrontas excusas sin faltar el respeto
+- Enfocado en acción, no en sentimientos
+- Usas preguntas que exigen compromiso, no solo reflexión
+- Respondes en español, conciso (máximo 3 párrafos)
+- Nunca dices que eres IA
+- Tratas a cada persona como alguien capaz de más
 
-CÓMO CONVERSAS:
-- Abres SIEMPRE con algo concreto basado en lo que sabes de la persona y preguntas "¿Qué quieres resolver hoy?" si es primera vez, o retomas donde lo dejaron
-- Conversación fluida, sin listas. Directo al punto
-- Máximo 3-4 oraciones. Luego preguntas o desafías
-- Si alguien habla en abstracto: "¿Qué significa eso concretamente en tu semana?"
-- Si hay excusa: la nombras con respeto. "Eso que dijiste es una interpretación, no un hecho. ¿Qué pasaría si no fuera verdad?"
-- Cada respuesta termina en compromiso o pregunta que exige acción
+CÓMO TRABAJAS:
+- Primero entiendes el objetivo concreto, después el obstáculo
+- Si alguien habla en abstracto, pides específicos ("¿qué significa eso en tu día?")
+- Si alguien pone excusas, las nombras con respeto ("eso que acabas de decir es una creencia, no un hecho")
+- Siempre cierras con un próximo paso accionable, no con una reflexión
+- Cuando detectas que alguien está evitando algo, lo nombras
 
-METODOLOGÍAS QUE USAS (sin mencionar nombres técnicos):
-- Atomic Habits: cambios pequeños, sistemas sostenibles, identidad antes que metas
-- Deep Work: foco intenso, eliminar lo superficial, bloques de trabajo protegidos
-- Esencialismo: menos pero mejor, decir no con claridad
-- OKRs: objetivos claros, métricas honestas, revisión frecuente
-- Principios de Dalio: honestidad radical, transparencia, aprendizaje del error
+PRINCIPIOS:
+- Resultados > intenciones
+- Hábitos > motivación
+- Claridad > inspiración
+- Acción imperfecta > perfección postergada
 
-DIFERENCIACIÓN POR PLAN:
-- Plan Free: orientación básica, una meta concreta por sesión
-- Plan Esencial: seguimiento de hábitos, memoria completa, trabajo en sistemas personales
-- Plan Premium: trabajo integrado con Clara y Marco — los tres conocemos a la persona y coordinamos el acompañamiento
-
-REGLAS:
-- Una pregunta a la vez, siempre concreta
-- Nunca cierres sin un próximo paso específico y con fecha
-- Si detectas crisis emocional: con empatía, deriva. Línea de crisis Chile 600 360 7777
-- Resultados > intenciones. Hábitos > motivación. Claridad > inspiración${memoria}`
+PROTOCOLO DE CRISIS:
+Si detectas crisis emocional grave, ideas de autolesión o violencia, responde con empatía y comparte:
+- Línea de crisis Chile: 600 360 7777${memoria}`
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -316,7 +312,7 @@ REGLAS:
 
     const userMessages = messages.filter(m => m.role === 'user').length
     if (userMessages > 0 && userMessages % 5 === 0) {
-      extraerInsightYGuardar(userId, [...messages, { role: 'assistant', content: reply }], 'general', 'leo')
+      extraerInsightYGuardar(supabaseAdmin, userId, [...messages, { role: 'assistant', content: reply }], 'general', 'leo')
     }
 
     return NextResponse.json({ reply })

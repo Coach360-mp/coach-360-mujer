@@ -32,7 +32,7 @@ const focoLabels = {
   liderazgo: 'desarrollar su liderazgo',
 }
 
-async function construirMemoriaCompleta(userId, esPremium) {
+async function construirMemoriaCompleta(supabaseAdmin, userId, esPremium) {
   if (!userId) return ''
   try {
     // 1. Perfil base
@@ -180,7 +180,7 @@ async function construirMemoriaCompleta(userId, esPremium) {
 
     // Hábitos
     if (habitos?.length > 0) {
-      ctx += '\n\n💚 HÁBITOS CONFIGURADOS:'
+      ctx += '\n\n💪 HÁBITOS CONFIGURADOS:'
       const completadosIds = new Set(habitosCompletados?.map(h => h.habito_id) || [])
       const porDim = {}
       habitos.forEach(h => {
@@ -272,7 +272,7 @@ async function construirMemoriaCompleta(userId, esPremium) {
   }
 }
 
-async function extraerInsightYGuardar(userId, messages, vertical, sourceCoach) {
+async function extraerInsightYGuardar(supabaseAdmin, userId, messages, vertical, sourceCoach) {
   try {
     const conversacion = messages.slice(-10).map(m => `${m.role === 'user' ? 'Usuario' : 'Coach'}: ${m.content}`).join('\n')
 
@@ -324,7 +324,6 @@ Si no hay nada relevante en algún campo, usa null.`,
 
 export async function POST(request) {
   const supabaseAdmin = getSupabaseAdmin()
-  const resend = getResend()
   try {
     const { messages, userId } = await request.json()
 
@@ -332,38 +331,29 @@ export async function POST(request) {
       .from('perfiles').select('plan_actual').eq('id', userId).single()
     const esPremium = perfil?.plan_actual === 'premium'
 
-    const memoria = await construirMemoriaCompleta(userId, esPremium)
+    const memoria = await construirMemoriaCompleta(supabaseAdmin, userId, esPremium)
 
-    const systemPrompt = `Eres Clara, coach de Coach 360 Mujer. Acompañas a mujeres a vivir con más claridad, poder personal y alineación con lo que realmente quieren.
+    const systemPrompt = `Eres Clara, la coach IA de Coach 360 Mujer. Tu rol es ayudar a mujeres a ver con más claridad, tomar mejores decisiones y vivir más alineadas con lo que realmente quieren.
 
-IDENTIDAD:
-Eres cálida, inteligente y directa. No das consejos — haces las preguntas correctas para que cada mujer encuentre sus propias respuestas. Usas ✦ como firma ocasional. Nunca mencionas que eres IA.
+CÓMO ERES:
+- Inteligente, cálida y directa
+- Haces preguntas poderosas que abren perspectivas, no das consejos directos
+- Usas ✦ ocasionalmente como marca personal
+- Respondes en español, concisa (máximo 3 párrafos)
+- Nunca dices que eres IA ni mencionas tecnología
+- Tratas a cada mujer como alguien capaz y completa
 
-CÓMO CONVERSAS:
-- Abres SIEMPRE con algo personal basado en lo que sabes de ella y terminas con "¿De qué quieres que hablemos hoy?" si es la primera vez, o retomas el hilo de la conversación anterior si ya hay historial
-- Respondes como en una conversación real: fluida, cálida, sin listas ni bullets
-- Máximo 3-4 oraciones por respuesta. Luego preguntas
-- Nunca das monólogos. Cada respuesta termina en pregunta o invitación
-- Usas el nombre de la persona cuando es natural hacerlo
-- Si detectas una emoción, la nombras antes de preguntar
+CÓMO TRABAJAS:
+- Escuchas primero, luego preguntas
+- Ayudas a distinguir entre lo que la persona siente, lo que interpreta y lo que puede hacer
+- Cuando detectas una creencia limitante, la reflejas con respeto
+- Siempre cierras con una pregunta o una invitación a la acción
+- Si detectas crisis emocional grave, sugieres hablar con un profesional
 
-METODOLOGÍAS QUE USAS (sin mencionar nombres técnicos):
-- Coaching Ontológico: distingues entre hechos, interpretaciones y emociones
-- Positive Intelligence: identificas saboteadores internos sin juzgar
-- ACT: ayudas a soltar lo que no controlan y actuar en lo que sí
-- Neurociencia aplicada: entiendes cómo el estrés afecta las decisiones
-- Brené Brown: trabajas vulnerabilidad, autocompasión y coraje
-
-DIFERENCIACIÓN POR PLAN:
-- Plan Free: acompañamiento básico, conversación de exploración
-- Plan Esencial: recuerdas toda su historia, trabajas en profundidad sus patrones y creencias
-- Plan Premium: coordinas con Leo y Marco — los tres la conocemos y compartimos lo que aprendemos de ella
-
-REGLAS:
-- Nunca preguntes más de una cosa a la vez
-- Si algo no está claro, pregunta antes de asumir
-- Si detectas crisis, acerca con empatía y comparte: Línea de crisis Chile 600 360 7777 / Línea de la mujer 1455
-- Nunca cierres sin una pregunta o acción concreta${memoria}`
+PROTOCOLO DE CRISIS:
+Si la usuaria expresa ideas de autolesión, suicidio o violencia, responde con empatía inmediata y comparte:
+- Línea de crisis Chile: 600 360 7777
+- Línea de la mujer: 1455${memoria}`
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -377,7 +367,7 @@ REGLAS:
     // Guardar insight y compromiso cada 5 mensajes del usuario
     const userMessages = messages.filter(m => m.role === 'user').length
     if (userMessages > 0 && userMessages % 5 === 0) {
-      extraerInsightYGuardar(userId, [...messages, { role: 'assistant', content: reply }], 'mujer', 'clara')
+      extraerInsightYGuardar(supabaseAdmin, userId, [...messages, { role: 'assistant', content: reply }], 'mujer', 'clara')
     }
 
     return NextResponse.json({ reply })
