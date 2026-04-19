@@ -137,18 +137,21 @@ export async function POST(request) {
 
     const { data: perfil } = await supabaseAdmin
       .from('perfiles')
-      .select('nombre, email')
+      .select('nombre, nombre_preferido')
       .eq('id', userId)
       .single()
 
-    if (!perfil?.email) return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 })
+    const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(userId)
+    const email = authUser?.user?.email
+
+    if (!email) return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 })
 
     const c = COACHES[vertical] || COACHES.mujer
-    const nombre = perfil.nombre || 'bienvenida'
+    const nombre = perfil?.nombre_preferido || perfil?.nombre || 'bienvenida'
 
     const { data, error } = await resend.emails.send({
       from: `${c.nombre} de Coach 360 <${c.email}>`,
-      to: perfil.email,
+      to: email,
       subject: `Hola, soy ${c.nombre} — tu coach en Coach 360 ✦`,
       html: emailBienvenida({ nombre, coach: c.nombre, vertical }),
     })

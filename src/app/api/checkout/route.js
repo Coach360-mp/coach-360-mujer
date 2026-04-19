@@ -70,7 +70,6 @@ function getMercadoPagoConfig(paisCodigo) {
 
 export async function POST(request) {
   const supabaseAdmin = getSupabaseAdmin()
-  const resend = getResend()
   try {
     const { planId, userId, userEmail, vertical } = await request.json()
 
