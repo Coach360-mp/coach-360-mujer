@@ -324,8 +324,12 @@ Si no hay nada relevante en algún campo, usa null.`,
 
 export async function POST(request) {
   const supabaseAdmin = getSupabaseAdmin()
+  let userId
+  let messages
   try {
-    const { messages, userId } = await request.json()
+    const body = await request.json()
+    userId = body.userId
+    messages = body.messages
 
     const { data: perfil } = await supabaseAdmin
       .from('perfiles').select('plan_actual').eq('id', userId).single()
@@ -362,6 +366,15 @@ Si la usuaria expresa ideas de autolesión, suicidio o violencia, responde con e
     })
 
     const data = await response.json()
+    if (!response.ok || !data.content || data.content.length === 0) {
+      console.error('[CHAT ERROR] anthropic response anomaly', {
+        status: response.status,
+        ok: response.ok,
+        body: data,
+        userId,
+        messagesCount: messages?.length,
+      })
+    }
     const reply = data.content?.map(c => c.text || '').join('') || 'Cuéntame más ✦'
 
     // Guardar insight y compromiso cada 5 mensajes del usuario
@@ -372,7 +385,13 @@ Si la usuaria expresa ideas de autolesión, suicidio o violencia, responde con e
 
     return NextResponse.json({ reply })
   } catch (error) {
-    console.error('Chat error:', error)
+    console.error('[CHAT ERROR] unhandled exception', {
+      message: error?.message,
+      stack: error?.stack,
+      name: error?.name,
+      userId,
+      messagesCount: messages?.length,
+    })
     return NextResponse.json({ reply: 'Perdona, hubo un error. ¿Puedes intentar de nuevo? ✦' }, { status: 500 })
   }
 }
