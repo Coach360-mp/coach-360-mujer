@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic'
 
 import { NextResponse } from 'next/server'
-import { getSupabaseAdmin } from '@/lib/clients'
+import { getSupabaseAdmin, ANTHROPIC_MODEL } from '@/lib/clients'
 
 
 const momentosLabels = {
@@ -280,7 +280,7 @@ async function extraerInsightYGuardar(supabaseAdmin, userId, messages, vertical,
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: ANTHROPIC_MODEL,
         max_tokens: 300,
         system: `Analiza esta conversación de coaching y extrae:
 1. UN insight sobre la persona (máx 20 palabras, tercera persona, factual)
@@ -362,7 +362,7 @@ Si la usuaria expresa ideas de autolesión, suicidio o violencia, responde con e
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, system: systemPrompt, messages }),
+      body: JSON.stringify({ model: ANTHROPIC_MODEL, max_tokens: 1000, system: systemPrompt, messages }),
     })
 
     const data = await response.json()

@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic'
 
 import { NextResponse } from 'next/server'
+import { ANTHROPIC_MODEL } from '@/lib/clients'
 
 export async function POST(request) {
   try {
@@ -24,7 +25,7 @@ export async function POST(request) {
         'anthropic-beta': 'audio-1',
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: ANTHROPIC_MODEL,
         max_tokens: 500,
         messages: [{
           role: 'user',

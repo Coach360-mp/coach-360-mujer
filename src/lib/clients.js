@@ -11,3 +11,5 @@ export function getResend() {
   const { Resend } = require('resend')
   return new Resend(process.env.RESEND_API_KEY)
 }
+
+export const ANTHROPIC_MODEL = 'claude-sonnet-4-6'
