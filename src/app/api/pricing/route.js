@@ -43,7 +43,6 @@ async function detectarPaisPorIP(request) {
 
 export async function GET(request) {
   const supabaseAdmin = getSupabaseAdmin()
-  const resend = getResend()
   try {
     const { searchParams } = new URL(request.url)
     const userId = searchParams.get('userId')
