@@ -51,9 +51,12 @@ const planesMetadata = {
 }
 
 function getMercadoPagoConfig(paisCodigo) {
+  const isProduction = process.env.VERCEL_ENV === 'production'
   const configs = {
     CL: {
-      accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN_CL || process.env.MERCADOPAGO_ACCESS_TOKEN,
+      accessToken: isProduction
+        ? (process.env.MERCADOPAGO_ACCESS_TOKEN_CL || process.env.MERCADOPAGO_ACCESS_TOKEN)
+        : (process.env.MERCADOPAGO_TEST_TOKEN_CL || process.env.MERCADOPAGO_ACCESS_TOKEN_CL || process.env.MERCADOPAGO_ACCESS_TOKEN),
       currency: 'CLP',
     },
     AR: {
