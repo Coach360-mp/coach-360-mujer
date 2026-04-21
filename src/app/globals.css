@@ -137,3 +137,209 @@ input {
 .nav-icon {
   font-size: 22px;
 }
+
+/* ============================================================
+   COACH 360 — DESIGN SYSTEM TOKENS (rediseño)
+   ----------
+   Bloque nuevo que coexiste con las variables y clases legacy
+   de arriba. Para usarlo, agrega className="dir-ritual" y
+   data-v="clara|leo|marco" en el wrapper principal del componente.
+
+   Colisiones resueltas con prefijo --ds-:
+     --text    (legacy: #2d2d2d) → --ds-text    (nuevo: ink-12)
+     --success (legacy: #4a7c59) → --ds-success (nuevo: oklch verde)
+
+   Fuentes: se consumen via var(--font-fraunces) y var(--font-inter),
+   cargadas desde layout.js con next/font.
+   ============================================================ */
+
+:root {
+  /* ── NEUTRALS ─────────────────────────────────── */
+  --ink-1: #0a0c0e;
+  --ink-2: #111418;
+  --ink-3: #181c21;
+  --ink-4: #20252b;
+  --ink-5: #2a3038;
+  --ink-6: #3a4049;
+  --ink-7: #565d67;
+  --ink-8: #7b828c;
+  --ink-9: #a9afb7;
+  --ink-10: #cfd2d6;
+  --ink-11: #e6e7e9;
+  --ink-12: #f4f4f5;
+
+  /* hairlines */
+  --line: color-mix(in oklab, var(--ink-12) 8%, transparent);
+  --line-strong: color-mix(in oklab, var(--ink-12) 14%, transparent);
+
+  /* ── VERTICAL PALETTES ────────────────────────── */
+  /* Leo · turquesa (general) — DEFAULT */
+  --leo-primary: oklch(74% 0.13 192);
+  --leo-primary-hi: oklch(82% 0.14 192);
+  --leo-soft: oklch(30% 0.07 192);
+  --leo-tint: oklch(20% 0.04 192);
+
+  /* Clara · dorado (mujer) */
+  --clara-primary: oklch(82% 0.12 78);
+  --clara-primary-hi: oklch(88% 0.13 78);
+  --clara-soft: oklch(32% 0.08 68);
+  --clara-tint: oklch(22% 0.05 68);
+
+  /* Marco · violeta (líderes) */
+  --marco-primary: oklch(72% 0.14 295);
+  --marco-primary-hi: oklch(80% 0.15 295);
+  --marco-soft: oklch(32% 0.08 295);
+  --marco-tint: oklch(22% 0.05 295);
+
+  /* default vertical: Leo */
+  --v-primary: var(--leo-primary);
+  --v-primary-hi: var(--leo-primary-hi);
+  --v-soft: var(--leo-soft);
+  --v-tint: var(--leo-tint);
+
+  /* ── SEMANTIC ─────────────────────────────────── */
+  --bg: var(--ink-1);
+  --bg-raised: var(--ink-2);
+  --bg-card: var(--ink-3);
+  --bg-elevated: var(--ink-4);
+  --ds-text: var(--ink-12);         /* renombrado: colisión con --text legacy */
+  --text-muted: var(--ink-9);
+  --text-dim: var(--ink-8);
+
+  --ds-success: oklch(76% 0.14 150); /* renombrado: colisión con --success legacy */
+  --warn: oklch(78% 0.15 60);
+  --danger: oklch(68% 0.2 25);
+
+  /* ── RADII ────────────────────────────────────── */
+  --r-xs: 4px;
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  --r-xl: 20px;
+  --r-2xl: 28px;
+  --r-pill: 999px;
+
+  /* ── SPACING (8pt grid with 4 accent) ─────────── */
+  --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px;
+  --s-5: 20px; --s-6: 24px; --s-7: 32px; --s-8: 40px;
+  --s-9: 48px; --s-10: 64px; --s-11: 80px; --s-12: 112px;
+
+  /* ── SHADOWS ──────────────────────────────────── */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.4);
+  --shadow-md: 0 6px 24px rgba(0,0,0,.32), 0 1px 2px rgba(0,0,0,.3);
+  --shadow-lg: 0 20px 60px rgba(0,0,0,.45), 0 2px 4px rgba(0,0,0,.3);
+  --glow: 0 0 0 1px color-mix(in oklab, var(--v-primary) 30%, transparent),
+          0 0 32px color-mix(in oklab, var(--v-primary) 18%, transparent);
+
+  /* ── MOTION ──────────────────────────────────── */
+  --ease-out: cubic-bezier(.2,.8,.2,1);
+  --ease-spring: cubic-bezier(.3,1.4,.5,1);
+  --d-fast: 140ms;
+  --d-med: 260ms;
+  --d-slow: 500ms;
+}
+
+/* vertical swatches */
+[data-v="leo"]   { --v-primary: var(--leo-primary);   --v-primary-hi: var(--leo-primary-hi);   --v-soft: var(--leo-soft);   --v-tint: var(--leo-tint); }
+[data-v="clara"] { --v-primary: var(--clara-primary); --v-primary-hi: var(--clara-primary-hi); --v-soft: var(--clara-soft); --v-tint: var(--clara-tint); }
+[data-v="marco"] { --v-primary: var(--marco-primary); --v-primary-hi: var(--marco-primary-hi); --v-soft: var(--marco-soft); --v-tint: var(--marco-tint); }
+
+/* ── DIRECCIÓN A · SERENE ─────────────────────── */
+.dir-serene {
+  --font-display: "Geist", "Inter", system-ui, sans-serif;
+  --font-body: "Geist", "Inter", system-ui, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, monospace;
+  --tracking-tight: -0.02em;
+  --tracking-wide: 0.04em;
+  --radius-card: var(--r-lg);
+  --radius-button: var(--r-md);
+  --density: 1;
+  font-family: var(--font-body);
+}
+
+/* ── DIRECCIÓN B · RITUAL (principal — Fraunces + Inter) ─── */
+.dir-ritual {
+  --font-display: var(--font-fraunces), "Fraunces", "Cormorant Garamond", Georgia, serif;
+  --font-body: var(--font-inter), "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --tracking-tight: -0.025em;
+  --tracking-wide: 0.08em;
+  --radius-card: var(--r-xl);
+  --radius-button: var(--r-pill);
+  --density: 1;
+  font-family: var(--font-body);
+}
+
+/* ── DIRECCIÓN C · OPUS ──────────────────────── */
+.dir-opus {
+  --font-display: "Instrument Serif", "Playfair Display", Georgia, serif;
+  --font-body: "DM Sans", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --tracking-tight: -0.035em;
+  --tracking-wide: 0.16em;
+  --radius-card: var(--r-sm);
+  --radius-button: var(--r-xs);
+  --density: 1;
+  font-family: var(--font-body);
+}
+
+/* ── HELPERS ─────────────────────────────────── */
+.c-text { color: var(--ds-text); }
+.c-muted { color: var(--text-muted); }
+.c-dim { color: var(--text-dim); }
+.c-primary { color: var(--v-primary); }
+
+.font-display { font-family: var(--font-display); letter-spacing: var(--tracking-tight); }
+.font-body { font-family: var(--font-body); }
+.font-mono { font-family: var(--font-mono); }
+
+.eyebrow {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.hairline { border: 0; border-top: 1px solid var(--line); }
+
+.dotsep::before { content: "·"; padding: 0 .5em; color: var(--ink-7); }
+
+/* subtle grain for hero backgrounds */
+.grain { position: relative; }
+.grain::after {
+  content: "";
+  position: absolute; inset: 0;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.4 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  opacity: 0.04;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+}
+
+/* photo placeholder: editorial portrait, striped duotone */
+.coach-portrait {
+  background:
+    linear-gradient(135deg, var(--v-soft), var(--v-tint)),
+    repeating-linear-gradient(45deg, transparent 0 8px, rgba(255,255,255,.025) 8px 16px);
+  background-blend-mode: overlay;
+  position: relative;
+  overflow: hidden;
+}
+.coach-portrait::before {
+  content: "";
+  position: absolute; inset: 0;
+  background: radial-gradient(100% 70% at 50% 35%, color-mix(in oklab, var(--v-primary) 20%, transparent), transparent 70%);
+}
+.coach-portrait::after {
+  content: attr(data-initial);
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display);
+  font-size: 42%;
+  color: color-mix(in oklab, var(--v-primary) 80%, white 20%);
+  letter-spacing: -0.04em;
+  font-weight: 300;
+}
+
+/* extended reset — cubre pseudo-elementos (complementa el * legacy) */
+*, *::before, *::after { box-sizing: border-box; }
