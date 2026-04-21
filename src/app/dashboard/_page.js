@@ -616,154 +616,213 @@ export default function Dashboard() {
       )}
 
       {view === 'inicio' && (
-        <div className="dir-ritual" data-v="clara" style={{ background: 'var(--bg)', color: 'var(--ds-text)', minHeight: '100vh' }}>
-          {/* HERO */}
-          <div style={{ position: 'relative', padding: '56px 20px 28px', background: 'var(--bg-raised)', borderBottom: '1px solid var(--line)', overflow: 'hidden' }}>
-            <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(80% 60% at 90% 0%, color-mix(in oklab, var(--v-primary) 14%, transparent), transparent 70%)', pointerEvents: 'none' }} />
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative', marginBottom: 18 }}>
-              <div>
-                <div className="eyebrow" style={{ marginBottom: 8 }}>
-                  {new Date().toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' })}
-                </div>
-                <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 32, fontWeight: 400, color: 'var(--ds-text)', letterSpacing: 'var(--tracking-tight)', lineHeight: 1.1, margin: 0 }}>
-                  {perfil?.nombre || 'Bienvenida'} <span style={{ color: 'var(--v-primary)' }}>✦</span>
-                </h1>
-              </div>
-              <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-                <div style={{ width: 34, height: 34, borderRadius: 'var(--r-pill)', background: 'var(--bg-card)', border: '1px solid var(--line)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', position: 'relative' }}>
-                  <div style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--v-primary)' }} />
-                </div>
-                <div onClick={() => setMenuAbierto(true)} style={{ width: 38, height: 38, borderRadius: 'var(--r-pill)', background: 'var(--v-tint)', border: '1.5px solid color-mix(in oklab, var(--v-primary) 40%, transparent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontSize: 16, color: 'var(--v-primary)', cursor: 'pointer' }}>
-                  {(perfil?.nombre || 'U')[0]}
-                </div>
-              </div>
-            </div>
-            <div style={{ display: 'flex', gap: 6, position: 'relative', flexWrap: 'wrap' }}>
-              {[
-                { txt: `${perfil?.racha_dias || 0} días` },
-                { txt: `Nivel ${perfil?.nivel || 1}` },
-                { txt: `${perfil?.puntos_totales || 0} pts` },
-              ].map((s, si) => (
-                <div key={si} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'var(--v-tint)', border: '1px solid color-mix(in oklab, var(--v-primary) 22%, transparent)', borderRadius: 'var(--r-pill)', padding: '5px 12px' }}>
-                  <div style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--v-primary)' }} />
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--v-primary-hi)', letterSpacing: 0.3 }}>{s.txt}</span>
-                </div>
-              ))}
-            </div>
-          </div>
+        <div className="dir-ritual" data-v="clara" style={{ background: 'var(--bg)', color: 'var(--text)', minHeight: '100vh' }}>
+          <style>{`
+            .cd-wrap { display: flex; flex-direction: column; min-height: 100vh; }
+            .cd-sidebar { display: none; }
+            .cd-main { padding: 28px 16px 96px; }
+            .cd-hero-row { display: flex; flex-direction: column; gap: 20px; margin-bottom: 28px; }
+            .cd-moment { height: 140px; position: relative; border-radius: 16px; overflow: hidden; border: 1px solid var(--line); }
+            .cd-coach-card { display: flex; flex-direction: column; gap: 16px; padding: 16px; margin-bottom: 24px; background: linear-gradient(135deg, var(--v-tint), var(--ink-2) 70%); border: 1px solid color-mix(in oklab, var(--v-primary) 22%, var(--line)); border-radius: var(--r-xl); }
+            .cd-coach-img-wrap { width: 100%; height: 240px; border-radius: 12px; overflow: hidden; background: var(--ink-3); }
+            .cd-checkbal { display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px; }
+            .cd-community-inner { display: flex; flex-direction: column; align-items: flex-start; gap: 14px; }
+            @media (min-width: 768px) {
+              .cd-wrap { display: grid; grid-template-columns: 240px 1fr; }
+              .cd-sidebar { display: flex; flex-direction: column; gap: 2px; border-right: 1px solid var(--line); padding: 28px 20px; background: var(--ink-2); }
+              .cd-main { padding: 40px 48px 48px; overflow: auto; }
+              .cd-hero-row { display: grid; grid-template-columns: 1fr 280px; gap: 28px; }
+              .cd-moment { height: 130px; }
+              .cd-coach-card { display: grid; grid-template-columns: 220px 1fr; gap: 24px; padding: 20px; }
+              .cd-coach-img-wrap { width: 220px; height: 260px; }
+              .cd-checkbal { display: grid; grid-template-columns: 1.2fr 1fr; gap: 20px; }
+              .cd-community-inner { flex-direction: row; justify-content: space-between; align-items: center; }
+            }
+          `}</style>
 
-          <div style={{ padding: '20px 16px 0' }}>
-
-            {/* QUOTE */}
-            <div style={{ background: 'color-mix(in oklab, var(--v-primary) 5%, var(--bg-card))', border: '1px solid color-mix(in oklab, var(--v-primary) 18%, transparent)', borderRadius: 'var(--r-xl)', padding: 20, marginBottom: 14 }}>
-              <div className="eyebrow" style={{ marginBottom: 12 }}>Reflexión del día</div>
-              <div style={{ width: 28, height: 1.5, background: 'color-mix(in oklab, var(--v-primary) 55%, transparent)', marginBottom: 14 }} />
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: 16, color: 'var(--ds-text)', lineHeight: 1.6, fontStyle: 'italic', marginBottom: 12, letterSpacing: 'var(--tracking-tight)' }}>
-                No es lo que nos sucede, sino cómo reaccionamos a ello lo que importa.
+          <div className="cd-wrap">
+            {/* sidebar */}
+            <aside className="cd-sidebar">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '4px 10px', marginBottom: 24 }}>
+                <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round">
+                  <circle cx="12" cy="12" r="10" />
+                  <circle cx="12" cy="12" r="5.5" opacity=".55" />
+                  <path d="M12 2v20M2 12h20" opacity=".22" />
+                </svg>
+                <span style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: 17, letterSpacing: '-0.02em' }}>Coach 360</span>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <div style={{ width: 4, height: 4, borderRadius: '50%', background: 'color-mix(in oklab, var(--v-primary) 50%, transparent)' }} />
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-dim)', letterSpacing: 0.3 }}>Epicteto · Filósofo estoico</div>
-              </div>
-            </div>
 
-            {/* COACH */}
-            <div style={{ background: 'var(--bg-card)', border: '1px solid var(--line)', borderRadius: 'var(--r-xl)', padding: 16, marginBottom: 14 }}>
-              <div className="eyebrow" style={{ marginBottom: 14 }}>Tu coach</div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                <div style={{ position: 'relative' }}>
-                  <img src={coach.photo} alt={coach.name} style={{ width: 52, height: 52, borderRadius: 'var(--r-pill)', objectFit: 'cover', border: '1.5px solid color-mix(in oklab, var(--v-primary) 35%, transparent)' }} />
-                  <div style={{ position: 'absolute', bottom: 0, right: 0, width: 11, height: 11, background: 'var(--ds-success)', borderRadius: '50%', border: '2.5px solid var(--bg-card)' }} />
+              <div style={{ padding: '10px 12px', background: 'var(--ink-3)', borderRadius: 12, border: '1px solid var(--line)', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{ width: 36, height: 36, borderRadius: '50%', overflow: 'hidden', background: 'var(--ink-3)', flexShrink: 0, boxShadow: '0 0 0 3px var(--bg), 0 0 0 4px color-mix(in oklab, var(--v-primary) 50%, transparent)' }}>
+                  <img src={coach.photo} alt={coach.name} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                 </div>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 500, color: 'var(--ds-text)', letterSpacing: 'var(--tracking-tight)', marginBottom: 3 }}>{coach.name}</div>
-                  <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{coach.credential}</div>
+                  <div style={{ fontSize: 13, fontWeight: 600 }}>{coach.name}</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <span style={{ width: 5, height: 5, borderRadius: 3, background: 'var(--success)' }} /> en línea
+                  </div>
                 </div>
-                <button onClick={() => navigate('clara')} style={{ background: 'var(--v-primary)', color: 'var(--ink-1)', border: 'none', borderRadius: 'var(--r-pill)', padding: '9px 18px', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)', letterSpacing: 0.3 }}>
-                  Conversar
+              </div>
+
+              {[
+                { label: 'Hoy', action: () => navigate('inicio'), active: true },
+                { label: 'Conversación', action: () => navigate('clara') },
+                { label: 'Módulos', action: () => { if (modulos[0]) { setActiveModulo(modulos[0]); navigate('modulo') } else { navigate('planes') } } },
+                { label: 'Tests', action: () => navigate('tests') },
+                { label: 'Mi equilibrio', action: () => navigate('equilibrio') },
+                { label: 'Progreso', action: () => navigate('perfil') },
+              ].map((item, i) => (
+                <button key={i} onClick={item.action} style={{
+                  display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', border: 'none', borderRadius: 10,
+                  background: item.active ? 'var(--v-tint)' : 'transparent',
+                  color: item.active ? 'var(--text)' : 'var(--text-muted)',
+                  fontSize: 14, cursor: 'pointer', textAlign: 'left', fontFamily: 'var(--font-body)',
+                }}>
+                  <span>{item.label}</span>
                 </button>
-              </div>
-            </div>
+              ))}
 
-            {/* CHECK-IN */}
-            <div style={{ background: 'var(--bg-card)', border: '1px solid var(--line)', borderRadius: 'var(--r-xl)', padding: 16, marginBottom: 14 }}>
-              <div className="eyebrow" style={{ marginBottom: 14 }}>Check-in de hoy</div>
-              {!checkinDone ? (
-                <div style={{ display: 'flex', gap: 6 }}>
-                  {animos.map(a => (
-                    <button key={a.value} onClick={() => { setAnimoHoy(a.value); setCheckinDone(true); sumarPuntos('checkin', 5, `Check-in: ${a.label}`) }} style={{ flex: 1, padding: '12px 4px', borderRadius: 'var(--r-md)', border: '1px solid var(--line)', background: animoHoy === a.value ? 'var(--v-tint)' : 'transparent', color: animoHoy === a.value ? 'var(--v-primary-hi)' : 'var(--text-muted)', fontSize: 11, cursor: 'pointer', fontFamily: 'var(--font-body)', transition: 'all var(--d-fast) var(--ease-out)', textAlign: 'center' }}>{a.label}</button>
-                  ))}
+              <div style={{ marginTop: 'auto', padding: 16, borderRadius: 14, background: 'var(--ink-3)', border: '1px solid var(--line)' }}>
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: 14, lineHeight: 1.4, fontStyle: 'italic', color: 'var(--text)', marginBottom: 12 }}>
+                  "Nunca pensé que un coach digital me iba a conocer tanto."
                 </div>
-              ) : (
-                <div style={{ textAlign: 'center', fontSize: 13, color: 'var(--v-primary)', fontFamily: 'var(--font-mono)', letterSpacing: 0.3 }}>Check-in completado ✦</div>
-              )}
-            </div>
-
-            {/* EQUILIBRIO */}
-            <div onClick={() => navigate('equilibrio')} style={{ background: 'var(--bg-card)', border: '1px solid var(--line)', borderRadius: 'var(--r-xl)', padding: 16, marginBottom: 14, cursor: 'pointer' }}>
-              <div className="eyebrow" style={{ marginBottom: 14 }}>Equilibrio esta semana</div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 14 }}>
-                {dimensiones.map(d => (
-                  <div key={d.key} style={{ background: 'var(--bg-raised)', borderRadius: 'var(--r-md)', padding: '12px 12px 10px' }}>
-                    <div className="eyebrow" style={{ marginBottom: 8 }}>{d.label}</div>
-                    <div style={{ height: 3, background: 'var(--line)', borderRadius: 2, marginBottom: 8, overflow: 'hidden' }}>
-                      <div style={{ height: '100%', width: '65%', background: 'var(--v-primary)', borderRadius: 2 }} />
-                    </div>
-                    <div style={{ fontSize: 20, fontWeight: 300, fontFamily: 'var(--font-display)', color: 'var(--ds-text)', letterSpacing: 'var(--tracking-tight)' }}>6.5</div>
-                  </div>
-                ))}
+                <div style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.3 }}>
+                  <div style={{ color: 'var(--text)', fontWeight: 500 }}>María José</div>
+                  <div>Santiago · 4 meses</div>
+                </div>
               </div>
-              <svg width="100%" height="36" viewBox="0 0 260 36" preserveAspectRatio="none">
-                <path d="M0,30 C50,26 90,14 130,17 C170,20 210,8 260,4" fill="none" stroke="var(--v-primary)" strokeOpacity={0.6} strokeWidth="1.5"/>
-                <circle cx="260" cy="4" r="2.5" fill="var(--v-primary)"/>
-              </svg>
-            </div>
+            </aside>
 
-            {/* MODULO EN CURSO */}
-            {modulos.length > 0 && (
-                <div onClick={() => { if (canAccess(modulos[0].plan_requerido)) { setActiveModulo(modulos[0]); navigate('modulo') } else { navigate('planes') } }} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 16, padding: 14, marginBottom: 12, cursor: 'pointer' }}>
-                  <div style={{ fontSize: 8, letterSpacing: 2.5, color: 'rgba(255,255,255,0.25)', textTransform: 'uppercase', marginBottom: 12 }}>Módulo en curso</div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <div style={{ width: 38, height: 38, borderRadius: 10, background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.18)', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                        <rect x="2" y="2" width="6" height="6" rx="1" fill="#d4af37"/>
-                        <rect x="10" y="2" width="6" height="6" rx="1" fill="rgba(212,175,55,0.4)"/>
-                        <rect x="2" y="10" width="6" height="6" rx="1" fill="rgba(212,175,55,0.4)"/>
-                        <rect x="10" y="10" width="6" height="6" rx="1" fill="rgba(212,175,55,0.2)"/>
-                      </svg>
+            {/* main */}
+            <main className="cd-main">
+              {/* Greeting + moment */}
+              <div className="cd-hero-row">
+                <div>
+                  <div className="eyebrow" style={{ marginBottom: 12 }}>
+                    {new Date().toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' })} · día {perfil?.racha_dias || 0} ✦
+                  </div>
+                  <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(32px, 7vw, 52px)', letterSpacing: '-0.035em', fontWeight: 400, lineHeight: 1, margin: 0 }}>
+                    Buenos días, <em style={{ fontStyle: 'italic', color: 'var(--v-primary)' }}>{perfil?.nombre_preferido || perfil?.nombre || 'bienvenida'}</em>.
+                  </h1>
+                  <p style={{ fontSize: 15, color: 'var(--text-muted)', marginTop: 14, lineHeight: 1.6, maxWidth: 420 }}>
+                    Ayer escribiste que estabas cansada pero esperanzada. Hoy partimos desde ahí.
+                  </p>
+                </div>
+                <div className="cd-moment">
+                  <img src="https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=1200&q=80&auto=format&fit=crop" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'saturate(0.85)' }} />
+                  <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, rgba(10,12,14,.7), transparent 50%)' }} />
+                  <div style={{ position: 'absolute', bottom: 14, left: 16, right: 16 }}>
+                    <div className="eyebrow" style={{ marginBottom: 4, color: 'color-mix(in oklab, var(--v-primary) 90%, white)' }}>✦ Momento del día</div>
+                    <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, lineHeight: 1.2, color: '#fff' }}>
+                      Una pausa de 3 minutos.
                     </div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.85)', marginBottom: 6 }}>{modulos[0].titulo}</div>
-                      <div style={{ height: 3, background: 'rgba(255,255,255,0.07)', borderRadius: 2, overflow: 'hidden', marginBottom: 4 }}>
-                        <div style={{ height: '100%', width: `${progresoModulos?.find(p => p.modulo_id === modulos[0].id)?.porcentaje_avance || 10}%`, background: 'linear-gradient(90deg, #d4af37, #f5c842)', borderRadius: 2 }} />
+                  </div>
+                </div>
+              </div>
+
+              {/* Coach card */}
+              <div className="cd-coach-card">
+                <div className="cd-coach-img-wrap">
+                  <img src={coach.photo} alt={coach.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <div className="eyebrow" style={{ color: 'var(--v-primary)', marginBottom: 10 }}>✦ Tu coach · mujer</div>
+                  <div style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(30px, 6vw, 44px)', letterSpacing: '-0.03em', lineHeight: 1, marginBottom: 6 }}>
+                    {coach.name}
+                  </div>
+                  <div style={{ fontSize: 15, color: 'var(--text-muted)', fontStyle: 'italic', marginBottom: 16 }}>
+                    "Más claridad. Más poder. Más tú."
+                  </div>
+                  <div style={{ fontSize: 14, color: 'var(--text-muted)', lineHeight: 1.55, marginBottom: 20, maxWidth: 520 }}>
+                    Ayer terminamos hablando del miedo a decepcionar. ¿Seguimos por ahí, o llegaste con otra cosa hoy?
+                  </div>
+                  <div style={{ display: 'flex', gap: 10, marginTop: 'auto', flexWrap: 'wrap' }}>
+                    <button onClick={() => navigate('clara')} style={{ padding: '12px 20px', borderRadius: 999, border: 'none', background: 'var(--v-primary)', color: '#0a0c0e', fontWeight: 600, fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, fontFamily: 'var(--font-body)' }}>
+                      Seguir conversando →
+                    </button>
+                    <button onClick={() => { setChatMsgs([]); navigate('clara') }} style={{ padding: '12px 20px', borderRadius: 999, border: '1px solid var(--line-strong)', background: 'transparent', color: 'var(--text)', fontWeight: 500, fontSize: 14, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
+                      Empezar algo nuevo
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Check-in + Balance */}
+              <div className="cd-checkbal">
+                <div style={{ padding: 22, background: 'var(--ink-2)', border: '1px solid var(--line)', borderRadius: 'var(--r-xl)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 16, gap: 12 }}>
+                    <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 500, letterSpacing: '-0.02em' }}>¿Cómo llegas hoy?</div>
+                    <div className="eyebrow">un minuto</div>
+                  </div>
+                  {!checkinDone ? (
+                    <>
+                      <div style={{ display: 'flex', gap: 8, marginBottom: 14, flexWrap: 'wrap' }}>
+                        {animos.map(a => (
+                          <button key={a.value} onClick={() => { setAnimoHoy(a.value); setCheckinDone(true); sumarPuntos('checkin', 5, `Check-in: ${a.label}`) }} style={{
+                            flex: '1 1 0', minWidth: 70, padding: '12px 8px', border: '1px solid var(--line)', borderRadius: 999, cursor: 'pointer',
+                            background: animoHoy === a.value ? 'var(--v-primary)' : 'transparent',
+                            color: animoHoy === a.value ? '#0a0c0e' : 'var(--text-muted)',
+                            borderColor: animoHoy === a.value ? 'var(--v-primary)' : 'var(--line)',
+                            fontSize: 12, fontWeight: animoHoy === a.value ? 600 : 400, textTransform: 'lowercase', fontFamily: 'var(--font-body)',
+                          }}>{a.label}</button>
+                        ))}
                       </div>
-                      <div style={{ fontSize: 9, color: 'rgba(212,175,55,0.5)', letterSpacing: 0.5 }}>{progresoModulos?.find(p => p.modulo_id === modulos[0].id)?.porcentaje_avance || 0}% · {modulos[0].numero_semanas} semanas</div>
-                    </div>
-                    <div style={{ fontSize: 14, color: 'rgba(212,175,55,0.4)' }}>→</div>
+                      <textarea placeholder="Cuéntame en una frase... (opcional)" style={{
+                        width: '100%', minHeight: 64, padding: 14, background: 'var(--ink-3)', border: '1px solid var(--line)',
+                        borderRadius: 12, color: 'var(--text)', fontSize: 14, resize: 'none', fontFamily: 'var(--font-body)', outline: 'none', lineHeight: 1.5,
+                      }} />
+                    </>
+                  ) : (
+                    <div style={{ fontSize: 13, color: 'var(--v-primary)', fontFamily: 'var(--font-mono)', letterSpacing: 0.3 }}>Check-in completado ✦</div>
+                  )}
+                </div>
+
+                <div onClick={() => navigate('equilibrio')} style={{ padding: 22, background: 'var(--ink-2)', border: '1px solid var(--line)', borderRadius: 'var(--r-xl)', cursor: 'pointer' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 14, gap: 12 }}>
+                    <div style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 500, letterSpacing: '-0.02em' }}>Tu equilibrio</div>
+                    <div className="eyebrow">esta semana</div>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                    {[
+                      { k: 'Mente', v: 7.8 }, { k: 'Cuerpo', v: 6.2 }, { k: 'Corazón', v: 8.4 }, { k: 'Espíritu', v: 5.9 },
+                    ].map((b) => (
+                      <div key={b.k}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 }}>
+                          <span style={{ fontSize: 13 }}>{b.k}</span>
+                          <span style={{ fontFamily: 'var(--font-display)', fontSize: 18 }}>{b.v.toFixed(1)}<span style={{ fontSize: 11, color: 'var(--text-dim)' }}>/10</span></span>
+                        </div>
+                        <div style={{ height: 3, background: 'var(--ink-5)', borderRadius: 999, overflow: 'hidden' }}>
+                          <div style={{ height: '100%', width: `${b.v * 10}%`, background: 'var(--v-primary)', transition: 'width .4s var(--ease-out)' }} />
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
-            )}
-
-            {/* TESTS */}
-            <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 16, padding: 14, marginBottom: 12 }}>
-              <div style={{ fontSize: 8, letterSpacing: 2.5, color: 'rgba(255,255,255,0.25)', textTransform: 'uppercase', marginBottom: 12 }}>Tests disponibles</div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-                {tests.slice(0, 3).map((t, ti) => (
-                  <div key={t.id} onClick={() => canAccess(t.plan_requerido) && startTest(t)} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: ti < 2 ? '1px solid rgba(255,255,255,0.04)' : 'none', cursor: canAccess(t.plan_requerido) ? 'pointer' : 'default' }}>
-                    <div>
-                      <div style={{ fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.8)', marginBottom: 2 }}>{t.titulo}</div>
-                      <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>{t.numero_preguntas} preguntas · {t.categoria}</div>
-                    </div>
-                    {!canAccess(t.plan_requerido) ? (
-                      <span style={{ fontSize: 9, background: 'rgba(255,255,255,0.05)', padding: '3px 8px', borderRadius: 6, color: 'rgba(255,255,255,0.3)', letterSpacing: 0.5 }}>Premium</span>
-                    ) : (
-                      <span style={{ fontSize: 13, color: 'rgba(212,175,55,0.4)' }}>→</span>
-                    )}
-                  </div>
-                ))}
               </div>
-            </div>
 
+              {/* Community band */}
+              <div style={{ padding: '20px 22px', background: 'var(--ink-2)', border: '1px solid var(--line)', borderRadius: 'var(--r-xl)' }}>
+                <div className="cd-community-inner">
+                  <div>
+                    <div className="eyebrow" style={{ marginBottom: 4 }}>✦ Cerca de ti</div>
+                    <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, letterSpacing: '-0.02em' }}>Otras <em style={{ fontStyle: 'italic', color: 'var(--v-primary)' }}>142 personas</em> también están trabajando en esto hoy.</div>
+                  </div>
+                  <div style={{ display: 'flex' }}>
+                    {[
+                      'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=80&auto=format&fit=crop',
+                      'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&q=80&auto=format&fit=crop',
+                      'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&q=80&auto=format&fit=crop',
+                      'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=400&q=80&auto=format&fit=crop',
+                    ].map((s, i) => (
+                      <div key={i} style={{ marginLeft: i === 0 ? 0 : -12, width: 36, height: 36, borderRadius: 18, overflow: 'hidden', boxShadow: '0 0 0 3px var(--bg), 0 0 0 4px color-mix(in oklab, var(--v-primary) 50%, transparent)' }}>
+                        <img src={s} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                      </div>
+                    ))}
+                    <div style={{ marginLeft: -12, width: 36, height: 36, borderRadius: 18, background: 'var(--ink-4)', border: '3px solid var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, color: 'var(--text-muted)', fontWeight: 600 }}>+138</div>
+                  </div>
+                </div>
+              </div>
+            </main>
           </div>
         </div>
       )}

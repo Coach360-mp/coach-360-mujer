@@ -267,6 +267,11 @@ input {
   --radius-card: var(--r-xl);
   --radius-button: var(--r-pill);
   --density: 1;
+  /* Overrides de vars legacy para que el código portado de Fase 5 resuelva
+     correctamente a los tokens del design system nuevo. Solo aplica dentro
+     de descendientes con className="dir-ritual". */
+  --text: var(--ink-12);
+  --success: var(--ds-success);
   font-family: var(--font-body);
 }
 
