@@ -616,110 +616,106 @@ export default function Dashboard() {
       )}
 
       {view === 'inicio' && (
-        <div>
+        <div className="dir-ritual" data-v="clara" style={{ background: 'var(--bg)', color: 'var(--ds-text)', minHeight: '100vh' }}>
           {/* HERO */}
-          <div style={{ position: 'relative', padding: '52px 20px 20px', background: '#0f0d0b', overflow: 'hidden', marginBottom: 0 }}>
-            <div style={{ position: 'absolute', top: -60, right: -60, width: 200, height: 200, borderRadius: '50%', background: 'radial-gradient(circle, rgba(212,175,55,0.16) 0%, transparent 70%)', pointerEvents: 'none' }} />
-            <div style={{ position: 'absolute', bottom: -30, left: -30, width: 130, height: 130, borderRadius: '50%', background: 'radial-gradient(circle, rgba(212,175,55,0.07) 0%, transparent 70%)', pointerEvents: 'none' }} />
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative', marginBottom: 14 }}>
+          <div style={{ position: 'relative', padding: '56px 20px 28px', background: 'var(--bg-raised)', borderBottom: '1px solid var(--line)', overflow: 'hidden' }}>
+            <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(80% 60% at 90% 0%, color-mix(in oklab, var(--v-primary) 14%, transparent), transparent 70%)', pointerEvents: 'none' }} />
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative', marginBottom: 18 }}>
               <div>
-                <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 4 }}>
+                <div className="eyebrow" style={{ marginBottom: 8 }}>
                   {new Date().toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' })}
                 </div>
-                <h1 style={{ fontFamily: 'Georgia,serif', fontSize: 28, fontWeight: 300, color: '#fff', marginBottom: 0 }}>
-                  {perfil?.nombre || 'Bienvenida'} <span style={{ color: '#d4af37' }}>✦</span>
+                <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 32, fontWeight: 400, color: 'var(--ds-text)', letterSpacing: 'var(--tracking-tight)', lineHeight: 1.1, margin: 0 }}>
+                  {perfil?.nombre || 'Bienvenida'} <span style={{ color: 'var(--v-primary)' }}>✦</span>
                 </h1>
               </div>
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', position: 'relative' }}>
-                  <div style={{ width: 10, height: 10, borderRadius: '50%', border: '1.5px solid #d4af37', position: 'absolute', top: 5, right: 5 }}>
-                    <div style={{ width: 4, height: 4, background: '#d4af37', borderRadius: '50%', position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)' }} />
-                  </div>
+              <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                <div style={{ width: 34, height: 34, borderRadius: 'var(--r-pill)', background: 'var(--bg-card)', border: '1px solid var(--line)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', position: 'relative' }}>
+                  <div style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--v-primary)' }} />
                 </div>
-                <div onClick={() => setMenuAbierto(true)} style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(212,175,55,0.1)', border: '1.5px solid rgba(212,175,55,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Georgia,serif', fontSize: 15, color: '#d4af37', cursor: 'pointer' }}>
+                <div onClick={() => setMenuAbierto(true)} style={{ width: 38, height: 38, borderRadius: 'var(--r-pill)', background: 'var(--v-tint)', border: '1.5px solid color-mix(in oklab, var(--v-primary) 40%, transparent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontSize: 16, color: 'var(--v-primary)', cursor: 'pointer' }}>
                   {(perfil?.nombre || 'U')[0]}
                 </div>
               </div>
             </div>
             <div style={{ display: 'flex', gap: 6, position: 'relative', flexWrap: 'wrap' }}>
               {[
-                { dot: true, txt: `${perfil?.racha_dias || 0} días` },
-                { dot: true, txt: `Nivel ${perfil?.nivel || 1}` },
-                { dot: true, txt: `${perfil?.puntos_totales || 0} pts` },
+                { txt: `${perfil?.racha_dias || 0} días` },
+                { txt: `Nivel ${perfil?.nivel || 1}` },
+                { txt: `${perfil?.puntos_totales || 0} pts` },
               ].map((s, si) => (
-                <div key={si} style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.18)', borderRadius: 20, padding: '4px 10px' }}>
-                  <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#d4af37' }} />
-                  <span style={{ fontSize: 10, color: 'rgba(212,175,55,0.9)', letterSpacing: 0.5 }}>{s.txt}</span>
+                <div key={si} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'var(--v-tint)', border: '1px solid color-mix(in oklab, var(--v-primary) 22%, transparent)', borderRadius: 'var(--r-pill)', padding: '5px 12px' }}>
+                  <div style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--v-primary)' }} />
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--v-primary-hi)', letterSpacing: 0.3 }}>{s.txt}</span>
                 </div>
               ))}
             </div>
-            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 1, background: 'linear-gradient(90deg, transparent, rgba(212,175,55,0.15), transparent)' }} />
           </div>
 
-          <div style={{ padding: '16px 16px 0' }}>
+          <div style={{ padding: '20px 16px 0' }}>
 
             {/* QUOTE */}
-            <div style={{ background: 'rgba(212,175,55,0.04)', border: '1px solid rgba(212,175,55,0.13)', borderRadius: 16, padding: 16, marginBottom: 12 }}>
-              <div style={{ fontSize: 8, letterSpacing: 2.5, color: 'rgba(212,175,55,0.45)', textTransform: 'uppercase', marginBottom: 10 }}>Reflexión del día</div>
-              <div style={{ width: 24, height: 1.5, background: 'rgba(212,175,55,0.4)', marginBottom: 10 }} />
-              <div style={{ fontFamily: 'Georgia,serif', fontSize: 13, color: 'rgba(255,255,255,0.72)', lineHeight: 1.7, fontStyle: 'italic', marginBottom: 10 }}>
+            <div style={{ background: 'color-mix(in oklab, var(--v-primary) 5%, var(--bg-card))', border: '1px solid color-mix(in oklab, var(--v-primary) 18%, transparent)', borderRadius: 'var(--r-xl)', padding: 20, marginBottom: 14 }}>
+              <div className="eyebrow" style={{ marginBottom: 12 }}>Reflexión del día</div>
+              <div style={{ width: 28, height: 1.5, background: 'color-mix(in oklab, var(--v-primary) 55%, transparent)', marginBottom: 14 }} />
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: 16, color: 'var(--ds-text)', lineHeight: 1.6, fontStyle: 'italic', marginBottom: 12, letterSpacing: 'var(--tracking-tight)' }}>
                 No es lo que nos sucede, sino cómo reaccionamos a ello lo que importa.
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <div style={{ width: 4, height: 4, borderRadius: '50%', background: 'rgba(212,175,55,0.5)' }} />
-                <div style={{ fontSize: 10, color: 'rgba(212,175,55,0.6)', letterSpacing: 0.5 }}>Epicteto · Filósofo estoico</div>
+                <div style={{ width: 4, height: 4, borderRadius: '50%', background: 'color-mix(in oklab, var(--v-primary) 50%, transparent)' }} />
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-dim)', letterSpacing: 0.3 }}>Epicteto · Filósofo estoico</div>
               </div>
             </div>
 
             {/* COACH */}
-            <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 16, padding: 14, marginBottom: 12 }}>
-              <div style={{ fontSize: 8, letterSpacing: 2.5, color: 'rgba(255,255,255,0.25)', textTransform: 'uppercase', marginBottom: 12 }}>Tu coach</div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ background: 'var(--bg-card)', border: '1px solid var(--line)', borderRadius: 'var(--r-xl)', padding: 16, marginBottom: 14 }}>
+              <div className="eyebrow" style={{ marginBottom: 14 }}>Tu coach</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                 <div style={{ position: 'relative' }}>
-                  <img src={coach.photo} alt={coach.name} style={{ width: 46, height: 46, borderRadius: '50%', objectFit: 'cover', border: '1.5px solid rgba(212,175,55,0.3)' }} />
-                  <div style={{ position: 'absolute', bottom: 1, right: 1, width: 9, height: 9, background: '#10b981', borderRadius: '50%', border: '2px solid #0f0d0b' }} />
+                  <img src={coach.photo} alt={coach.name} style={{ width: 52, height: 52, borderRadius: 'var(--r-pill)', objectFit: 'cover', border: '1.5px solid color-mix(in oklab, var(--v-primary) 35%, transparent)' }} />
+                  <div style={{ position: 'absolute', bottom: 0, right: 0, width: 11, height: 11, background: 'var(--ds-success)', borderRadius: '50%', border: '2.5px solid var(--bg-card)' }} />
                 </div>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 15, fontWeight: 500, color: '#fff', marginBottom: 2 }}>{coach.name}</div>
-                  <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>{coach.credential}</div>
+                  <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 500, color: 'var(--ds-text)', letterSpacing: 'var(--tracking-tight)', marginBottom: 3 }}>{coach.name}</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{coach.credential}</div>
                 </div>
-                <button onClick={() => navigate('clara')} style={{ background: 'linear-gradient(135deg, #d4af37, #f5c842)', color: '#0a0a0a', border: 'none', borderRadius: 10, padding: '8px 16px', fontSize: 11, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', letterSpacing: 0.3 }}>
+                <button onClick={() => navigate('clara')} style={{ background: 'var(--v-primary)', color: 'var(--ink-1)', border: 'none', borderRadius: 'var(--r-pill)', padding: '9px 18px', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)', letterSpacing: 0.3 }}>
                   Conversar
                 </button>
               </div>
             </div>
 
             {/* CHECK-IN */}
-            <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 16, padding: 14, marginBottom: 12 }}>
-              <div style={{ fontSize: 8, letterSpacing: 2.5, color: 'rgba(255,255,255,0.25)', textTransform: 'uppercase', marginBottom: 12 }}>Check-in de hoy</div>
+            <div style={{ background: 'var(--bg-card)', border: '1px solid var(--line)', borderRadius: 'var(--r-xl)', padding: 16, marginBottom: 14 }}>
+              <div className="eyebrow" style={{ marginBottom: 14 }}>Check-in de hoy</div>
               {!checkinDone ? (
                 <div style={{ display: 'flex', gap: 6 }}>
                   {animos.map(a => (
-                    <button key={a.value} onClick={() => { setAnimoHoy(a.value); setCheckinDone(true); sumarPuntos('checkin', 5, `Check-in: ${a.label}`) }} style={{ flex: 1, padding: '10px 4px', borderRadius: 10, border: '1px solid rgba(255,255,255,0.07)', background: animoHoy === a.value ? 'rgba(212,175,55,0.15)' : 'rgba(255,255,255,0.03)', color: animoHoy === a.value ? '#d4af37' : 'rgba(255,255,255,0.5)', fontSize: 11, cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s', textAlign: 'center' }}>{a.label}</button>
+                    <button key={a.value} onClick={() => { setAnimoHoy(a.value); setCheckinDone(true); sumarPuntos('checkin', 5, `Check-in: ${a.label}`) }} style={{ flex: 1, padding: '12px 4px', borderRadius: 'var(--r-md)', border: '1px solid var(--line)', background: animoHoy === a.value ? 'var(--v-tint)' : 'transparent', color: animoHoy === a.value ? 'var(--v-primary-hi)' : 'var(--text-muted)', fontSize: 11, cursor: 'pointer', fontFamily: 'var(--font-body)', transition: 'all var(--d-fast) var(--ease-out)', textAlign: 'center' }}>{a.label}</button>
                   ))}
                 </div>
               ) : (
-                <div style={{ textAlign: 'center', fontSize: 13, color: 'rgba(212,175,55,0.7)' }}>Check-in completado ✦</div>
+                <div style={{ textAlign: 'center', fontSize: 13, color: 'var(--v-primary)', fontFamily: 'var(--font-mono)', letterSpacing: 0.3 }}>Check-in completado ✦</div>
               )}
             </div>
 
             {/* EQUILIBRIO */}
-            <div onClick={() => navigate('equilibrio')} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 16, padding: 14, marginBottom: 12, cursor: 'pointer' }}>
-              <div style={{ fontSize: 8, letterSpacing: 2.5, color: 'rgba(255,255,255,0.25)', textTransform: 'uppercase', marginBottom: 12 }}>Equilibrio esta semana</div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 7, marginBottom: 12 }}>
+            <div onClick={() => navigate('equilibrio')} style={{ background: 'var(--bg-card)', border: '1px solid var(--line)', borderRadius: 'var(--r-xl)', padding: 16, marginBottom: 14, cursor: 'pointer' }}>
+              <div className="eyebrow" style={{ marginBottom: 14 }}>Equilibrio esta semana</div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 14 }}>
                 {dimensiones.map(d => (
-                  <div key={d.key} style={{ background: 'rgba(255,255,255,0.025)', borderRadius: 10, padding: '10px 10px 8px' }}>
-                    <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.28)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 7 }}>{d.label}</div>
-                    <div style={{ height: 3, background: 'rgba(255,255,255,0.06)', borderRadius: 2, marginBottom: 6, overflow: 'hidden' }}>
-                      <div style={{ height: '100%', width: '65%', background: d.color, borderRadius: 2 }} />
+                  <div key={d.key} style={{ background: 'var(--bg-raised)', borderRadius: 'var(--r-md)', padding: '12px 12px 10px' }}>
+                    <div className="eyebrow" style={{ marginBottom: 8 }}>{d.label}</div>
+                    <div style={{ height: 3, background: 'var(--line)', borderRadius: 2, marginBottom: 8, overflow: 'hidden' }}>
+                      <div style={{ height: '100%', width: '65%', background: 'var(--v-primary)', borderRadius: 2 }} />
                     </div>
-                    <div style={{ fontSize: 18, fontWeight: 300, fontFamily: 'Georgia,serif', color: d.color }}>6.5</div>
+                    <div style={{ fontSize: 20, fontWeight: 300, fontFamily: 'var(--font-display)', color: 'var(--ds-text)', letterSpacing: 'var(--tracking-tight)' }}>6.5</div>
                   </div>
                 ))}
               </div>
               <svg width="100%" height="36" viewBox="0 0 260 36" preserveAspectRatio="none">
-                <path d="M0,30 C50,26 90,14 130,17 C170,20 210,8 260,4" fill="none" stroke="rgba(212,175,55,0.4)" strokeWidth="1.5"/>
-                <circle cx="260" cy="4" r="2.5" fill="#d4af37"/>
+                <path d="M0,30 C50,26 90,14 130,17 C170,20 210,8 260,4" fill="none" stroke="var(--v-primary)" strokeOpacity={0.6} strokeWidth="1.5"/>
+                <circle cx="260" cy="4" r="2.5" fill="var(--v-primary)"/>
               </svg>
             </div>
 
