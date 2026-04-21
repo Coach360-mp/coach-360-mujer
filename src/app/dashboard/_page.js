@@ -75,6 +75,61 @@ const elementProfiles = {
   4: { nombre: 'Aire', icono: '🌬️', color: '#a78bfa', colorBg: 'rgba(167, 139, 250, 0.12)', desc: 'Eres creativa, adaptable y libre. Exploras antes de comprometerte.', descLarga: 'Tu mente vuela alto y conecta ideas que otras no ven. Eres la que llena espacios de chispa, humor y posibilidades nuevas.', fortalezas: ['Creatividad que rompe esquemas', 'Adaptabilidad ante el cambio', 'Visión amplia y conectiva', 'Capacidad de reinventarte'], sombras: ['Te cuesta sostener compromisos largos', 'Saltas de idea en idea sin profundizar', 'A veces evitas el peso de las emociones difíciles'], recomendaciones: ['Elige UNA cosa esta semana y termínala', 'Practica quedarte 5 minutos más en una conversación incómoda', 'Profundiza en algo que ya conoces antes de buscar lo nuevo'], proximoPaso: 'El módulo "Decisiones Alineadas" te va a ayudar a sostener tus elecciones.', promptClara: 'Mi elemento es Aire. Soy creativa pero me cuesta profundizar y sostener compromisos.' },
 }
 
+// Iconos SVG del diseño de Fase 5 (líneas 906-958 del HTML de referencia).
+const Icon = {
+  sparkle: ({ s = 14 }) => (
+    <svg width={s} height={s} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M8 1v3M8 12v3M1 8h3M12 8h3M3 3l2 2M11 11l2 2M3 13l2-2M11 5l2-2"/>
+    </svg>
+  ),
+  check: ({ s = 14 }) => (
+    <svg width={s} height={s} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M3 8.5l3 3 7-7"/></svg>
+  ),
+  arrow: ({ s = 14, dir = 'right' }) => (
+    <svg width={s} height={s} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+      style={{ transform: dir === 'left' ? 'rotate(180deg)' : dir === 'up' ? 'rotate(-90deg)' : dir === 'down' ? 'rotate(90deg)' : 'none' }}>
+      <path d="M3 8h10M9 4l4 4-4 4"/>
+    </svg>
+  ),
+  lock: ({ s = 14 }) => (
+    <svg width={s} height={s} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round">
+      <rect x="3" y="7" width="10" height="7" rx="1.5"/><path d="M5 7V5a3 3 0 0 1 6 0v2"/>
+    </svg>
+  ),
+  mic: ({ s = 16 }) => (
+    <svg width={s} height={s} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="6" y="1.5" width="4" height="8" rx="2"/><path d="M3 7a5 5 0 0 0 10 0M8 12v2.5"/>
+    </svg>
+  ),
+  plus: ({ s = 14 }) => (
+    <svg width={s} height={s} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"><path d="M8 3v10M3 8h10"/></svg>
+  ),
+  dots: ({ s = 14 }) => (
+    <svg width={s} height={s} viewBox="0 0 16 16" fill="currentColor"><circle cx="3" cy="8" r="1.4"/><circle cx="8" cy="8" r="1.4"/><circle cx="13" cy="8" r="1.4"/></svg>
+  ),
+  moon: ({ s = 14 }) => (
+    <svg width={s} height={s} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"><path d="M13 9.5A5.5 5.5 0 1 1 6.5 3a4.5 4.5 0 0 0 6.5 6.5z"/></svg>
+  ),
+  chart: ({ s = 14 }) => (
+    <svg width={s} height={s} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"><path d="M2 13h12M4 10v3M7 7v6M10 4v9M13 8v5"/></svg>
+  ),
+  star: ({ s = 14 }) => (
+    <svg width={s} height={s} viewBox="0 0 16 16" fill="currentColor" stroke="none"><path d="M8 1.5l1.8 4 4.2.4-3.2 2.9.9 4.2L8 10.8l-3.7 2.2.9-4.2L2 5.9l4.2-.4z"/></svg>
+  ),
+  close: ({ s = 14 }) => (
+    <svg width={s} height={s} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg>
+  ),
+  flame: ({ s = 14 }) => (
+    <svg width={s} height={s} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" strokeLinecap="round"><path d="M8 1s4 3 4 7a4 4 0 1 1-8 0c0-1.5 1-2.5 1.5-3C5.5 4 6 2.5 8 1z"/><path d="M8 10a1.5 1.5 0 0 0 1.5-1.5c0-.8-1-1.5-1.5-2-.5.5-1.5 1.2-1.5 2A1.5 1.5 0 0 0 8 10z"/></svg>
+  ),
+  book: ({ s = 14 }) => (
+    <svg width={s} height={s} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3h4a2 2 0 0 1 2 2v9a2 2 0 0 0-2-2H3zM13 3H9a2 2 0 0 0-2 2v9a2 2 0 0 1 2-2h4z"/></svg>
+  ),
+  compass: ({ s = 14 }) => (
+    <svg width={s} height={s} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="8" cy="8" r="6"/><path d="M10.5 5.5L9 9l-3.5 1.5L7 7z" fill="currentColor"/></svg>
+  ),
+}
+
 export default function Dashboard() {
   const [user, setUser] = useState(null)
   const [perfil, setPerfil] = useState(null)
@@ -620,7 +675,11 @@ export default function Dashboard() {
           <style>{`
             .cd-wrap { display: flex; flex-direction: column; min-height: 100vh; }
             .cd-sidebar { display: none; }
-            .cd-main { padding: 28px 16px 96px; }
+            .cd-sidebar.open { display: flex; flex-direction: column; gap: 2px; position: fixed; top: 0; left: 0; bottom: 0; width: 280px; max-width: 85vw; z-index: 50; padding: 28px 20px; background: var(--ink-2); overflow-y: auto; box-shadow: 0 0 40px rgba(0,0,0,0.6); }
+            .cd-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 40; }
+            .cd-hamburger { position: fixed; top: 20px; left: 20px; z-index: 45; width: 40px; height: 40px; border-radius: 999px; background: var(--ink-3); border: 1px solid var(--line); color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+            .cd-sidebar-close { position: absolute; top: 18px; right: 18px; width: 32px; height: 32px; border-radius: 999px; background: transparent; border: 1px solid var(--line); color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+            .cd-main { padding: 76px 16px 96px; }
             .cd-hero-row { display: flex; flex-direction: column; gap: 20px; margin-bottom: 28px; }
             .cd-moment { height: 140px; position: relative; border-radius: 16px; overflow: hidden; border: 1px solid var(--line); }
             .cd-coach-card { display: flex; flex-direction: column; gap: 16px; padding: 16px; margin-bottom: 24px; background: linear-gradient(135deg, var(--v-tint), var(--ink-2) 70%); border: 1px solid color-mix(in oklab, var(--v-primary) 22%, var(--line)); border-radius: var(--r-xl); }
@@ -629,7 +688,14 @@ export default function Dashboard() {
             .cd-community-inner { display: flex; flex-direction: column; align-items: flex-start; gap: 14px; }
             @media (min-width: 768px) {
               .cd-wrap { display: grid; grid-template-columns: 240px 1fr; }
-              .cd-sidebar { display: flex; flex-direction: column; gap: 2px; border-right: 1px solid var(--line); padding: 28px 20px; background: var(--ink-2); }
+              .cd-sidebar, .cd-sidebar.open {
+                display: flex; flex-direction: column; gap: 2px;
+                border-right: 1px solid var(--line);
+                padding: 28px 20px; background: var(--ink-2);
+                position: static; width: auto; max-width: none; z-index: auto;
+                box-shadow: none; top: auto; left: auto; bottom: auto; overflow-y: visible;
+              }
+              .cd-backdrop, .cd-hamburger, .cd-sidebar-close { display: none; }
               .cd-main { padding: 40px 48px 48px; overflow: auto; }
               .cd-hero-row { display: grid; grid-template-columns: 1fr 280px; gap: 28px; }
               .cd-moment { height: 130px; }
@@ -640,9 +706,22 @@ export default function Dashboard() {
             }
           `}</style>
 
+          {/* Mobile hamburger (visible <768px) */}
+          <button className="cd-hamburger" onClick={() => setMenuAbierto(true)} aria-label="Menú">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+          </button>
+
+          {/* Mobile backdrop */}
+          {menuAbierto && <div className="cd-backdrop" onClick={() => setMenuAbierto(false)} />}
+
           <div className="cd-wrap">
-            {/* sidebar */}
-            <aside className="cd-sidebar">
+            {/* sidebar — port literal de RitualDashboard (Fase 5 L1582-1623) */}
+            <aside className={`cd-sidebar ${menuAbierto ? 'open' : ''}`}>
+              {/* Mobile-only close button */}
+              <button className="cd-sidebar-close" onClick={() => setMenuAbierto(false)} aria-label="Cerrar">
+                <Icon.close s={14} />
+              </button>
+
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '4px 10px', marginBottom: 24 }}>
                 <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round">
                   <circle cx="12" cy="12" r="10" />
@@ -652,44 +731,62 @@ export default function Dashboard() {
                 <span style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: 17, letterSpacing: '-0.02em' }}>Coach 360</span>
               </div>
 
+              {/* Coach chooser pill */}
               <div style={{ padding: '10px 12px', background: 'var(--ink-3)', borderRadius: 12, border: '1px solid var(--line)', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 10 }}>
-                <div style={{ width: 36, height: 36, borderRadius: '50%', overflow: 'hidden', background: 'var(--ink-3)', flexShrink: 0, boxShadow: '0 0 0 3px var(--bg), 0 0 0 4px color-mix(in oklab, var(--v-primary) 50%, transparent)' }}>
-                  <img src={coach.photo} alt={coach.name} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                <div style={{ width: 36, height: 36, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, background: 'var(--ink-3)' }}>
+                  <img src="/clara.jpg" alt="Clara" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                 </div>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 13, fontWeight: 600 }}>{coach.name}</div>
-                  <div style={{ fontSize: 11, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <span style={{ width: 5, height: 5, borderRadius: 3, background: 'var(--success)' }} /> en línea
-                  </div>
+                  <div style={{ fontSize: 13, fontWeight: 600 }}>Clara</div>
+                  <div className="font-mono" style={{ fontSize: 11, color: 'var(--text-muted)' }}>tu coach</div>
                 </div>
+                <Icon.arrow s={12} dir="down" />
               </div>
 
+              {/* Menú nav (6 items con dot indicator en activo) */}
               {[
-                { label: 'Hoy', action: () => navigate('inicio'), active: true },
-                { label: 'Conversación', action: () => navigate('clara') },
-                { label: 'Módulos', action: () => { if (modulos[0]) { setActiveModulo(modulos[0]); navigate('modulo') } else { navigate('planes') } } },
-                { label: 'Tests', action: () => navigate('tests') },
-                { label: 'Mi equilibrio', action: () => navigate('equilibrio') },
-                { label: 'Progreso', action: () => navigate('perfil') },
-              ].map((item, i) => (
-                <button key={i} onClick={item.action} style={{
-                  display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', border: 'none', borderRadius: 10,
-                  background: item.active ? 'var(--v-tint)' : 'transparent',
-                  color: item.active ? 'var(--text)' : 'var(--text-muted)',
-                  fontSize: 14, cursor: 'pointer', textAlign: 'left', fontFamily: 'var(--font-body)',
-                }}>
-                  <span>{item.label}</span>
-                </button>
-              ))}
+                { label: 'Hoy', I: Icon.sparkle, active: view === 'inicio', action: () => navigate('inicio') },
+                { label: 'Conversación', I: Icon.dots, active: false, action: () => navigate('clara') },
+                { label: 'Módulos', I: Icon.book, active: false, action: () => { if (modulos[0]) { setActiveModulo(modulos[0]); navigate('modulo') } else { navigate('planes') } } },
+                { label: 'Tests', I: Icon.chart, active: false, action: () => navigate('tests') },
+                { label: 'Mi equilibrio', I: Icon.compass, active: false, action: () => navigate('equilibrio') },
+                { label: 'Progreso', I: Icon.chart, active: false, action: () => navigate('perfil') },
+              ].map((item, i) => {
+                const ItemIcon = item.I
+                return (
+                  <button key={i} onClick={() => { item.action(); setMenuAbierto(false) }} style={{
+                    display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', border: 'none', borderRadius: 10,
+                    background: item.active ? 'var(--v-tint)' : 'transparent',
+                    color: item.active ? 'var(--text)' : 'var(--text-muted)',
+                    fontSize: 14, cursor: 'pointer', textAlign: 'left', fontFamily: 'var(--font-body)',
+                  }}>
+                    <ItemIcon />
+                    <span>{item.label}</span>
+                    {item.active && <span style={{ marginLeft: 'auto', width: 4, height: 4, borderRadius: 2, background: 'var(--v-primary)' }} />}
+                  </button>
+                )
+              })}
 
-              <div style={{ marginTop: 'auto', padding: 16, borderRadius: 14, background: 'var(--ink-3)', border: '1px solid var(--line)' }}>
-                <div style={{ fontFamily: 'var(--font-display)', fontSize: 14, lineHeight: 1.4, fontStyle: 'italic', color: 'var(--text)', marginBottom: 12 }}>
-                  "Nunca pensé que un coach digital me iba a conocer tanto."
+              {/* Plan card — datos reales del perfil */}
+              <div style={{ marginTop: 'auto', padding: 14, borderRadius: 14, background: 'var(--ink-3)', border: '1px solid var(--line)', fontSize: 12 }}>
+                <div className="eyebrow" style={{ marginBottom: 6, color: 'var(--v-primary)' }}>
+                  ✦ {perfil?.plan_actual === 'free' ? 'Plan Gratis' : perfil?.plan_actual === 'esencial' ? 'Plan Esencial' : 'Plan Premium'}
                 </div>
-                <div style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.3 }}>
-                  <div style={{ color: 'var(--text)', fontWeight: 500 }}>María José</div>
-                  <div>Santiago · 4 meses</div>
+                <div style={{ color: 'var(--text-muted)', marginBottom: 8, lineHeight: 1.5 }}>
+                  {perfil?.plan_actual === 'free' ? (
+                    <>Te quedan <b style={{ color: 'var(--text)' }}>{Math.max(0, 5 - (perfil?.mensajes_chat_hoy || 0))} mensajes</b> hoy.</>
+                  ) : (
+                    'Chat sin límite diario'
+                  )}
                 </div>
+                <div style={{ height: 3, background: 'var(--ink-5)', borderRadius: 999, overflow: 'hidden' }}>
+                  <div style={{ height: '100%', width: `${perfil?.plan_actual === 'free' ? Math.min(100, Math.round(((perfil?.mensajes_chat_hoy || 0) / 5) * 100)) : 0}%`, background: 'var(--v-primary)', transition: 'width .4s var(--ease-out)' }} />
+                </div>
+                {perfil?.plan_actual === 'free' && (
+                  <button onClick={() => { navigate('planes'); setMenuAbierto(false) }} style={{ marginTop: 12, width: '100%', padding: '8px 10px', borderRadius: 999, border: 'none', background: 'var(--v-primary)', color: '#0a0c0e', fontSize: 12, cursor: 'pointer', fontWeight: 600, fontFamily: 'var(--font-body)' }}>
+                    Ir a Esencial
+                  </button>
+                )}
               </div>
             </aside>
 
