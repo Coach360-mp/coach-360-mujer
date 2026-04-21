@@ -598,78 +598,6 @@ export default function Dashboard() {
   return (
     <div style={{ minHeight: '100vh', background: '#0f0d0b', paddingBottom: 80, position: 'relative' }}>
 
-      {/* MENU LATERAL */}
-      {menuAbierto && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex' }}>
-          <div onClick={() => setMenuAbierto(false)} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.7)' }} />
-          <div style={{ position: 'relative', width: 280, background: '#120f0a', height: '100%', overflowY: 'auto', borderRight: '1px solid rgba(212,175,55,0.12)', zIndex: 201 }}>
-            {/* Perfil */}
-            <div style={{ padding: '52px 20px 20px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-              <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'rgba(212,175,55,0.1)', border: '1.5px solid rgba(212,175,55,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Georgia,serif', fontSize: 20, color: '#d4af37', marginBottom: 10 }}>{(perfil?.nombre || 'U')[0]}</div>
-              <div style={{ fontSize: 13, fontWeight: 600, color: '#fff', marginBottom: 4 }}>{perfil?.nombre || 'Bienvenida'}</div>
-              <div style={{ fontSize: 9, color: 'rgba(212,175,55,0.6)', background: 'rgba(212,175,55,0.07)', border: '1px solid rgba(212,175,55,0.15)', padding: '2px 8px', borderRadius: 6, display: 'inline-block', letterSpacing: 1, textTransform: 'uppercase' }}>{plan || 'Free'}</div>
-            </div>
-            {/* Items menu */}
-            {[
-              { sec: 'MI CUENTA', items: [
-                { label: 'Mi perfil', action: () => {} },
-                { label: 'Planes y facturación', action: () => { navigate('planes'); setMenuAbierto(false) } },
-                { label: 'Notificaciones', action: () => {} },
-              ]},
-              { sec: 'COLOR DEL DASHBOARD', custom: (
-                <div style={{ display: 'flex', gap: 10, padding: '8px 12px' }}>
-                  {['#d4af37','#14b8a6','#7C3AED','#e07b39'].map(c => (
-                    <div key={c} onClick={() => {}} style={{ width: 24, height: 24, borderRadius: '50%', background: c, cursor: 'pointer', border: c === '#d4af37' ? '2.5px solid rgba(255,255,255,0.5)' : '2px solid transparent' }} />
-                  ))}
-                </div>
-              )},
-              { sec: 'EXPLORAR', items: [
-                { label: 'Comunidad', badge: 'Próximamente', action: () => {} },
-                { label: 'Agenda de coaches', action: () => {} },
-                { label: 'Mis logros', action: () => {} },
-                { label: 'Mi progreso', action: () => navigate('equilibrio') },
-                { label: 'Referidos', action: () => {} },
-              ]},
-            ].map((grupo, gi) => (
-              <div key={gi} style={{ padding: '14px 0 4px' }}>
-                <div style={{ fontSize: 7, letterSpacing: 2, color: 'rgba(255,255,255,0.2)', textTransform: 'uppercase', padding: '0 20px', marginBottom: 6 }}>{grupo.sec}</div>
-                {grupo.custom || grupo.items.map((item, ii) => (
-                  <div key={ii} onClick={item.action} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 20px', cursor: 'pointer', borderRadius: 0 }}>
-                    <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)' }}>{item.label}</span>
-                    {item.badge && <span style={{ fontSize: 8, background: 'rgba(212,175,55,0.12)', color: 'rgba(212,175,55,0.7)', padding: '2px 7px', borderRadius: 5, letterSpacing: 0.5 }}>{item.badge}</span>}
-                  </div>
-                ))}
-              </div>
-            ))}
-            <div style={{ height: 1, background: 'rgba(255,255,255,0.04)', margin: '8px 20px' }} />
-            {/* Conversaciones */}
-            <div style={{ padding: '14px 0 4px' }}>
-              <div style={{ fontSize: 7, letterSpacing: 2, color: 'rgba(255,255,255,0.2)', textTransform: 'uppercase', padding: '0 20px', marginBottom: 10 }}>Conversaciones recientes</div>
-              {[
-                { fecha: 'Hoy', resumen: 'Hablamos sobre claridad en decisiones importantes y cómo distinguir intuición de ansiedad.' },
-                { fecha: 'Hace 2 días', resumen: 'Exploraste tu relación con el tiempo y por qué sientes que nunca alcanza.' },
-                { fecha: 'Hace 4 días', resumen: 'Reflexionamos sobre tus límites en el trabajo y cómo decir no sin culpa.' },
-              ].map((c, ci) => (
-                <div key={ci} onClick={() => navigate('clara')} style={{ margin: '0 12px 8px', background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 10, padding: '10px 12px', cursor: 'pointer' }}>
-                  <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.2)', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 4 }}>{c.fecha} · Clara ✦</div>
-                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', lineHeight: 1.5 }}>{c.resumen}</div>
-                </div>
-              ))}
-            </div>
-            <div style={{ height: 1, background: 'rgba(255,255,255,0.04)', margin: '8px 20px' }} />
-            {/* Soporte */}
-            <div style={{ padding: '14px 0 4px' }}>
-              <div style={{ fontSize: 7, letterSpacing: 2, color: 'rgba(255,255,255,0.2)', textTransform: 'uppercase', padding: '0 20px', marginBottom: 6 }}>SOPORTE</div>
-              {['Centro de ayuda', 'Privacidad y datos'].map((l, li) => (
-                <div key={li} style={{ padding: '10px 20px', fontSize: 13, color: 'rgba(255,255,255,0.4)', cursor: 'pointer' }}>{l}</div>
-              ))}
-              <div onClick={() => supabase.auth.signOut()} style={{ padding: '10px 20px', fontSize: 13, color: 'rgba(220,38,38,0.6)', cursor: 'pointer' }}>Cerrar sesión</div>
-            </div>
-            <div style={{ height: 40 }} />
-          </div>
-        </div>
-      )}
-
       {view === 'inicio' && (
         <div className="dir-ritual" data-v="clara" style={{ background: 'var(--bg)', color: 'var(--text)', minHeight: '100vh' }}>
           <style>{`
@@ -788,6 +716,11 @@ export default function Dashboard() {
                   </button>
                 )}
               </div>
+
+              {/* Cerrar sesión — replicado del menú legacy eliminado */}
+              <button onClick={handleLogout} style={{ marginTop: 12, padding: '10px 12px', background: 'transparent', border: 'none', color: 'var(--text-dim)', fontSize: 12, cursor: 'pointer', fontFamily: 'var(--font-body)', textAlign: 'left', borderRadius: 10 }}>
+                Cerrar sesión
+              </button>
             </aside>
 
             {/* main */}
