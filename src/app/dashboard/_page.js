@@ -1756,12 +1756,53 @@ export default function Dashboard() {
       })()}
 
       {!activeTest && !testResult && !activeHerramienta && !['clara', 'equilibrio', 'herramienta_activa', 'planes'].includes(view) && (
-        <div className="bottom-nav">
-          <button className={`nav-item ${view === 'inicio' ? 'active' : ''}`} onClick={() => setView('inicio')}><span className="nav-icon">⬡</span>Inicio</button>
-          <button className={`nav-item ${view === 'tests' ? 'active' : ''}`} onClick={() => setView('tests')}><span className="nav-icon">◇</span>Tests</button>
-          <button className="nav-item" onClick={() => navigate('clara')}><span className="nav-icon">✦</span>{coach.name}</button>
-          <button className={`nav-item ${view === 'herramientas' ? 'active' : ''}`} onClick={() => setView('herramientas')}><span className="nav-icon">◎</span>Herramientas</button>
-          <button className={`nav-item ${view === 'perfil' ? 'active' : ''}`} onClick={() => setView('perfil')}><span className="nav-icon">○</span>Yo</button>
+        <div className="dir-ritual" data-v="clara">
+          <style>{`
+            .bnav {
+              position: fixed; bottom: 0; left: 0; right: 0;
+              background: var(--ink-2);
+              border-top: 1px solid var(--line);
+              display: flex; justify-content: space-around;
+              padding: 8px 4px calc(20px + env(safe-area-inset-bottom)) 4px;
+              z-index: 100;
+            }
+            .bnav-item {
+              flex: 1 1 0; min-width: 0;
+              display: flex; flex-direction: column; align-items: center; gap: 3px;
+              background: none; border: none; cursor: pointer;
+              color: var(--text-muted);
+              font-size: 10px; font-family: var(--font-body);
+              padding: 4px 2px;
+              overflow: hidden;
+              transition: color var(--d-fast) var(--ease-out);
+            }
+            .bnav-item.active { color: var(--v-primary); }
+            .bnav-label {
+              max-width: 100%;
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+            }
+            @media (min-width: 768px) { .bnav { display: none; } }
+          `}</style>
+          <div className="bnav">
+            {[
+              { label: 'Hoy',        I: Icon.sparkle, active: view === 'inicio',      action: () => setView('inicio') },
+              { label: 'Clara',      I: Icon.dots,    active: view === 'clara',       action: () => navigate('clara') },
+              { label: 'Módulos',    I: Icon.book,    active: view === 'modulo',      action: () => { if (modulos[0]) { setActiveModulo(modulos[0]); navigate('modulo') } else { navigate('planes') } } },
+              { label: 'Tests',      I: Icon.chart,   active: view === 'tests',       action: () => setView('tests') },
+              { label: 'Equilibrio', I: Icon.compass, active: view === 'equilibrio',  action: () => navigate('equilibrio') },
+              { label: 'Progreso',   I: Icon.chart,   active: view === 'perfil',      action: () => navigate('perfil') },
+            ].map((item, i) => {
+              const ItemIcon = item.I
+              return (
+                <button key={i} onClick={item.action} className={`bnav-item ${item.active ? 'active' : ''}`} aria-label={item.label}>
+                  <ItemIcon s={18} />
+                  <span className="bnav-label">{item.label}</span>
+                </button>
+              )
+            })}
+          </div>
         </div>
       )}
     </div>
