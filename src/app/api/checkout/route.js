@@ -150,6 +150,9 @@ export async function POST(request) {
       notification_url: `${baseUrl}/api/webhook`,
     }
 
+    console.log('[checkout] preference:', JSON.stringify(preference, null, 2))
+    console.log('[checkout] env:', { vercel_env: process.env.VERCEL_ENV, pais: paisCodigo, token_prefix: mpConfig.accessToken?.slice(0, 8), is_test_token: mpConfig.accessToken?.startsWith('TEST-') })
+
     const response = await fetch('https://api.mercadopago.com/checkout/preferences', {
       method: 'POST',
       headers: {
@@ -160,11 +163,12 @@ export async function POST(request) {
     })
 
     const data = await response.json()
+    console.log('[checkout] MP response:', { status: response.status, ok: response.ok, has_init_point: !!data.init_point, init_point: data.init_point, sandbox_init_point: data.sandbox_init_point, id: data.id, error: data.error, message: data.message, cause: data.cause })
 
     if (data.init_point) {
       return NextResponse.json({ url: data.init_point })
     } else {
-      console.error('MercadoPago error:', data)
+      console.error('[checkout] MercadoPago error — full body:', JSON.stringify(data, null, 2))
       return NextResponse.json({ error: 'Could not create payment' }, { status: 500 })
     }
   } catch (error) {
