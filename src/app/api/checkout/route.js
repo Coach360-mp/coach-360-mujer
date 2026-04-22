@@ -123,7 +123,7 @@ export async function POST(request) {
       mpConfig.accessToken = fallback.accessToken
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://coach-360-mujer.vercel.app'
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.micoach360.com'
 
     const verticalPath = vertical && ['general', 'lideres'].includes(vertical)
       ? `/${vertical}/dashboard`

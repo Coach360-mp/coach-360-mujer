@@ -76,7 +76,7 @@ export async function POST(request) {
                     badge: '/icon-192.png',
                     vibrate: [200, 100, 200],
                   },
-                  fcm_options: { link: 'https://coach-360-mujer.vercel.app/dashboard' },
+                  fcm_options: { link: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.micoach360.com'}/dashboard` },
                 },
               },
             }),
