@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { solicitarPermisoNotificaciones } from '@/lib/firebase'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
+import { Icon } from '@/components/design/icons'
 
 const coaches = {
   free: { name: 'Clara', photo: '/clara.jpg', credential: 'Coach certificada', desc: 'Tu compañera de crecimiento. Te escucha, te hace preguntas poderosas y te ayuda a ver con más claridad.' },
@@ -73,61 +74,6 @@ const elementProfiles = {
   2: { nombre: 'Tierra', icono: '🌱', color: '#84cc16', colorBg: 'rgba(132, 204, 22, 0.12)', desc: 'Eres estable, práctica y confiable. Analizas antes de actuar.', descLarga: 'Tu fortaleza es la solidez. Eres el ancla en momentos de tormenta, la voz de la razón, la que construye paso a paso lo que otras solo sueñan.', fortalezas: ['Estabilidad que inspira confianza', 'Capacidad de planificar y ejecutar', 'Paciencia para los procesos largos', 'Pragmatismo que evita errores costosos'], sombras: ['Te cuesta soltar el control', 'A veces pierdes oportunidades por sobreanalizar', 'Puedes volverte rígida ante el cambio'], recomendaciones: ['Practica decir sí a algo nuevo cada semana sin planearlo', 'Permítete equivocarte — la perfección es una jaula', 'Confía en otros para soltar parte del peso'], proximoPaso: 'La herramienta "Pausa Antes de Decidir" te va a sorprender.', promptClara: 'Mi elemento es Tierra. Soy muy analítica y me cuesta soltar el control. Quiero trabajar en confiar más y permitirme fluir.' },
   3: { nombre: 'Fuego', icono: '🔥', color: '#f97316', colorBg: 'rgba(249, 115, 22, 0.12)', desc: 'Eres apasionada, directa y valiente. Actúas antes de dudar.', descLarga: 'Tu energía es contagiosa. Donde otras ven obstáculos, tú ves desafíos. Cuando te comprometes con algo, lo das todo.', fortalezas: ['Determinación que mueve montañas', 'Coraje para iniciar lo que otras posponen', 'Pasión que inspira a quienes te rodean', 'Honestidad directa, sin máscaras'], sombras: ['A veces respondes antes de escuchar', 'Puedes quemarte por exceso de intensidad', 'Tu directness puede herir sin querer'], recomendaciones: ['Antes de responder, respira 3 veces', 'Aprende la diferencia entre directo y abrupto', 'Programa pausas reales — no son debilidad, son estrategia'], proximoPaso: 'La herramienta "Reset de 10 Minutos" es tu mejor aliada esta semana.', promptClara: 'Mi elemento es Fuego. Soy intensa y directa, pero a veces actúo antes de pensar.' },
   4: { nombre: 'Aire', icono: '🌬️', color: '#a78bfa', colorBg: 'rgba(167, 139, 250, 0.12)', desc: 'Eres creativa, adaptable y libre. Exploras antes de comprometerte.', descLarga: 'Tu mente vuela alto y conecta ideas que otras no ven. Eres la que llena espacios de chispa, humor y posibilidades nuevas.', fortalezas: ['Creatividad que rompe esquemas', 'Adaptabilidad ante el cambio', 'Visión amplia y conectiva', 'Capacidad de reinventarte'], sombras: ['Te cuesta sostener compromisos largos', 'Saltas de idea en idea sin profundizar', 'A veces evitas el peso de las emociones difíciles'], recomendaciones: ['Elige UNA cosa esta semana y termínala', 'Practica quedarte 5 minutos más en una conversación incómoda', 'Profundiza en algo que ya conoces antes de buscar lo nuevo'], proximoPaso: 'El módulo "Decisiones Alineadas" te va a ayudar a sostener tus elecciones.', promptClara: 'Mi elemento es Aire. Soy creativa pero me cuesta profundizar y sostener compromisos.' },
-}
-
-// Iconos SVG del diseño de Fase 5 (líneas 906-958 del HTML de referencia).
-const Icon = {
-  sparkle: ({ s = 14 }) => (
-    <svg width={s} height={s} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M8 1v3M8 12v3M1 8h3M12 8h3M3 3l2 2M11 11l2 2M3 13l2-2M11 5l2-2"/>
-    </svg>
-  ),
-  check: ({ s = 14 }) => (
-    <svg width={s} height={s} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M3 8.5l3 3 7-7"/></svg>
-  ),
-  arrow: ({ s = 14, dir = 'right' }) => (
-    <svg width={s} height={s} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
-      style={{ transform: dir === 'left' ? 'rotate(180deg)' : dir === 'up' ? 'rotate(-90deg)' : dir === 'down' ? 'rotate(90deg)' : 'none' }}>
-      <path d="M3 8h10M9 4l4 4-4 4"/>
-    </svg>
-  ),
-  lock: ({ s = 14 }) => (
-    <svg width={s} height={s} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round">
-      <rect x="3" y="7" width="10" height="7" rx="1.5"/><path d="M5 7V5a3 3 0 0 1 6 0v2"/>
-    </svg>
-  ),
-  mic: ({ s = 16 }) => (
-    <svg width={s} height={s} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="6" y="1.5" width="4" height="8" rx="2"/><path d="M3 7a5 5 0 0 0 10 0M8 12v2.5"/>
-    </svg>
-  ),
-  plus: ({ s = 14 }) => (
-    <svg width={s} height={s} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"><path d="M8 3v10M3 8h10"/></svg>
-  ),
-  dots: ({ s = 14 }) => (
-    <svg width={s} height={s} viewBox="0 0 16 16" fill="currentColor"><circle cx="3" cy="8" r="1.4"/><circle cx="8" cy="8" r="1.4"/><circle cx="13" cy="8" r="1.4"/></svg>
-  ),
-  moon: ({ s = 14 }) => (
-    <svg width={s} height={s} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"><path d="M13 9.5A5.5 5.5 0 1 1 6.5 3a4.5 4.5 0 0 0 6.5 6.5z"/></svg>
-  ),
-  chart: ({ s = 14 }) => (
-    <svg width={s} height={s} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"><path d="M2 13h12M4 10v3M7 7v6M10 4v9M13 8v5"/></svg>
-  ),
-  star: ({ s = 14 }) => (
-    <svg width={s} height={s} viewBox="0 0 16 16" fill="currentColor" stroke="none"><path d="M8 1.5l1.8 4 4.2.4-3.2 2.9.9 4.2L8 10.8l-3.7 2.2.9-4.2L2 5.9l4.2-.4z"/></svg>
-  ),
-  close: ({ s = 14 }) => (
-    <svg width={s} height={s} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg>
-  ),
-  flame: ({ s = 14 }) => (
-    <svg width={s} height={s} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" strokeLinecap="round"><path d="M8 1s4 3 4 7a4 4 0 1 1-8 0c0-1.5 1-2.5 1.5-3C5.5 4 6 2.5 8 1z"/><path d="M8 10a1.5 1.5 0 0 0 1.5-1.5c0-.8-1-1.5-1.5-2-.5.5-1.5 1.2-1.5 2A1.5 1.5 0 0 0 8 10z"/></svg>
-  ),
-  book: ({ s = 14 }) => (
-    <svg width={s} height={s} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3h4a2 2 0 0 1 2 2v9a2 2 0 0 0-2-2H3zM13 3H9a2 2 0 0 0-2 2v9a2 2 0 0 1 2-2h4z"/></svg>
-  ),
-  compass: ({ s = 14 }) => (
-    <svg width={s} height={s} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="8" cy="8" r="6"/><path d="M10.5 5.5L9 9l-3.5 1.5L7 7z" fill="currentColor"/></svg>
-  ),
 }
 
 export default function Dashboard() {

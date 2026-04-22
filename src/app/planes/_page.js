@@ -3,47 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
-
-// ─── Iconos SVG — copia literal del const Icon de Fase 5 (líneas 906-958) ───
-// Duplicado inline con el dashboard/_page.js (cleanup a helper compartido en commit aparte).
-const Icon = {
-  sparkle: ({ s = 14 }) => (
-    <svg width={s} height={s} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M8 1v3M8 12v3M1 8h3M12 8h3M3 3l2 2M11 11l2 2M3 13l2-2M11 5l2-2"/>
-    </svg>
-  ),
-  arrow: ({ s = 14, dir = 'right' }) => (
-    <svg width={s} height={s} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
-      style={{ transform: dir === 'left' ? 'rotate(180deg)' : dir === 'up' ? 'rotate(-90deg)' : dir === 'down' ? 'rotate(90deg)' : 'none' }}>
-      <path d="M3 8h10M9 4l4 4-4 4"/>
-    </svg>
-  ),
-  star: ({ s = 14 }) => (
-    <svg width={s} height={s} viewBox="0 0 16 16" fill="currentColor" stroke="none"><path d="M8 1.5l1.8 4 4.2.4-3.2 2.9.9 4.2L8 10.8l-3.7 2.2.9-4.2L2 5.9l4.2-.4z"/></svg>
-  ),
-}
-
-function Sigil({ s = 18 }) {
-  return (
-    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round">
-      <circle cx="12" cy="12" r="10" />
-      <circle cx="12" cy="12" r="5.5" opacity=".55" />
-      <path d="M12 2v20M2 12h20" opacity=".22" />
-    </svg>
-  )
-}
-
-function RealPortrait({ src, size = 40, ring = false }) {
-  return (
-    <div style={{
-      width: size, height: size, borderRadius: '50%', overflow: 'hidden', flexShrink: 0,
-      boxShadow: ring ? '0 0 0 3px var(--bg), 0 0 0 4px color-mix(in oklab, var(--v-primary) 50%, transparent)' : 'none',
-      background: 'var(--ink-3)',
-    }}>
-      <img src={src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-    </div>
-  )
-}
+import { Icon, Sigil, RealPortrait } from '@/components/design/icons'
 
 // ─── Data — copia literal de PLANS/ADDONS de Fase 5 (líneas 968-1013) ───
 const PLANS = [
