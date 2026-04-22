@@ -326,10 +326,12 @@ export async function POST(request) {
   const supabaseAdmin = getSupabaseAdmin()
   let userId
   let messages
+  let conversacionId
   try {
     const body = await request.json()
     userId = body.userId
     messages = body.messages
+    conversacionId = body.conversacionId
 
     const { data: perfil } = await supabaseAdmin
       .from('perfiles').select('plan_actual').eq('id', userId).single()
@@ -383,7 +385,45 @@ Si la usuaria expresa ideas de autolesión, suicidio o violencia, responde con e
       extraerInsightYGuardar(supabaseAdmin, userId, [...messages, { role: 'assistant', content: reply }], 'mujer', 'clara')
     }
 
-    return NextResponse.json({ reply })
+    // Persistir conversación en conversaciones_clara + mensajes_clara
+    // Envuelto en try/catch independiente — si falla, el reply igual se devuelve al cliente
+    let finalConvId = conversacionId
+    try {
+      // Validación de ownership: si viene conversacionId debe pertenecer al userId
+      if (finalConvId && userId) {
+        const { data: convExiste } = await supabaseAdmin
+          .from('conversaciones_clara')
+          .select('id').eq('id', finalConvId).eq('usuario_id', userId).maybeSingle()
+        if (!convExiste) {
+          console.warn('[chat] conversacionId no pertenece al user, creando nueva')
+          finalConvId = null
+        }
+      }
+      // Crear conv nueva si hace falta
+      if (!finalConvId && userId) {
+        const lastUserMsg = messages[messages.length - 1]?.content || ''
+        const { data: newConv } = await supabaseAdmin
+          .from('conversaciones_clara')
+          .insert({ usuario_id: userId, titulo: lastUserMsg.slice(0, 40) })
+          .select('id').single()
+        finalConvId = newConv?.id
+      }
+      // Insertar ambos mensajes + actualizar ultimo_mensaje
+      if (finalConvId) {
+        const lastUserMsg = messages[messages.length - 1]?.content || ''
+        await supabaseAdmin.from('mensajes_clara').insert([
+          { conversacion_id: finalConvId, rol: 'user', contenido: lastUserMsg },
+          { conversacion_id: finalConvId, rol: 'assistant', contenido: reply },
+        ])
+        await supabaseAdmin.from('conversaciones_clara')
+          .update({ ultimo_mensaje: new Date().toISOString() })
+          .eq('id', finalConvId)
+      }
+    } catch (err) {
+      console.error('[chat] Error persistiendo conversación:', err)
+    }
+
+    return NextResponse.json({ reply, conversacionId: finalConvId })
   } catch (error) {
     console.error('[CHAT ERROR] unhandled exception', {
       message: error?.message,

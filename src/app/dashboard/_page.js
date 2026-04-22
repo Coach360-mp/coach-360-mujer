@@ -151,6 +151,10 @@ export default function Dashboard() {
   const [chatMsgs, setChatMsgs] = useState([])
   const [chatInput, setChatInput] = useState('')
   const [typing, setTyping] = useState(false)
+  const [conversacionActiva, setConversacionActiva] = useState(null)
+  const [conversaciones, setConversaciones] = useState([])
+  const [chatSidebarAbierto, setChatSidebarAbierto] = useState(false)
+  const [contextoAbierto, setContextoAbierto] = useState(false)
   const [checkinDone, setCheckinDone] = useState(false)
   const [animoHoy, setAnimoHoy] = useState(null)
   const [equilibrio, setEquilibrio] = useState({ mente: 0, cuerpo: 0, corazon: 0, espiritu: 0 })
@@ -179,6 +183,53 @@ export default function Dashboard() {
 
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [chatMsgs, typing])
   useEffect(() => { checkUser() }, [])
+  useEffect(() => { if (user?.id) cargarConversaciones() }, [user?.id])
+
+  async function cargarConversaciones() {
+    if (!user?.id) return
+    const { data } = await supabase
+      .from('conversaciones_clara')
+      .select('id, titulo, fecha_inicio, ultimo_mensaje')
+      .eq('usuario_id', user.id)
+      .eq('activa', true)
+      .order('ultimo_mensaje', { ascending: false })
+      .limit(20)
+    setConversaciones(data || [])
+  }
+
+  async function abrirConversacion(convId) {
+    const { data } = await supabase
+      .from('mensajes_clara')
+      .select('rol, contenido, fecha')
+      .eq('conversacion_id', convId)
+      .order('fecha', { ascending: true })
+    setChatMsgs((data || []).map(m => ({
+      r: m.rol === 'user' ? 'u' : 'a',
+      t: m.contenido,
+      createdAt: m.fecha,
+    })))
+    setConversacionActiva(convId)
+    setChatSidebarAbierto(false)
+  }
+
+  function nuevaConversacion() {
+    setChatMsgs([])
+    setConversacionActiva(null)
+    setChatSidebarAbierto(false)
+  }
+
+  function agruparConvs(convs) {
+    const startOfToday = new Date(); startOfToday.setHours(0, 0, 0, 0)
+    const sevenDaysAgo = new Date(startOfToday.getTime() - 7 * 86400000)
+    const g = { hoy: [], semana: [], anterior: [] }
+    convs.forEach(c => {
+      const t = new Date(c.ultimo_mensaje)
+      if (t >= startOfToday) g.hoy.push(c)
+      else if (t >= sevenDaysAgo) g.semana.push(c)
+      else g.anterior.push(c)
+    })
+    return g
+  }
 
   const plan = perfil?.plan_actual || 'free'
   const coach = coaches[plan] || coaches.free
@@ -328,25 +379,33 @@ export default function Dashboard() {
   const sendMessage = async () => {
     if (!chatInput.trim()) return
     const msg = chatInput.trim()
-    setChatMsgs(prev => [...prev, { r: 'u', t: msg }])
+    setChatMsgs(prev => [...prev, { r: 'u', t: msg, createdAt: new Date().toISOString() }])
     setChatInput(''); setTyping(true)
     try {
       const history = chatMsgs.map(m => ({ role: m.r === 'a' ? 'assistant' : 'user', content: m.t }))
       history.push({ role: 'user', content: msg })
-      const res = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: history, userId: user?.id }) })
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: history, userId: user?.id, conversacionId: conversacionActiva }),
+      })
       const data = await res.json()
       setTyping(false)
       const reply = data.reply || 'Cuéntame más ✦'
-      setChatMsgs(prev => [...prev, { r: 'a', t: reply }])
+      setChatMsgs(prev => [...prev, { r: 'a', t: reply, createdAt: new Date().toISOString() }])
+      if (data.conversacionId) {
+        const esNueva = data.conversacionId !== conversacionActiva
+        if (esNueva) setConversacionActiva(data.conversacionId)
+        cargarConversaciones()
+      }
       speakText(reply)
-      // Sumar puntos solo si es el primer mensaje del usuario en esta sesión de chat
       const mensajesDelUsuario = chatMsgs.filter(m => m.r === 'u').length
       if (mensajesDelUsuario === 0) {
         sumarPuntos('conversacion_coach', 5, `Conversación con ${coach.name}`)
       }
     } catch {
       setTyping(false)
-      setChatMsgs(prev => [...prev, { r: 'a', t: 'Perdona, hubo un error. ¿Puedes intentar de nuevo? ✦' }])
+      setChatMsgs(prev => [...prev, { r: 'a', t: 'Perdona, hubo un error. ¿Puedes intentar de nuevo? ✦', createdAt: new Date().toISOString() }])
     }
   }
 
@@ -1212,105 +1271,276 @@ export default function Dashboard() {
       )}
 
       {view === 'clara' && !activeTest && (
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: 'var(--warm)' }}>
+        <div className="dir-ritual" data-v="clara" style={{ background: 'var(--bg)', color: 'var(--text)', minHeight: '100vh' }}>
+          <style>{`
+            @keyframes chatTypingDot { 0%,60%,100% { opacity: .3; transform: translateY(0); } 30% { opacity: 1; transform: translateY(-3px); } }
+            .ch-wrap { display: flex; flex-direction: column; min-height: 100vh; }
+            .ch-sidebar, .ch-context { display: none; }
+            .ch-sidebar.open { display: flex; flex-direction: column; gap: 4px; position: fixed; top: 0; left: 0; bottom: 0; width: 280px; max-width: 85vw; z-index: 50; padding: 24px 18px; background: var(--ink-2); overflow-y: auto; box-shadow: 0 0 40px rgba(0,0,0,0.6); }
+            .ch-context.open { display: flex; flex-direction: column; gap: 20px; position: fixed; top: 0; right: 0; bottom: 0; width: 320px; max-width: 85vw; z-index: 50; padding: 28px 22px; background: var(--ink-2); overflow-y: auto; box-shadow: 0 0 40px rgba(0,0,0,0.6); }
+            .ch-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 40; }
+            .ch-hamburger { position: fixed; top: 20px; left: 20px; z-index: 45; width: 40px; height: 40px; border-radius: 999px; background: var(--ink-3); border: 1px solid var(--line); color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+            .ch-sidebar-close, .ch-context-close { position: absolute; top: 18px; width: 32px; height: 32px; border-radius: 999px; background: transparent; border: 1px solid var(--line); color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 1; }
+            .ch-sidebar-close { right: 18px; }
+            .ch-context-close { right: 18px; }
+            .ch-main { display: flex; flex-direction: column; height: 100vh; min-height: 0; }
+            .ch-header { padding: 16px 20px 14px; padding-top: 72px; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 12px; }
+            .ch-back { display: flex; }
+            .ch-header-actions { display: none; }
+            .ch-messages { flex: 1; padding: 20px 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 18px; }
+            .ch-input-wrap { padding: 12px 16px 20px; border-top: 1px solid var(--line); }
+            @media (min-width: 768px) {
+              .ch-wrap { display: grid; grid-template-columns: 260px 1fr 300px; height: 100vh; }
+              .ch-sidebar, .ch-sidebar.open { display: flex; flex-direction: column; gap: 4px; position: static; padding: 24px 18px; border-right: 1px solid var(--line); background: var(--ink-2); box-shadow: none; max-width: none; width: auto; z-index: auto; top: auto; left: auto; bottom: auto; overflow-y: auto; }
+              .ch-context, .ch-context.open { display: flex; flex-direction: column; gap: 20px; position: static; padding: 28px 22px; border-left: 1px solid var(--line); background: var(--ink-2); box-shadow: none; max-width: none; width: auto; z-index: auto; top: auto; right: auto; bottom: auto; overflow-y: auto; }
+              .ch-backdrop, .ch-hamburger, .ch-sidebar-close, .ch-context-close { display: none; }
+              .ch-main { height: auto; }
+              .ch-header { padding: 20px 28px; padding-top: 20px; }
+              .ch-back { display: none; }
+              .ch-header-actions { display: flex; gap: 8px; }
+              .ch-messages { padding: 32px 64px; }
+              .ch-input-wrap { padding: 16px 28px 24px; }
+            }
+          `}</style>
 
-          {/* Header */}
-          <div style={{ padding: '48px 20px 16px', borderBottom: '1px solid rgba(0,0,0,0.06)', background: '#fff', display: 'flex', alignItems: 'center', gap: 14 }}>
-            <button onClick={goBack} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text)', padding: '4px 8px', display: 'flex', alignItems: 'center' }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-            </button>
-            <div style={{ position: 'relative' }}>
-              <img src={coach.photo} alt={coach.name} style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--gold-light)' }} />
-              <div style={{ position: 'absolute', bottom: 1, right: 1, width: 10, height: 10, borderRadius: '50%', background: '#22c55e', border: '2px solid #fff' }} />
-            </div>
-            <div style={{ flex: 1 }}>
-              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 18, margin: 0, color: 'var(--text)' }}>{coach.name}</h2>
-              <p style={{ fontSize: 11, color: 'var(--text-light)', margin: 0, marginTop: 1 }}>{coach.credential}</p>
-            </div>
-          </div>
+          <button className="ch-hamburger" onClick={() => setChatSidebarAbierto(true)} aria-label="Historial">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+          </button>
+          {(chatSidebarAbierto || contextoAbierto) && (
+            <div className="ch-backdrop" onClick={() => { setChatSidebarAbierto(false); setContextoAbierto(false); }} />
+          )}
 
-          {/* Mensajes */}
-          <div style={{ flex: 1, overflowY: 'auto', padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: 16 }}>
-            {chatMsgs.map((m, i) => (
-              <div key={i} style={{ display: 'flex', gap: 10, alignSelf: m.r === 'u' ? 'flex-end' : 'flex-start', maxWidth: '82%', flexDirection: m.r === 'u' ? 'row-reverse' : 'row', alignItems: 'flex-end' }}>
-                {m.r === 'a' && (
-                  <img src={coach.photo} alt={coach.name} style={{ width: 30, height: 30, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, marginBottom: 2 }} />
-                )}
-                <div style={{
-                  padding: '12px 16px',
-                  borderRadius: m.r === 'u' ? '20px 20px 4px 20px' : '20px 20px 20px 4px',
-                  background: m.r === 'u' ? 'var(--dark)' : '#fff',
-                  color: m.r === 'u' ? '#fff' : 'var(--text)',
-                  fontSize: 14, lineHeight: 1.6, whiteSpace: 'pre-wrap',
-                  boxShadow: '0 1px 6px rgba(0,0,0,0.07)',
-                  maxWidth: '100%',
-                }}>{m.t}</div>
+          <div className="ch-wrap">
+            {/* Columna 1: Sidebar — historial real de conversaciones_clara */}
+            <aside className={`ch-sidebar ${chatSidebarAbierto ? 'open' : ''}`}>
+              <button className="ch-sidebar-close" onClick={() => setChatSidebarAbierto(false)} aria-label="Cerrar">
+                <Icon.close s={14} />
+              </button>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '4px 8px', marginBottom: 18 }}>
+                <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round">
+                  <circle cx="12" cy="12" r="10" />
+                  <circle cx="12" cy="12" r="5.5" opacity=".55" />
+                  <path d="M12 2v20M2 12h20" opacity=".22" />
+                </svg>
+                <span style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: 16 }}>Coach 360</span>
               </div>
-            ))}
 
-            {/* Typing indicator */}
-            {typing && (
-              <div style={{ display: 'flex', gap: 10, alignSelf: 'flex-start', alignItems: 'flex-end' }}>
-                <img src={coach.photo} alt={coach.name} style={{ width: 30, height: 30, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, marginBottom: 2 }} />
-                <div style={{ padding: '14px 18px', borderRadius: '20px 20px 20px 4px', background: '#fff', boxShadow: '0 1px 6px rgba(0,0,0,0.07)', display: 'flex', gap: 5, alignItems: 'center' }}>
-                  <style>{`@keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}}`}</style>
-                  {[0,1,2].map(i => (
-                    <div key={i} style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--gold)', animation: `bounce 1.2s ease-in-out ${i * 0.15}s infinite` }} />
-                  ))}
+              <button onClick={nuevaConversacion} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', border: '1px solid var(--line-strong)', borderRadius: 10, background: 'transparent', color: 'var(--text)', fontSize: 13, cursor: 'pointer', marginBottom: 18, justifyContent: 'flex-start', fontFamily: 'var(--font-body)' }}>
+                <span style={{ color: 'var(--v-primary)' }}>✦</span> Nueva conversación
+              </button>
+
+              {(() => {
+                const g = agruparConvs(conversaciones)
+                const seccion = (titulo, items) => items.length > 0 && (
+                  <>
+                    <div className="eyebrow" style={{ marginBottom: 8, padding: '0 10px', marginTop: titulo === 'Hoy' ? 0 : 14 }}>{titulo}</div>
+                    {items.map(conv => {
+                      const isActive = conv.id === conversacionActiva
+                      const when = new Date(conv.ultimo_mensaje).toLocaleString('es-CL', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
+                      return (
+                        <button key={conv.id} onClick={() => abrirConversacion(conv.id)} style={{
+                          display: 'block', padding: '10px 12px', border: 'none',
+                          background: isActive ? 'var(--v-tint)' : 'transparent',
+                          borderRadius: 8, textAlign: 'left', cursor: 'pointer', color: 'var(--text)', fontSize: 13, lineHeight: 1.3, marginBottom: 2, width: '100%', fontFamily: 'var(--font-body)',
+                        }}>
+                          <div style={{ fontWeight: isActive ? 500 : 400, marginBottom: 2, color: isActive ? 'var(--text)' : 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{conv.titulo || 'Sin título'}</div>
+                          <div style={{ fontSize: 10, color: 'var(--text-dim)', fontFamily: 'var(--font-mono)' }}>{when}</div>
+                        </button>
+                      )
+                    })}
+                  </>
+                )
+                return (
+                  <>
+                    {seccion('Hoy', g.hoy)}
+                    {seccion('Esta semana', g.semana)}
+                    {seccion('Anterior', g.anterior)}
+                    {conversaciones.length === 0 && (
+                      <div style={{ padding: '10px 12px', fontSize: 12, color: 'var(--text-dim)', fontStyle: 'italic' }}>
+                        Aún no tienes conversaciones.
+                      </div>
+                    )}
+                  </>
+                )
+              })()}
+
+              {/* Plan card (mismo mapeo que el dashboard sidebar) */}
+              <div style={{ marginTop: 'auto', padding: 12, background: 'var(--ink-3)', border: '1px solid var(--line)', borderRadius: 12 }}>
+                <div className="eyebrow" style={{ marginBottom: 6 }}>
+                  {perfil?.plan_actual === 'free' ? 'Plan Gratis' : perfil?.plan_actual === 'esencial' ? 'Plan Esencial' : 'Plan Premium'}
+                </div>
+                <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                  {perfil?.plan_actual === 'free' ? 'Mensajes hoy' : 'Mensajes este mes'}
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 }}>
+                  <span style={{ fontFamily: 'var(--font-display)', fontSize: 24 }}>{perfil?.mensajes_chat_hoy || 0}</span>
+                  <span style={{ fontSize: 11, color: 'var(--text-dim)', fontFamily: 'var(--font-mono)' }}>/ {perfil?.plan_actual === 'free' ? 5 : 400}</span>
+                </div>
+                <div style={{ height: 3, background: 'var(--ink-5)', borderRadius: 999, overflow: 'hidden' }}>
+                  <div style={{ height: '100%', width: `${Math.min(100, Math.round(((perfil?.mensajes_chat_hoy || 0) / (perfil?.plan_actual === 'free' ? 5 : 400)) * 100))}%`, background: 'var(--v-primary)', transition: 'width .4s var(--ease-out)' }} />
                 </div>
               </div>
-            )}
-            <div ref={chatEndRef} />
-          </div>
+            </aside>
 
-          {/* Input */}
-          <div style={{ padding: '12px 16px 32px', background: '#fff', borderTop: '1px solid rgba(0,0,0,0.06)', display: 'flex', gap: 10, alignItems: 'center' }}>
-            <button
-              onClick={isRecording ? stopRecording : startRecording}
-              style={{
-                width: 44, height: 44, borderRadius: '50%', border: 'none', flexShrink: 0,
-                background: isRecording ? '#fee2e2' : 'var(--warm-dark)',
-                color: isRecording ? '#dc2626' : 'var(--text-light)',
-                cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                transition: 'all 0.2s',
-              }}
-            >
-              {isRecording ? (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
-              ) : (
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
-                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-                  <line x1="12" y1="19" x2="12" y2="22"/>
-                  <line x1="8" y1="22" x2="16" y2="22"/>
-                </svg>
-              )}
-            </button>
-            <input
-              placeholder={`Escríbele a ${coach.name}...`}
-              value={chatInput}
-              onChange={e => setChatInput(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && sendMessage()}
-              style={{
-                flex: 1, padding: '12px 16px', borderRadius: 24,
-                border: '1.5px solid #e8e0d6', background: 'var(--warm)',
-                color: 'var(--text)', fontSize: 14, fontFamily: 'inherit',
-                outline: 'none', transition: 'border-color 0.2s',
-              }}
-            />
-            <button
-              onClick={sendMessage}
-              style={{
-                width: 44, height: 44, borderRadius: '50%', border: 'none', flexShrink: 0,
-                background: chatInput.trim() ? 'var(--dark)' : '#e8e0d6',
-                color: chatInput.trim() ? '#fff' : 'var(--text-light)',
-                cursor: chatInput.trim() ? 'pointer' : 'default',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                transition: 'all 0.2s',
-              }}
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-            </button>
+            {/* Columna 2: Chat central */}
+            <section className="ch-main">
+              <div className="ch-header">
+                <button className="ch-back" onClick={goBack} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '4px 4px', display: 'flex', alignItems: 'center' }} aria-label="Volver">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                </button>
+                <div onClick={() => setContextoAbierto(true)} style={{ width: 44, height: 44, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, cursor: 'pointer', boxShadow: '0 0 0 3px var(--bg), 0 0 0 4px color-mix(in oklab, var(--v-primary) 50%, transparent)' }}>
+                  <img src="/clara.jpg" alt="Clara" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                    <span style={{ fontFamily: 'var(--font-display)', fontSize: 20, letterSpacing: '-0.02em' }}>Clara</span>
+                    <span style={{ fontSize: 10, padding: '3px 8px', borderRadius: 999, background: 'var(--v-tint)', color: 'var(--v-primary)', fontFamily: 'var(--font-mono)', letterSpacing: '.08em' }}>COACH · ICF</span>
+                  </div>
+                  <div style={{ fontSize: 12, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
+                    <span style={{ width: 6, height: 6, borderRadius: 3, background: 'var(--success)' }} />
+                    Escuchando · mujer
+                  </div>
+                </div>
+                <div className="ch-header-actions">
+                  <button style={{ padding: '8px 14px', borderRadius: 999, border: '1px solid var(--line)', background: 'transparent', color: 'var(--text-muted)', fontSize: 12, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Resumen</button>
+                  <button style={{ padding: '8px 14px', borderRadius: 999, border: '1px solid var(--line)', background: 'transparent', color: 'var(--text-muted)', fontSize: 12, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>✦ Guardar</button>
+                </div>
+              </div>
+
+              <div className="ch-messages">
+                <div style={{ textAlign: 'center', fontSize: 11, color: 'var(--text-dim)', fontFamily: 'var(--font-mono)', letterSpacing: '.1em', marginBottom: 8, textTransform: 'uppercase' }}>
+                  {new Date().toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' })}
+                </div>
+
+                {chatMsgs.map((m, i) => {
+                  const esPrimerMsgCoach = m.r === 'a' && !chatMsgs.slice(0, i).some(p => p.r === 'a')
+                  const hora = m.createdAt ? new Date(m.createdAt).toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' }) : ''
+                  return (
+                    <div key={i} style={{ display: 'flex', gap: 12, flexDirection: m.r === 'u' ? 'row-reverse' : 'row', alignItems: 'flex-end' }}>
+                      {m.r === 'a' && (
+                        <img src="/clara.jpg" alt="Clara" style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                      )}
+                      <div style={{
+                        maxWidth: 520,
+                        padding: '14px 18px',
+                        borderRadius: m.r === 'u' ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
+                        background: m.r === 'u' ? 'var(--ink-5)' : (esPrimerMsgCoach ? 'var(--v-tint)' : 'var(--ink-2)'),
+                        color: 'var(--text)',
+                        border: esPrimerMsgCoach ? '1px solid color-mix(in oklab, var(--v-primary) 30%, transparent)' : '1px solid var(--line)',
+                        fontSize: 15, lineHeight: 1.55, whiteSpace: 'pre-wrap',
+                      }}>
+                        {esPrimerMsgCoach && (
+                          <div className="eyebrow" style={{ color: 'var(--v-primary)', marginBottom: 8 }}>✦ Clara recuerda</div>
+                        )}
+                        {m.t}
+                        {hora && (
+                          <div style={{ fontSize: 10, color: 'var(--text-dim)', marginTop: 6, fontFamily: 'var(--font-mono)', textAlign: m.r === 'u' ? 'right' : 'left' }}>{hora}</div>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
+
+                {typing && (
+                  <div style={{ display: 'flex', gap: 12, alignItems: 'flex-end' }}>
+                    <img src="/clara.jpg" alt="Clara" style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                    <div style={{ padding: '14px 18px', background: 'var(--ink-2)', borderRadius: '18px 18px 18px 4px', border: '1px solid var(--line)', display: 'flex', gap: 4 }}>
+                      {[0,1,2].map(i => (
+                        <span key={i} style={{ width: 6, height: 6, borderRadius: 3, background: 'var(--text-muted)', animation: `chatTypingDot 1.4s ${i * 0.2}s infinite ease-in-out` }} />
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <div ref={chatEndRef} />
+              </div>
+
+              <div className="ch-input-wrap">
+                <div style={{ display: 'flex', alignItems: 'flex-end', gap: 10, padding: '10px 14px', background: 'var(--ink-2)', border: '1px solid var(--line-strong)', borderRadius: 20 }}>
+                  <button
+                    onClick={isRecording ? stopRecording : startRecording}
+                    aria-label={isRecording ? 'Detener grabación' : 'Grabar audio'}
+                    style={{ width: 32, height: 32, borderRadius: 16, border: 'none', background: isRecording ? 'color-mix(in oklab, var(--danger) 18%, transparent)' : 'transparent', color: isRecording ? 'var(--danger)' : 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+                  >
+                    {isRecording ? (
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+                    ) : (
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4"/></svg>
+                    )}
+                  </button>
+                  <textarea
+                    value={chatInput}
+                    onChange={e => setChatInput(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage() } }}
+                    placeholder={`Escríbele a Clara...`}
+                    rows={1}
+                    style={{ flex: 1, minHeight: 24, maxHeight: 120, background: 'transparent', border: 'none', color: 'var(--text)', fontSize: 15, lineHeight: 1.5, outline: 'none', resize: 'none', fontFamily: 'var(--font-body)', padding: '4px 0' }}
+                  />
+                  <button
+                    onClick={sendMessage}
+                    disabled={!chatInput.trim()}
+                    aria-label="Enviar"
+                    style={{ width: 36, height: 36, borderRadius: 18, border: 'none', background: chatInput.trim() ? 'var(--v-primary)' : 'var(--ink-4)', color: chatInput.trim() ? '#0a0c0e' : 'var(--text-dim)', cursor: chatInput.trim() ? 'pointer' : 'default', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+                  >
+                    <Icon.arrow s={14} />
+                  </button>
+                </div>
+                <div style={{ fontSize: 11, color: 'var(--text-dim)', fontFamily: 'var(--font-mono)', textAlign: 'center', marginTop: 10, letterSpacing: '.05em' }}>
+                  Enter para enviar · Shift+Enter para línea nueva · todo queda cifrado
+                </div>
+              </div>
+            </section>
+
+            {/* Columna 3: Panel contexto (hardcoded placeholder) */}
+            <aside className={`ch-context ${contextoAbierto ? 'open' : ''}`}>
+              <button className="ch-context-close" onClick={() => setContextoAbierto(false)} aria-label="Cerrar">
+                <Icon.close s={14} />
+              </button>
+
+              <div>
+                <div className="eyebrow" style={{ marginBottom: 10 }}>✦ Clara recuerda</div>
+                <div style={{ padding: 14, background: 'var(--ink-3)', border: '1px solid var(--line)', borderRadius: 12, fontSize: 13, lineHeight: 1.55 }}>
+                  <div style={{ color: 'var(--text-muted)', marginBottom: 4, fontSize: 11, fontFamily: 'var(--font-mono)' }}>Del lunes</div>
+                  Pedirle a Nicolás una reunión uno-a-uno para hablar del proyecto.
+                  <button style={{ marginTop: 10, padding: '6px 10px', fontSize: 11, borderRadius: 999, border: '1px solid var(--line-strong)', background: 'transparent', color: 'var(--text-muted)', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>✓ Marcar hecho</button>
+                </div>
+              </div>
+
+              <div>
+                <div className="eyebrow" style={{ marginBottom: 10 }}>Tu estado ahora</div>
+                <div style={{ padding: 14, background: 'var(--ink-3)', border: '1px solid var(--line)', borderRadius: 12 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>
+                    <span>Ansiedad</span><span>moderada</span>
+                  </div>
+                  <div style={{ height: 3, background: 'var(--ink-5)', borderRadius: 999, overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: '62%', background: 'var(--v-primary)', transition: 'width .4s var(--ease-out)' }} />
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--text-muted)', margin: '12px 0 8px' }}>
+                    <span>Claridad</span><span>media</span>
+                  </div>
+                  <div style={{ height: 3, background: 'var(--ink-5)', borderRadius: 999, overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: '48%', background: 'var(--v-primary)', transition: 'width .4s var(--ease-out)' }} />
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <div className="eyebrow" style={{ marginBottom: 10 }}>Sugeridos</div>
+                {[
+                  { t: 'Ejercicio de respiración', sub: '3 min · sugerido por Clara' },
+                  { t: 'Módulo: ordenar el día', sub: '12 min · autoconocimiento' },
+                ].map((s, i) => (
+                  <div key={i} style={{ padding: '12px 14px', background: 'var(--ink-3)', border: '1px solid var(--line)', borderRadius: 12, marginBottom: 8, cursor: 'pointer' }}>
+                    <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 2 }}>{s.t}</div>
+                    <div style={{ fontSize: 11, color: 'var(--text-dim)', fontFamily: 'var(--font-mono)' }}>{s.sub}</div>
+                  </div>
+                ))}
+              </div>
+
+              <button style={{ marginTop: 'auto', padding: 12, borderRadius: 12, border: '1px dashed var(--line-strong)', background: 'transparent', color: 'var(--text-muted)', fontSize: 12, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
+                ✦ Agendar sesión humana 1:1
+              </button>
+            </aside>
           </div>
         </div>
       )}
