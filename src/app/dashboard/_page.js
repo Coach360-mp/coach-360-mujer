@@ -101,6 +101,9 @@ export default function Dashboard() {
   const [conversaciones, setConversaciones] = useState([])
   const [chatSidebarAbierto, setChatSidebarAbierto] = useState(false)
   const [contextoAbierto, setContextoAbierto] = useState(false)
+  const [profileTone, setProfileTone] = useState(1)
+  const [profileFreq, setProfileFreq] = useState('ritmo')
+  const [profileNotif, setProfileNotif] = useState({ ritual: true, gap: true, modulo: false, nueva: true })
   const [checkinDone, setCheckinDone] = useState(false)
   const [animoHoy, setAnimoHoy] = useState(null)
   const [equilibrio, setEquilibrio] = useState({ mente: 0, cuerpo: 0, corazon: 0, espiritu: 0 })
@@ -1509,30 +1512,250 @@ export default function Dashboard() {
         </div>
       )}
 
-      {view === 'perfil' && !activeTest && (
-        <div>
-          <Header title="Tu Perfil ✦" showBack={false} />
-          <div style={{ padding: '20px' }}>
-            <div className="card" style={{ marginBottom: 16, textAlign: 'center' }}>
-              <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'var(--gold)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, fontFamily: 'var(--font-display)', margin: '0 auto 12px' }}>{nombre[0].toUpperCase()}</div>
-              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 22 }}>{nombre}</h3>
-              <p style={{ fontSize: 13, color: 'var(--text-light)', marginTop: 4 }}>{user?.email}</p>
-              <p style={{ display: 'inline-block', marginTop: 8, fontSize: 12, background: 'var(--warm-dark)', padding: '4px 12px', borderRadius: 8, color: 'var(--gold)', fontWeight: 600, textTransform: 'capitalize' }}>Plan {plan}</p>
-            </div>
-            <div className="card" style={{ marginBottom: 16, display: 'flex', gap: 14, alignItems: 'center' }}>
-              <img src={coach.photo} alt={coach.name} style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover' }} />
-              <div><p style={{ fontWeight: 600, fontSize: 14 }}>Tu coach: {coach.name}</p><p style={{ fontSize: 12, color: 'var(--text-light)' }}>{coach.credential}</p></div>
-            </div>
-            <div className="card" style={{ marginBottom: 16 }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-                {[{ label: 'Racha actual', val: perfil?.racha_dias || 0 }, { label: 'Mejor racha', val: perfil?.mejor_racha || 0 }, { label: 'Nivel', val: perfil?.nivel || 1 }, { label: 'Puntos', val: perfil?.puntos_totales || 0 }].map(s => (<div key={s.label} style={{ textAlign: 'center' }}><p style={{ fontSize: 28, fontWeight: 700, color: 'var(--gold)' }}>{s.val}</p><p style={{ fontSize: 12, color: 'var(--text-light)' }}>{s.label}</p></div>))}
+      {view === 'perfil' && !activeTest && (() => {
+        // Port literal de ProfilePage (Fase 5 L4243-4445).
+        const tones = [
+          { k: 'directo', d: 'sin rodeos, claro' },
+          { k: 'equilibrado', d: 'mezcla afecto y verdad' },
+          { k: 'cálido', d: 'suave, pausado, afectivo' },
+        ]
+        const freqs = [
+          { k: 'suave', d: '2-3 gestos / semana', times: '~15 min' },
+          { k: 'ritmo', d: 'algo cada día', times: '~30 min' },
+          { k: 'intenso', d: 'presente varias veces al día', times: '~60 min' },
+        ]
+        const convsCount = conversaciones.length
+        const modulosCount = (progresoModulos || []).filter(p => p.porcentaje_avance > 0).length
+        const fechaEntrada = perfil?.created_at
+          ? new Date(perfil.created_at).toLocaleDateString('es-CL', { month: 'short', year: 'numeric' }).toUpperCase()
+          : ''
+        const planNombre = perfil?.plan_actual === 'esencial' ? 'Esencial' : perfil?.plan_actual === 'premium' ? 'Premium' : 'Gratis'
+        const planPrecio = perfil?.plan_actual === 'esencial' ? '$9.990 / mes' : perfil?.plan_actual === 'premium' ? '$19.990 / mes' : '$0 / mes'
+        const renueva = perfil?.fecha_fin_plan
+          ? ` · renueva ${new Date(perfil.fecha_fin_plan).toLocaleDateString('es-CL', { day: 'numeric', month: 'long' })}`
+          : ''
+        const inicial = (perfil?.nombre || 'U')[0].toUpperCase()
+
+        return (
+          <div className="dir-ritual" data-v="clara" style={{ background: 'var(--bg)', color: 'var(--text)', minHeight: '100vh' }}>
+            <style>{`
+              .pf-wrap { padding: 24px 20px 80px; }
+              .pf-hero { display: flex; flex-direction: column; gap: 16px; align-items: flex-start; padding-bottom: 24px; border-bottom: 1px solid var(--line); }
+              .pf-hero-avatar { width: 72px; height: 72px; }
+              .pf-hero-name { font-size: clamp(28px, 6vw, 42px); }
+              .pf-grid { display: flex; flex-direction: column; gap: 16px; margin-top: 24px; }
+              .pf-col { display: flex; flex-direction: column; gap: 16px; }
+              .pf-coach-card-inner { display: grid; grid-template-columns: 80px 1fr; gap: 16px; align-items: center; }
+              .pf-coach-img { width: 80px; height: 80px; }
+              @media (min-width: 768px) {
+                .pf-wrap { padding: 40px 64px 64px; }
+                .pf-hero { flex-direction: row; justify-content: space-between; align-items: center; padding-bottom: 32px; gap: 40px; }
+                .pf-hero-avatar { width: 96px; height: 96px; }
+                .pf-grid { display: grid; grid-template-columns: 1.3fr 1fr; gap: 48px; margin-top: 40px; }
+                .pf-col { gap: 24px; }
+                .pf-coach-card-inner { grid-template-columns: 120px 1fr; gap: 22px; }
+                .pf-coach-img { width: 120px; height: 120px; }
+              }
+            `}</style>
+
+            <div className="pf-wrap">
+              {/* Hero */}
+              <div className="pf-hero">
+                <div style={{ display: 'flex', gap: 18, alignItems: 'center' }}>
+                  <div style={{ position: 'relative' }}>
+                    <div className="pf-hero-avatar" style={{ borderRadius: '50%', background: 'var(--v-tint)', color: 'var(--v-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32, fontFamily: 'var(--font-display)', border: '3px solid var(--ink-2)' }}>{inicial}</div>
+                    <div style={{ position: 'absolute', bottom: -2, right: -2, width: 22, height: 22, borderRadius: '50%', background: 'var(--v-primary)', border: '3px solid var(--bg)' }} />
+                  </div>
+                  <div>
+                    <div className="eyebrow" style={{ marginBottom: 8 }}>Perfil</div>
+                    <div className="pf-hero-name" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.03em', fontWeight: 400, lineHeight: 1 }}>
+                      {perfil?.nombre || 'Bienvenida'}
+                    </div>
+                    <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 6, fontFamily: 'var(--font-mono)', letterSpacing: '.05em' }}>
+                      {fechaEntrada ? `EN COACH 360 DESDE ${fechaEntrada} · ` : ''}{convsCount} CONVERSACIÓN{convsCount === 1 ? '' : 'ES'} · {modulosCount} MÓDULO{modulosCount === 1 ? '' : 'S'}
+                    </div>
+                  </div>
+                </div>
+                <button style={{ padding: '10px 18px', borderRadius: 999, border: '1px solid var(--line-strong)', background: 'transparent', color: 'var(--text-muted)', fontSize: 12, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Editar foto</button>
+              </div>
+
+              {/* Dos columnas */}
+              <div className="pf-grid">
+                {/* IZQ — tu coach + tono + ritmo */}
+                <div className="pf-col">
+                  {/* Coach actual */}
+                  <div style={{ padding: 24, borderRadius: 20, background: 'linear-gradient(140deg, var(--v-tint), var(--ink-2) 75%)', border: '1px solid color-mix(in oklab, var(--v-primary) 25%, var(--line))' }}>
+                    <div className="eyebrow" style={{ marginBottom: 18 }}>✦ Tu coach principal</div>
+                    <div className="pf-coach-card-inner">
+                      <img src="/clara.jpg" alt="Clara" className="pf-coach-img" style={{ borderRadius: 18, objectFit: 'cover' }} />
+                      <div>
+                        <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, letterSpacing: '-0.025em' }}>Clara</div>
+                        <div style={{ fontSize: 13, color: 'var(--text-muted)', fontStyle: 'italic', marginBottom: 10 }}>Más claridad, más poder. Más tú.</div>
+                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                          {['directa', 'reflexiva', 'cálida'].map(t => (
+                            <span key={t} style={{ padding: '4px 10px', borderRadius: 999, background: 'var(--ink-3)', fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', letterSpacing: '.03em' }}>{t}</span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    <div style={{ marginTop: 20, paddingTop: 20, borderTop: '1px solid var(--line)', display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                      <button style={{ flex: '1 1 140px', padding: 11, borderRadius: 10, border: '1px solid var(--line-strong)', background: 'transparent', color: 'var(--text)', fontSize: 13, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Probar otro coach</button>
+                      <button style={{ flex: '1 1 140px', padding: 11, borderRadius: 10, border: '1px solid var(--line-strong)', background: 'transparent', color: 'var(--text)', fontSize: 13, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Hablar con 2 a la vez</button>
+                    </div>
+                  </div>
+
+                  {/* Tono */}
+                  <div style={{ padding: 24, borderRadius: 18, background: 'var(--ink-2)', border: '1px solid var(--line)' }}>
+                    <div style={{ marginBottom: 20 }}>
+                      <div className="eyebrow" style={{ marginBottom: 6 }}>Tono de Clara</div>
+                      <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, letterSpacing: '-0.02em' }}>
+                        Hoy está en <em style={{ fontStyle: 'italic', color: 'var(--v-primary)' }}>{tones[profileTone].k}</em>.
+                      </div>
+                    </div>
+                    <div style={{ position: 'relative', padding: '24px 8px' }}>
+                      <div style={{ height: 2, background: 'var(--ink-4)', borderRadius: 1, position: 'relative' }}>
+                        <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: `${profileTone * 50}%`, background: 'var(--v-primary)' }} />
+                      </div>
+                      {[0, 1, 2].map(i => (
+                        <button key={i} onClick={() => setProfileTone(i)} aria-label={`Tono ${tones[i].k}`} style={{
+                          position: 'absolute', top: '50%', left: `calc(8px + ${i * 50}%)`, transform: 'translate(-50%, -50%)',
+                          width: 18, height: 18, borderRadius: '50%',
+                          background: profileTone >= i ? 'var(--v-primary)' : 'var(--ink-4)',
+                          border: profileTone === i ? '3px solid var(--bg)' : 'none',
+                          boxShadow: profileTone === i ? '0 0 0 2px var(--v-primary)' : 'none',
+                          cursor: 'pointer', padding: 0,
+                        }} />
+                      ))}
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+                      {tones.map((t, i) => (
+                        <div key={t.k} style={{ textAlign: i === 0 ? 'left' : i === 1 ? 'center' : 'right' }}>
+                          <div style={{ fontSize: 13, color: profileTone === i ? 'var(--text)' : 'var(--text-muted)', fontWeight: profileTone === i ? 600 : 400, textTransform: 'capitalize' }}>{t.k}</div>
+                          <div style={{ fontSize: 11, color: 'var(--text-dim)', fontStyle: 'italic', marginTop: 2 }}>{t.d}</div>
+                        </div>
+                      ))}
+                    </div>
+                    <div style={{ marginTop: 22, padding: 16, background: 'var(--ink-3)', borderRadius: 12 }}>
+                      <div style={{ fontSize: 10, fontFamily: 'var(--font-mono)', color: 'var(--text-dim)', letterSpacing: '.08em', marginBottom: 8 }}>MUESTRA — ASÍ TE RESPONDERÍA</div>
+                      <div style={{ fontFamily: 'var(--font-display)', fontSize: 15, lineHeight: 1.5, fontStyle: 'italic' }}>
+                        {profileTone === 0 && 'Lo evitaste tres veces esta semana. ¿Cuál es la conversación que no estás teniendo?'}
+                        {profileTone === 1 && 'Noto que lo evitaste tres veces. Sin juicio — ¿qué pasa cuando lo intentas?'}
+                        {profileTone === 2 && 'Oye, suave contigo. Lo has rozado tres veces esta semana. Eso ya es algo.'}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Ritmo */}
+                  <div style={{ padding: 24, borderRadius: 18, background: 'var(--ink-2)', border: '1px solid var(--line)' }}>
+                    <div className="eyebrow" style={{ marginBottom: 16 }}>Tu ritmo</div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
+                      {freqs.map(f => (
+                        <button key={f.k} onClick={() => setProfileFreq(f.k)} style={{
+                          padding: '16px 12px', borderRadius: 14, cursor: 'pointer',
+                          background: profileFreq === f.k ? 'var(--v-tint)' : 'var(--ink-3)',
+                          border: `1px solid ${profileFreq === f.k ? 'var(--v-primary)' : 'var(--line)'}`,
+                          color: 'var(--text)', textAlign: 'left', fontFamily: 'var(--font-body)',
+                        }}>
+                          <div style={{ fontFamily: 'var(--font-display)', fontSize: 16, letterSpacing: '-0.015em', textTransform: 'capitalize', marginBottom: 4 }}>{f.k}</div>
+                          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 8, lineHeight: 1.4 }}>{f.d}</div>
+                          <div style={{ fontSize: 10, fontFamily: 'var(--font-mono)', color: profileFreq === f.k ? 'var(--v-primary)' : 'var(--text-dim)', letterSpacing: '.05em' }}>{f.times.toUpperCase()}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* DER — plan + privacidad + notificaciones */}
+                <div className="pf-col">
+                  {/* Plan */}
+                  <div style={{ padding: 22, borderRadius: 18, background: 'var(--ink-2)', border: '1px solid var(--line)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                      <div className="eyebrow">Tu plan</div>
+                      <span style={{ padding: '3px 10px', borderRadius: 999, background: 'var(--v-tint)', color: 'var(--v-primary)', fontSize: 10, fontFamily: 'var(--font-mono)', letterSpacing: '.08em' }}>ACTIVO</span>
+                    </div>
+                    <div style={{ fontFamily: 'var(--font-display)', fontSize: 30, letterSpacing: '-0.025em', marginBottom: 4 }}>{planNombre}</div>
+                    <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 16 }}>{planPrecio}{renueva}</div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, paddingTop: 16, borderTop: '1px solid var(--line)' }}>
+                      {[
+                        ['Conversaciones', perfil?.plan_actual === 'free' ? '5 / día' : 'ilimitadas'],
+                        ['Coaches', perfil?.plan_actual === 'premium' ? 'Clara + Leo + Marco' : '1 (cambias cuando quieras)'],
+                        ['Módulos premium', perfil?.plan_actual === 'premium' ? 'incluidos' : 'desbloqueas con Premium'],
+                        ['Exportar datos', 'sí, cualquier momento'],
+                      ].map(([k, v], i) => (
+                        <div key={i} style={{ display: 'flex', justifyContent: 'space-between', gap: 10, fontSize: 12 }}>
+                          <span style={{ color: 'var(--text-muted)' }}>{k}</span>
+                          <span style={{ color: 'var(--text)', textAlign: 'right' }}>{v}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <button onClick={() => navigate('planes')} style={{ width: '100%', marginTop: 18, padding: 11, borderRadius: 10, border: 'none', background: 'var(--v-primary)', color: '#0a0c0e', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
+                      {perfil?.plan_actual === 'free' ? 'Pasar a Esencial · $9.990/mes' : perfil?.plan_actual === 'esencial' ? 'Pasar a Premium · $19.990/mes' : 'Ver planes'}
+                    </button>
+                    {perfil?.plan_actual !== 'free' && (
+                      <button style={{ width: '100%', marginTop: 6, padding: 8, borderRadius: 10, border: 'none', background: 'transparent', color: 'var(--text-dim)', fontSize: 11, cursor: 'pointer', textDecoration: 'underline', fontFamily: 'var(--font-body)' }}>
+                        Cancelar plan
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Privacidad */}
+                  <div style={{ padding: 22, borderRadius: 18, background: 'var(--ink-2)', border: '1px solid var(--line)' }}>
+                    <div className="eyebrow" style={{ marginBottom: 14 }}>✦ Privacidad</div>
+                    {[
+                      { k: 'Tus conversaciones', v: 'Cifradas. Solo las ves tú y tu coach.' },
+                      { k: 'Datos para entrenar IA', v: 'Nunca. Así fue acordado.' },
+                      { k: 'Comparten coaches entre sí', v: 'Solo con tu permiso explícito.' },
+                    ].map((p, i) => (
+                      <div key={i} style={{ display: 'flex', gap: 12, paddingTop: i === 0 ? 0 : 14, paddingBottom: 14, borderBottom: i < 2 ? '1px solid var(--line)' : 'none' }}>
+                        <div style={{ width: 20, height: 20, flexShrink: 0, borderRadius: '50%', background: 'var(--ds-success)', color: '#0a0c0e', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M5 12l5 5 9-11"/></svg>
+                        </div>
+                        <div>
+                          <div style={{ fontSize: 13, color: 'var(--text)', marginBottom: 2 }}>{p.k}</div>
+                          <div style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.4 }}>{p.v}</div>
+                        </div>
+                      </div>
+                    ))}
+                    <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
+                      <button style={{ flex: 1, padding: 9, borderRadius: 8, border: '1px solid var(--line-strong)', background: 'transparent', color: 'var(--text-muted)', fontSize: 11, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Exportar mis datos</button>
+                      <button style={{ flex: 1, padding: 9, borderRadius: 8, border: '1px solid color-mix(in oklab, var(--warn) 40%, var(--line))', background: 'transparent', color: 'var(--warn)', fontSize: 11, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Eliminar cuenta</button>
+                    </div>
+                  </div>
+
+                  {/* Notificaciones */}
+                  <div style={{ padding: 22, borderRadius: 18, background: 'var(--ink-2)', border: '1px solid var(--line)' }}>
+                    <div className="eyebrow" style={{ marginBottom: 14 }}>Cuándo aparezco</div>
+                    {[
+                      { key: 'ritual', label: 'Ritual diario', when: '09:00' },
+                      { key: 'gap', label: 'Si te perdiste 3 días', when: 'sin horario' },
+                      { key: 'modulo', label: 'Recordatorio de módulo', when: '—' },
+                      { key: 'nueva', label: 'Nueva carta descubierta', when: 'siempre' },
+                    ].map((n, i, arr) => {
+                      const on = profileNotif[n.key]
+                      return (
+                        <div key={n.key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 0', borderBottom: i < arr.length - 1 ? '1px solid var(--line)' : 'none' }}>
+                          <div>
+                            <div style={{ fontSize: 13 }}>{n.label}</div>
+                            <div style={{ fontSize: 10, fontFamily: 'var(--font-mono)', color: 'var(--text-dim)', letterSpacing: '.05em' }}>{n.when.toUpperCase()}</div>
+                          </div>
+                          <button onClick={() => setProfileNotif(prev => ({ ...prev, [n.key]: !prev[n.key] }))} aria-label={`Toggle ${n.label}`} style={{ width: 36, height: 20, borderRadius: 10, background: on ? 'var(--v-primary)' : 'var(--ink-4)', position: 'relative', cursor: 'pointer', border: 'none', padding: 0, flexShrink: 0 }}>
+                            <div style={{ position: 'absolute', top: 2, left: on ? 18 : 2, width: 16, height: 16, borderRadius: '50%', background: '#fff', transition: 'left var(--d-fast) var(--ease-out)' }} />
+                          </button>
+                        </div>
+                      )
+                    })}
+                  </div>
+
+                  {/* Cerrar sesión */}
+                  <button onClick={handleLogout} style={{ padding: 14, borderRadius: 12, border: '1px solid var(--line-strong)', background: 'transparent', color: 'var(--text-muted)', fontSize: 13, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
+                    Cerrar sesión
+                  </button>
+                </div>
               </div>
             </div>
-            <button className="btn-primary" onClick={() => navigate('planes')} style={{ marginBottom: 12 }}>Cambiar plan</button>
-            <button className="btn-secondary" onClick={handleLogout}>Cerrar sesión</button>
           </div>
-        </div>
-      )}
+        )
+      })()}
 
       {/* === MODAL STATS INTERACTIVAS === */}
       {statModal && (() => {
