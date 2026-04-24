@@ -5,12 +5,19 @@ import { getSupabaseAdmin, ANTHROPIC_MODEL } from '@/lib/clients'
 
 
 const momentosLabels = {
+  // legacy (pre rediseño onboarding)
   transicion: 'en un momento de cambio o transición',
   crecimiento: 'buscando crecer profesionalmente',
   equilibrio: 'buscando más equilibrio y bienestar',
   relaciones: 'trabajando en sus relaciones',
   reconexion: 'queriendo reconectarse consigo misma',
   empezar: 'empezando algo nuevo',
+  // nuevos (diseño Fase 5 híbrido)
+  cambio: 'en un momento de cambio',
+  crecimiento_personal: 'en crecimiento personal',
+  incertidumbre: 'navegando incertidumbre',
+  construyendo: 'construyendo algo nuevo',
+  transicion_profesional: 'en transición profesional',
 }
 
 const identidadLabels = {
@@ -21,6 +28,9 @@ const identidadLabels = {
   minoria: 'es minoría en su industria',
   proposito: 'busca propósito',
   transicion_rel: 'saliendo de una relación o etapa',
+  // nuevos (diseño Fase 5 híbrido)
+  independiente: 'profesional independiente',
+  busqueda: 'en búsqueda laboral',
 }
 
 const focoLabels = {
@@ -152,7 +162,12 @@ async function construirMemoriaCompleta(supabaseAdmin, userId, esPremium) {
       if (onboarding.respuesta_libre) ctx += `\n• Lo que quiere diferente en 90 días: "${onboarding.respuesta_libre}"`
       if (onboarding.bienestar_inicial) {
         const b = onboarding.bienestar_inicial
-        ctx += `\n• Bienestar inicial: Mente ${b.mente}/10, Cuerpo ${b.cuerpo}/10, Corazón ${b.corazon}/10, Espíritu ${b.espiritu}/10`
+        // Shape legacy (4 sliders 1-10) vs nuevo (single mood + nota) — backwards compat
+        if (b?.mente != null) {
+          ctx += `\n• Bienestar inicial: Mente ${b.mente}/10, Cuerpo ${b.cuerpo}/10, Corazón ${b.corazon}/10, Espíritu ${b.espiritu}/10`
+        } else if (b?.mood) {
+          ctx += `\n• Bienestar inicial: llegó sintiéndose ${b.mood}${b.nota ? ` — "${b.nota}"` : ''}`
+        }
       }
     }
 
