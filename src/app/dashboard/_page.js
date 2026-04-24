@@ -104,6 +104,8 @@ export default function Dashboard() {
   const [profileTone, setProfileTone] = useState(1)
   const [profileFreq, setProfileFreq] = useState('ritmo')
   const [profileNotif, setProfileNotif] = useState({ ritual: true, gap: true, modulo: false, nueva: true })
+  const [modulosCat, setModulosCat] = useState(0)
+  const [mostrarPopupPostTest, setMostrarPopupPostTest] = useState(false)
   const [checkinDone, setCheckinDone] = useState(false)
   const [animoHoy, setAnimoHoy] = useState(null)
   const [equilibrio, setEquilibrio] = useState({ mente: 0, cuerpo: 0, corazon: 0, espiritu: 0 })
@@ -133,6 +135,23 @@ export default function Dashboard() {
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [chatMsgs, typing])
   useEffect(() => { checkUser() }, [])
   useEffect(() => { if (user?.id) cargarConversaciones() }, [user?.id])
+  useEffect(() => {
+    if (testResult && perfil && !perfil?.popup_post_test_visto?.mujer) {
+      setMostrarPopupPostTest(true)
+    }
+  }, [testResult, perfil])
+
+  async function cerrarPopupPostTest(navegarDespues) {
+    setMostrarPopupPostTest(false)
+    if (user) {
+      const nuevoVisto = { ...(perfil?.popup_post_test_visto || {}), mujer: true }
+      try {
+        await supabase.from('perfiles').update({ popup_post_test_visto: nuevoVisto }).eq('id', user.id)
+        setPerfil(prev => ({ ...(prev || {}), popup_post_test_visto: nuevoVisto }))
+      } catch (err) { console.error('Error guardando popup_post_test_visto:', err) }
+    }
+    if (navegarDespues) navegarDespues()
+  }
 
   async function cargarConversaciones() {
     if (!user?.id) return
@@ -1937,6 +1956,81 @@ export default function Dashboard() {
           </div>
         )
       })()}
+
+      {/* === POPUP POST-TEST (Fase 5 L3290-3362) === */}
+      {mostrarPopupPostTest && testResult && (
+        <div className="dir-ritual" data-v="clara" onClick={() => cerrarPopupPostTest()} style={{ position: 'fixed', inset: 0, zIndex: 2500, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(10,12,14,.78)', padding: 16 }}>
+          <style>{`
+            .pop-modal { width: 100%; max-width: 920px; background: var(--ink-2); border: 1px solid var(--line-strong); border-radius: 24px; overflow: hidden; box-shadow: var(--shadow-lg); display: flex; flex-direction: column; max-height: 90vh; }
+            .pop-img { position: relative; height: 220px; }
+            .pop-body { padding: 28px 24px 24px; display: flex; flex-direction: column; overflow-y: auto; }
+            .pop-title { font-size: clamp(22px, 5vw, 28px); }
+            .pop-perfil { font-size: clamp(30px, 7vw, 40px); }
+            @media (min-width: 768px) {
+              .pop-modal { display: grid; grid-template-columns: 380px 1fr; max-height: 720px; }
+              .pop-img { height: 100%; }
+              .pop-body { padding: 40px 40px 32px; }
+            }
+          `}</style>
+          <div className="pop-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="pop-img">
+              <img src="/clara.jpg" alt="Clara" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, transparent 40%, rgba(10,12,14,.92))' }} />
+              <div style={{ position: 'absolute', bottom: 24, left: 24, right: 24, color: '#fff' }}>
+                <div className="eyebrow" style={{ marginBottom: 8, color: 'color-mix(in oklab, var(--v-primary) 90%, white)' }}>✦ Tu resultado</div>
+                <div className="pop-perfil" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.025em', lineHeight: 1 }}>
+                  {testResult.titulo_perfil || testResult.perfil || 'Tu perfil'}
+                </div>
+                <div style={{ fontSize: 12, opacity: .75, fontFamily: 'var(--font-mono)', marginTop: 10, letterSpacing: '.03em' }}>
+                  {(activeTest?.titulo || 'test').toLowerCase()}
+                </div>
+              </div>
+            </div>
+
+            <div className="pop-body">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
+                <div className="eyebrow">✦ Para ti, después del test</div>
+                <button onClick={() => cerrarPopupPostTest()} aria-label="Cerrar" style={{ width: 28, height: 28, borderRadius: 14, border: 'none', background: 'transparent', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M6 6l12 12M18 6L6 18"/></svg>
+                </button>
+              </div>
+
+              <div className="pop-title" style={{ fontFamily: 'var(--font-display)', lineHeight: 1.2, letterSpacing: '-0.02em', marginBottom: 18 }}>
+                Tu test terminó. ¿<em style={{ fontStyle: 'italic', color: 'var(--v-primary)' }}>Hablamos</em>?
+              </div>
+              <p style={{ fontSize: 14, color: 'var(--text-muted)', lineHeight: 1.6, marginBottom: 22 }}>
+                Vi algo interesante en tus respuestas. Si quieres, podemos abrirlo juntas — ahora o cuando tengas un momento.
+              </p>
+
+              {plan === 'free' && (
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '14px 16px', background: 'var(--v-tint)', border: '1px solid color-mix(in oklab, var(--v-primary) 30%, transparent)', borderRadius: 12, marginBottom: 20 }}>
+                  <span style={{ fontSize: 20, color: 'var(--v-primary)', lineHeight: 1 }}>✦</span>
+                  <div style={{ flex: 1, fontSize: 13, lineHeight: 1.5 }}>
+                    Plan Esencial te da <b>chat sin límite diario</b> y <b>todos los módulos</b>.
+                  </div>
+                </div>
+              )}
+
+              {plan === 'free' ? (
+                <button onClick={() => cerrarPopupPostTest(() => navigate('planes'))} style={{ padding: 14, borderRadius: 12, border: 'none', background: 'var(--v-primary)', color: '#0a0c0e', fontWeight: 600, fontSize: 15, cursor: 'pointer', marginBottom: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, fontFamily: 'var(--font-body)' }}>
+                  Pasar a Esencial <Icon.arrow s={14} />
+                </button>
+              ) : (
+                <button onClick={() => cerrarPopupPostTest(() => navigate('clara'))} style={{ padding: 14, borderRadius: 12, border: 'none', background: 'var(--v-primary)', color: '#0a0c0e', fontWeight: 600, fontSize: 15, cursor: 'pointer', marginBottom: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, fontFamily: 'var(--font-body)' }}>
+                  Hablar con Clara ahora <Icon.arrow s={14} />
+                </button>
+              )}
+              <button onClick={() => cerrarPopupPostTest()} style={{ padding: 12, borderRadius: 12, border: '1px solid var(--line-strong)', background: 'transparent', color: 'var(--text)', fontSize: 14, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
+                Hablar con Clara después
+              </button>
+
+              <div style={{ fontSize: 11, color: 'var(--text-dim)', textAlign: 'center', marginTop: 'auto', paddingTop: 16, fontFamily: 'var(--font-mono)' }}>
+                Sin tarjeta · cancelas cuando quieras
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* === MODAL STATS INTERACTIVAS === */}
       {statModal && (() => {
