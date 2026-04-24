@@ -683,7 +683,7 @@ export default function Dashboard() {
               {[
                 { label: 'Hoy', I: Icon.sparkle, active: view === 'inicio', action: () => navigate('inicio') },
                 { label: 'Conversación', I: Icon.dots, active: false, action: () => navigate('clara') },
-                { label: 'Módulos', I: Icon.book, active: false, action: () => { if (modulos[0]) { setActiveModulo(modulos[0]); navigate('modulo') } else { navigate('planes') } } },
+                { label: 'Módulos', I: Icon.book, active: view === 'modulos' || view === 'modulo', action: () => navigate('modulos') },
                 { label: 'Tests', I: Icon.chart, active: false, action: () => navigate('tests') },
                 { label: 'Mi equilibrio', I: Icon.compass, active: false, action: () => navigate('equilibrio') },
                 { label: 'Progreso', I: Icon.chart, active: false, action: () => navigate('perfil') },
@@ -905,6 +905,187 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+
+      {view === 'modulos' && !activeTest && (() => {
+        // Port literal de HumanModulos (Fase 5 L3031-3142) — catálogo de módulos.
+        const cats = ['Todos', 'Autoconocimiento', 'Hábitos', 'Liderazgo', 'Relaciones', 'Propósito']
+        const estadoModulo = (m) => {
+          if (!canAccess(m.plan_requerido)) return 'locked'
+          const p = progresoModulos?.find(pp => pp.modulo_id === m.id)
+          if (!p) return 'available'
+          if (p.completado) return 'done'
+          if (p.porcentaje_avance > 0) return 'progress'
+          return 'available'
+        }
+        const getProgreso = (m) => progresoModulos?.find(pp => pp.modulo_id === m.id)?.porcentaje_avance || 0
+        const placeholderImg = 'https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=800&q=80&auto=format&fit=crop'
+        const featured = modulos.find(m => {
+          const e = estadoModulo(m)
+          return e === 'progress'
+        }) || modulos.find(m => estadoModulo(m) === 'available') || modulos[0]
+        const recomendado = modulos.find(m => m.id !== featured?.id && estadoModulo(m) === 'available') || modulos.find(m => m.id !== featured?.id)
+        const abrirModulo = (m) => {
+          if (!canAccess(m.plan_requerido)) { navigate('planes'); return }
+          setActiveModulo(m)
+          navigate('modulo')
+        }
+
+        return (
+          <div className="dir-ritual" data-v="clara" style={{ background: 'var(--bg)', color: 'var(--text)', minHeight: '100vh' }}>
+            <style>{`
+              .mo-wrap { padding: 32px 20px 96px; }
+              .mo-h1 { font-size: clamp(36px, 8vw, 60px); line-height: 1; letter-spacing: -0.035em; font-weight: 400; margin: 0; }
+              .mo-tabs { display: flex; gap: 6px; margin-bottom: 24px; border-bottom: 1px solid var(--line); overflow-x: auto; scrollbar-width: none; }
+              .mo-tabs::-webkit-scrollbar { display: none; }
+              .mo-featured { display: flex; flex-direction: column; gap: 16px; margin-bottom: 28px; }
+              .mo-feat-hero { position: relative; border-radius: 18px; overflow: hidden; border: 1px solid var(--line); height: 240px; }
+              .mo-feat-reco { padding: 22px; background: var(--ink-2); border: 1px solid var(--line); border-radius: 18px; display: flex; flex-direction: column; }
+              .mo-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+              @media (min-width: 640px) {
+                .mo-grid { grid-template-columns: repeat(2, 1fr); }
+              }
+              @media (min-width: 768px) {
+                .mo-wrap { padding: 48px 64px 64px; }
+                .mo-featured { display: grid; grid-template-columns: 1.2fr 1fr; gap: 20px; height: 340px; }
+                .mo-feat-hero { height: 100%; }
+                .mo-feat-reco { padding: 28px; }
+                .mo-grid { grid-template-columns: repeat(3, 1fr); }
+              }
+            `}</style>
+
+            <div className="mo-wrap">
+              {/* Header */}
+              <div style={{ marginBottom: 32 }}>
+                <div className="eyebrow" style={{ marginBottom: 12 }}>Módulos ✦ micro-cursos</div>
+                <h1 className="mo-h1" style={{ fontFamily: 'var(--font-display)' }}>
+                  Algo que <em style={{ fontStyle: 'italic', color: 'var(--v-primary)' }}>mover</em> esta semana.
+                </h1>
+                <p style={{ fontSize: 16, color: 'var(--text-muted)', marginTop: 16, maxWidth: 520, lineHeight: 1.55 }}>
+                  Cursos cortos hechos por tus coaches. Cinco a quince minutos. Para hacer, no solo para leer.
+                </p>
+              </div>
+
+              {/* Category tabs (decorativos — el schema no tiene categoría aún) */}
+              <div className="mo-tabs">
+                {cats.map((cLabel, i) => (
+                  <button key={cLabel} onClick={() => setModulosCat(i)} style={{
+                    padding: '10px 16px', border: 'none', background: 'transparent',
+                    color: modulosCat === i ? 'var(--text)' : 'var(--text-muted)',
+                    borderBottom: `2px solid ${modulosCat === i ? 'var(--v-primary)' : 'transparent'}`,
+                    fontSize: 13, cursor: 'pointer', fontWeight: modulosCat === i ? 600 : 400,
+                    whiteSpace: 'nowrap', marginBottom: -1, fontFamily: 'var(--font-body)',
+                  }}>{cLabel}</button>
+                ))}
+              </div>
+
+              {/* Featured */}
+              {featured && (
+                <div className="mo-featured">
+                  <div onClick={() => abrirModulo(featured)} className="mo-feat-hero" style={{ cursor: 'pointer' }}>
+                    <img src={featured.imagen_portada || placeholderImg} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, transparent 40%, rgba(10,12,14,.9))' }} />
+                    <div style={{ position: 'absolute', bottom: 20, left: 20, right: 20, color: '#fff' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10, flexWrap: 'wrap' }}>
+                        {estadoModulo(featured) === 'progress' && (
+                          <span style={{ fontSize: 10, padding: '4px 10px', borderRadius: 999, background: 'var(--v-primary)', color: '#0a0c0e', fontWeight: 600, letterSpacing: '.05em' }}>EN PROGRESO</span>
+                        )}
+                        <span style={{ fontSize: 11, opacity: .8, fontFamily: 'var(--font-mono)' }}>POR CLARA</span>
+                      </div>
+                      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(22px, 4vw, 34px)', letterSpacing: '-0.02em', fontWeight: 400, margin: 0, lineHeight: 1.1, marginBottom: 12 }}>
+                        {featured.titulo}
+                      </h2>
+                      {estadoModulo(featured) === 'progress' && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, maxWidth: 280 }}>
+                          <div style={{ flex: 1, height: 3, background: 'rgba(255,255,255,0.2)', borderRadius: 2, overflow: 'hidden' }}>
+                            <div style={{ height: '100%', width: `${getProgreso(featured)}%`, background: 'var(--v-primary)' }} />
+                          </div>
+                          <span style={{ fontSize: 11, fontFamily: 'var(--font-mono)', opacity: .8 }}>{getProgreso(featured)}%</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {recomendado && (
+                    <div className="mo-feat-reco">
+                      <div className="eyebrow" style={{ marginBottom: 10 }}>Recomendado para ti</div>
+                      <div style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(20px, 3.5vw, 28px)', letterSpacing: '-0.02em', lineHeight: 1.15, marginBottom: 10 }}>
+                        {recomendado.titulo}
+                      </div>
+                      <p style={{ fontSize: 14, color: 'var(--text-muted)', lineHeight: 1.55, flex: 1 }}>
+                        {recomendado.descripcion || `Clara pensó que esto te iba a servir. Son ${recomendado.numero_semanas || 4} semanas de contenido corto.`}
+                      </p>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 16, flexWrap: 'wrap' }}>
+                        <img src="/clara.jpg" alt="Clara" style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover' }} />
+                        <div>
+                          <div style={{ fontSize: 12, fontWeight: 500 }}>Clara</div>
+                          <div style={{ fontSize: 11, color: 'var(--text-dim)', fontFamily: 'var(--font-mono)' }}>
+                            Mujer · {recomendado.numero_semanas || 4} semanas
+                          </div>
+                        </div>
+                        <button onClick={() => abrirModulo(recomendado)} style={{ marginLeft: 'auto', padding: '10px 18px', borderRadius: 999, border: 'none', background: 'var(--text)', color: 'var(--bg)', fontWeight: 600, fontSize: 13, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
+                          Empezar
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Grid */}
+              <div className="eyebrow" style={{ marginBottom: 14 }}>Todos los módulos</div>
+              <div className="mo-grid">
+                {modulos.map((m) => {
+                  const estado = estadoModulo(m)
+                  const progreso = getProgreso(m)
+                  const locked = estado === 'locked'
+                  const done = estado === 'done'
+                  return (
+                    <div key={m.id} onClick={() => abrirModulo(m)} style={{ background: 'var(--ink-2)', border: '1px solid var(--line)', borderRadius: 16, overflow: 'hidden', opacity: locked ? 0.6 : 1, cursor: 'pointer' }}>
+                      <div style={{ position: 'relative', height: 160, background: 'var(--ink-3)' }}>
+                        <img src={m.imagen_portada || placeholderImg} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: locked ? 'grayscale(1)' : 'none' }} />
+                        {locked && (
+                          <div style={{ position: 'absolute', inset: 0, background: 'rgba(10,12,14,.55)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <div style={{ padding: '6px 14px', borderRadius: 999, background: 'var(--ink-1)', border: '1px solid var(--line-strong)', fontSize: 11, color: 'var(--text)', fontFamily: 'var(--font-mono)' }}>
+                              Plan {m.plan_requerido === 'premium' ? 'Premium' : 'Esencial'}
+                            </div>
+                          </div>
+                        )}
+                        {done && (
+                          <div style={{ position: 'absolute', top: 12, right: 12, padding: '4px 10px', borderRadius: 999, background: 'var(--ds-success)', color: '#0a0c0e', fontSize: 10, fontWeight: 600, letterSpacing: '.05em' }}>✓ COMPLETADO</div>
+                        )}
+                      </div>
+                      <div style={{ padding: 18 }}>
+                        <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, letterSpacing: '-0.015em', lineHeight: 1.2, marginBottom: 6 }}>{m.titulo}</div>
+                        <div style={{ fontSize: 11, color: 'var(--text-dim)', fontFamily: 'var(--font-mono)', letterSpacing: '.05em', marginBottom: 12, textTransform: 'uppercase' }}>
+                          {m.numero_semanas || 4} SEMANAS
+                        </div>
+                        {estado === 'progress' && (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+                            <div style={{ flex: 1, height: 2, background: 'var(--ink-5)', borderRadius: 1, overflow: 'hidden' }}>
+                              <div style={{ height: '100%', width: `${progreso}%`, background: 'var(--v-primary)' }} />
+                            </div>
+                            <span style={{ fontSize: 10, color: 'var(--text-dim)', fontFamily: 'var(--font-mono)' }}>{progreso}%</span>
+                          </div>
+                        )}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, paddingTop: 10, borderTop: '1px solid var(--line)' }}>
+                          <img src="/clara.jpg" alt="Clara" style={{ width: 22, height: 22, borderRadius: '50%', objectFit: 'cover' }} />
+                          <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>por Clara</span>
+                          {done && <span style={{ marginLeft: 'auto', fontSize: 10, color: 'var(--v-primary)', fontFamily: 'var(--font-mono)' }}>✦ CERTIFICADO</span>}
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })}
+                {modulos.length === 0 && (
+                  <div style={{ gridColumn: '1 / -1', padding: 40, textAlign: 'center', fontSize: 14, color: 'var(--text-muted)', background: 'var(--ink-2)', border: '1px solid var(--line)', borderRadius: 16 }}>
+                    No hay módulos disponibles aún.
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )
+      })()}
 
       {view === 'planes' && (
         <div>
@@ -1958,7 +2139,7 @@ export default function Dashboard() {
             {[
               { label: 'Hoy',        I: Icon.sparkle, active: view === 'inicio',      action: () => setView('inicio') },
               { label: 'Clara',      I: Icon.dots,    active: view === 'clara',       action: () => navigate('clara') },
-              { label: 'Módulos',    I: Icon.book,    active: view === 'modulo',      action: () => { if (modulos[0]) { setActiveModulo(modulos[0]); navigate('modulo') } else { navigate('planes') } } },
+              { label: 'Módulos',    I: Icon.book,    active: view === 'modulos' || view === 'modulo',  action: () => navigate('modulos') },
               { label: 'Tests',      I: Icon.chart,   active: view === 'tests',       action: () => setView('tests') },
               { label: 'Equilibrio', I: Icon.compass, active: view === 'equilibrio',  action: () => navigate('equilibrio') },
               { label: 'Progreso',   I: Icon.chart,   active: view === 'perfil',      action: () => navigate('perfil') },
