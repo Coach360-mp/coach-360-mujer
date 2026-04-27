@@ -103,41 +103,6 @@ input {
   box-shadow: 0 2px 12px rgba(0,0,0,0.06);
 }
 
-/* Bottom navigation */
-.bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: #fff;
-  border-top: 1px solid #eee;
-  display: flex;
-  justify-content: space-around;
-  padding: 8px 0 24px;
-  z-index: 100;
-}
-
-.nav-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  font-size: 11px;
-  color: var(--text-light);
-  background: none;
-  border: none;
-  padding: 4px 12px;
-  transition: color 0.2s;
-}
-
-.nav-item.active {
-  color: var(--gold);
-}
-
-.nav-icon {
-  font-size: 22px;
-}
-
 /* ============================================================
    COACH 360 — DESIGN SYSTEM TOKENS (rediseño)
    ----------
