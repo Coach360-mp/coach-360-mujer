@@ -159,7 +159,10 @@ export async function POST(request) {
     const userId = parts[0]
     const planId = parts[1]
     const vertical = parts[2] || 'mujer'
-    console.log('[webhook] Parsed ref:', { userId, planId, vertical })
+    // parts[3] = paisCodigo (CL/AR/CO), parts[4] = billingCycle (mensual/anual), parts[5] = timestamp.
+    // Pagos anteriores al commit 2acbe4e no tienen billingCycle: parts[4] sería timestamp numérico → fallback a 'mensual'.
+    const billingCycle = parts[4] === 'anual' ? 'anual' : 'mensual'
+    console.log('[webhook] Parsed ref:', { userId, planId, vertical, billingCycle })
 
     if (!userId || !planId) {
       console.log('[webhook] Referencia inválida, faltan userId o planId')
@@ -179,10 +182,14 @@ export async function POST(request) {
 
     // === SUSCRIPCIONES ===
     if (planId === 'esencial' || planId === 'premium') {
-      console.log('[webhook] Procesando suscripción', planId, 'para', userId)
+      console.log('[webhook] Procesando suscripción', planId, billingCycle, 'para', userId)
       const fechaInicio = new Date()
       const fechaFin = new Date()
-      fechaFin.setMonth(fechaFin.getMonth() + 1)
+      if (billingCycle === 'anual') {
+        fechaFin.setFullYear(fechaFin.getFullYear() + 1)
+      } else {
+        fechaFin.setMonth(fechaFin.getMonth() + 1)
+      }
 
       const { data: perfilActual } = await supabaseAdmin
         .from('perfiles')
