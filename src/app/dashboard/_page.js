@@ -108,6 +108,9 @@ export default function Dashboard() {
   const [mostrarPopupPostTest, setMostrarPopupPostTest] = useState(false)
   const [badgesCatalogo, setBadgesCatalogo] = useState([])
   const [badgesUsuario, setBadgesUsuario] = useState([])
+  const [ritualAcciones, setRitualAcciones] = useState([false, false, false])
+  const [ritualGuardando, setRitualGuardando] = useState(false)
+  const [ritualCompletadoHoy, setRitualCompletadoHoy] = useState(false)
   const [checkinDone, setCheckinDone] = useState(false)
   const [animoHoy, setAnimoHoy] = useState(null)
   const [equilibrio, setEquilibrio] = useState({ mente: 0, cuerpo: 0, corazon: 0, espiritu: 0 })
@@ -138,6 +141,69 @@ export default function Dashboard() {
   useEffect(() => { checkUser() }, [])
   useEffect(() => { if (user?.id) cargarConversaciones() }, [user?.id])
   useEffect(() => { if (user?.id) cargarBadges() }, [user?.id])
+  useEffect(() => { if (user?.id) cargarRitualHoy() }, [user?.id])
+
+  async function cargarRitualHoy() {
+    if (!user?.id) return
+    const startOfToday = new Date()
+    startOfToday.setHours(0, 0, 0, 0)
+    const { data } = await supabase
+      .from('daily_checkins')
+      .select('id, note, created_at')
+      .eq('user_id', user.id)
+      .eq('vertical', 'mujer')
+      .gte('created_at', startOfToday.toISOString())
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    if (data) {
+      setRitualCompletadoHoy(true)
+      try {
+        const parsed = data.note ? JSON.parse(data.note) : null
+        if (parsed?.acciones && Array.isArray(parsed.acciones) && parsed.acciones.length === 3) {
+          setRitualAcciones(parsed.acciones)
+        } else {
+          setRitualAcciones([true, true, true])
+        }
+      } catch { setRitualAcciones([true, true, true]) }
+    }
+  }
+
+  function toggleRitualAccion(i) {
+    if (ritualGuardando) return
+    setRitualAcciones(prev => {
+      const nuevo = [...prev]
+      nuevo[i] = !nuevo[i]
+      // Auto-guardar al completar los 3 (solo primera vez del día)
+      if (nuevo.every(Boolean) && !ritualCompletadoHoy) {
+        guardarRitual(nuevo)
+      }
+      return nuevo
+    })
+  }
+
+  async function guardarRitual(accionesActuales) {
+    if (!user?.id || ritualGuardando) return
+    setRitualGuardando(true)
+    try {
+      const res = await fetch('/api/daily-checkin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id, acciones: accionesActuales, vertical: 'mujer' }),
+      })
+      const data = await res.json()
+      if (data?.success) {
+        setRitualCompletadoHoy(true)
+        if (data.racha_dias != null) {
+          setPerfil(prev => ({ ...(prev || {}), racha_dias: data.racha_dias, mejor_racha: data.mejor_racha }))
+        }
+      }
+    } catch (err) {
+      console.error('[ritual] error:', err)
+    } finally {
+      setRitualGuardando(false)
+    }
+  }
 
   async function cargarBadges() {
     if (!user?.id) return
@@ -713,7 +779,7 @@ export default function Dashboard() {
 
               {/* Menú nav (6 items con dot indicator en activo) */}
               {[
-                { label: 'Hoy', I: Icon.sparkle, active: view === 'inicio', action: () => navigate('inicio') },
+                { label: 'Hoy', I: Icon.sparkle, active: view === 'ritual' || view === 'inicio', action: () => navigate('ritual') },
                 { label: 'Conversación', I: Icon.dots, active: false, action: () => navigate('clara') },
                 { label: 'Módulos', I: Icon.book, active: view === 'modulos' || view === 'modulo', action: () => navigate('modulos') },
                 { label: 'Tests', I: Icon.chart, active: false, action: () => navigate('tests') },
@@ -1313,6 +1379,149 @@ export default function Dashboard() {
                       </div>
                     )
                   })}
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+      })()}
+
+      {view === 'ritual' && !activeTest && (() => {
+        // Port literal de DailyRitual (Fase 5 L5132-5240).
+        const items = [
+          { n: 'I',   t: 'Una palabra',          d: 'Cómo llegas hoy. Una sola palabra basta.',                  time: '30 seg', action: 'Escribir',     img: 'https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=600&q=80&auto=format&fit=crop' },
+          { n: 'II',  t: 'Leer la carta del día', d: 'Algo que Clara escribió para ti a partir del test.',       time: '2 min',  action: 'Abrir carta',  img: 'https://images.unsplash.com/photo-1518622358385-8ea7d0794bf6?w=600&q=80&auto=format&fit=crop' },
+          { n: 'III', t: 'Un paso pequeño',       d: 'El movimiento acordado ayer.',                              time: '5 min',  action: 'Empezar',      img: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80&auto=format&fit=crop' },
+        ]
+        const progress = ritualAcciones.filter(Boolean).length
+        const fechaHoy = new Date().toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' })
+
+        return (
+          <div className="dir-ritual" data-v="clara" style={{ background: 'var(--bg)', color: 'var(--text)', minHeight: '100vh' }}>
+            <style>{`
+              .rt-wrap { padding: 32px 20px 80px; }
+              .rt-header { display: flex; flex-direction: column; gap: 24px; margin-bottom: 32px; }
+              .rt-title-h1 { font-size: clamp(38px, 8vw, 64px); line-height: .98; letter-spacing: -0.04em; font-weight: 400; margin: 0; }
+              .rt-moons { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; justify-content: flex-start; }
+              .rt-cards-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+              .rt-reward { margin-top: 32px; padding: 22px; background: linear-gradient(120deg, var(--v-tint), var(--ink-2) 70%); border: 1px solid color-mix(in oklab, var(--v-primary) 28%, var(--line)); border-radius: 18px; display: flex; flex-direction: column; gap: 18px; }
+              @media (min-width: 768px) {
+                .rt-wrap { padding: 48px 64px 64px; }
+                .rt-header { flex-direction: row; gap: 48px; align-items: end; justify-content: space-between; margin-bottom: 40px; }
+                .rt-moons { justify-content: flex-end; }
+                .rt-cards-grid { grid-template-columns: repeat(3, 1fr); gap: 18px; }
+                .rt-reward { display: grid; grid-template-columns: 1fr auto; gap: 20px; align-items: center; padding: 26px; }
+              }
+            `}</style>
+
+            <div className="rt-wrap">
+              <div className="rt-header">
+                <div>
+                  <div className="eyebrow" style={{ marginBottom: 14 }}>✦ Tu ritual · {fechaHoy}</div>
+                  <h1 className="rt-title-h1" style={{ fontFamily: 'var(--font-display)' }}>
+                    Tres gestos <em style={{ fontStyle: 'italic', color: 'var(--v-primary)' }}>breves</em>.<br />Ocho minutos total.
+                  </h1>
+                </div>
+
+                {/* Lunas que se llenan */}
+                <div className="rt-moons">
+                  {[0, 1, 2].map(i => (
+                    <div key={i} style={{ position: 'relative', width: 64, height: 64 }}>
+                      <svg viewBox="0 0 72 72" width="64" height="64">
+                        <circle cx="36" cy="36" r="30" fill="none" stroke="var(--ink-4)" strokeWidth="2" />
+                        {ritualAcciones[i] && <circle cx="36" cy="36" r="30" fill="var(--v-primary)" opacity=".3" />}
+                        {ritualAcciones[i] && <circle cx="36" cy="36" r="24" fill="var(--v-primary)" />}
+                        <text x="36" y="42" textAnchor="middle" fontFamily="var(--font-display)" fontSize="18" fontStyle="italic" fill={ritualAcciones[i] ? '#0a0c0e' : 'var(--text-muted)'}>
+                          {['I', 'II', 'III'][i]}
+                        </text>
+                      </svg>
+                    </div>
+                  ))}
+                  <div style={{ marginLeft: 8 }}>
+                    <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, letterSpacing: '-0.02em' }}>{progress} / 3</div>
+                    <div style={{ fontSize: 11, color: 'var(--text-dim)', fontFamily: 'var(--font-mono)' }}>HOY</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 3 cards */}
+              <div className="rt-cards-grid">
+                {items.map((it, i) => {
+                  const complete = ritualAcciones[i]
+                  const active = !complete && (i === 0 || ritualAcciones[i - 1])
+                  const locked = !complete && !active
+                  return (
+                    <div key={i} style={{
+                      position: 'relative', borderRadius: 20, overflow: 'hidden', minHeight: 380,
+                      border: `1px solid ${complete ? 'color-mix(in oklab, var(--v-primary) 40%, var(--line))' : 'var(--line)'}`,
+                      background: 'var(--ink-2)',
+                      opacity: locked ? 0.6 : 1,
+                    }}>
+                      <div style={{ position: 'relative', height: 180, overflow: 'hidden' }}>
+                        <img src={it.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: locked ? 'grayscale(1) brightness(.7)' : 'none' }} />
+                        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, transparent 40%, rgba(10,12,14,.85))' }} />
+                        <div style={{
+                          position: 'absolute', top: 18, left: 20,
+                          fontFamily: 'var(--font-display)', fontSize: 56, letterSpacing: '-0.02em', fontStyle: 'italic',
+                          color: complete ? 'var(--v-primary)' : 'rgba(255,255,255,.9)', lineHeight: 1,
+                        }}>{it.n}</div>
+                        {complete && (
+                          <div style={{ position: 'absolute', top: 18, right: 18, width: 32, height: 32, borderRadius: '50%', background: 'var(--v-primary)', color: '#0a0c0e', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12l5 5 9-11" /></svg>
+                          </div>
+                        )}
+                      </div>
+                      <div style={{ padding: '22px 22px 24px' }}>
+                        <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, letterSpacing: '-0.02em', lineHeight: 1.15, marginBottom: 8 }}>{it.t}</div>
+                        <div style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.55, marginBottom: 18, minHeight: 42 }}>{it.d}</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          <button
+                            onClick={() => { if (!locked && !ritualGuardando) toggleRitualAccion(i) }}
+                            disabled={locked || ritualGuardando}
+                            style={{
+                              flex: 1, padding: 12, borderRadius: 12,
+                              cursor: (locked || ritualGuardando) ? 'default' : 'pointer',
+                              background: complete ? 'transparent' : active ? 'var(--v-primary)' : 'var(--ink-3)',
+                              border: complete ? '1px solid var(--line-strong)' : 'none',
+                              color: complete ? 'var(--text-muted)' : active ? '#0a0c0e' : 'var(--text-dim)',
+                              fontWeight: complete ? 400 : 600, fontSize: 13,
+                              fontFamily: 'var(--font-body)',
+                            }}
+                          >
+                            {ritualGuardando && active && !complete ? 'Guardando...' : complete ? '✓ hecho · deshacer' : locked ? 'después' : it.action}
+                          </button>
+                          <div style={{ fontSize: 10, color: 'var(--text-dim)', fontFamily: 'var(--font-mono)', letterSpacing: '.05em', width: 54, textAlign: 'right' }}>{it.time.toUpperCase()}</div>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+
+              {/* Reward + racha real */}
+              <div className="rt-reward">
+                <div>
+                  <div className="eyebrow" style={{ marginBottom: 8 }}>
+                    {ritualCompletadoHoy ? `Racha actual · ${perfil?.racha_dias || 0} día${(perfil?.racha_dias || 0) === 1 ? '' : 's'}` : 'Cuando cierres los tres'}
+                  </div>
+                  <div style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(18px, 3.5vw, 22px)', letterSpacing: '-0.02em', lineHeight: 1.3 }}>
+                    {ritualCompletadoHoy
+                      ? <>Mejor racha personal: <em style={{ fontStyle: 'italic', color: 'var(--v-primary)' }}>{perfil?.mejor_racha || 0} día{(perfil?.mejor_racha || 0) === 1 ? '' : 's'}</em>. Vuelve mañana para sumar otro.</>
+                      : <>Una carta nueva aparece en tu baraja. Y tu planta sube una hoja.</>
+                    }
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                  <svg width="44" height="54" viewBox="0 0 44 54">
+                    <path d="M22 48 L22 26" stroke="var(--v-primary)" strokeWidth="1.8" />
+                    <ellipse cx="10" cy="28" rx="5" ry="2.5" fill="var(--v-primary)" opacity=".7" transform="rotate(-20 10 28)" />
+                    <ellipse cx="34" cy="22" rx="5" ry="2.5" fill="var(--v-primary)" opacity=".8" transform="rotate(20 34 22)" />
+                    <circle cx="22" cy="22" r="4" fill="var(--v-primary-hi)" />
+                  </svg>
+                  <div style={{ width: 2, height: 40, background: 'var(--line)' }} />
+                  <div style={{ padding: '10px 16px', borderRadius: 10, background: 'var(--ink-1)', border: '1px dashed color-mix(in oklab, var(--v-primary) 40%, transparent)', fontFamily: 'var(--font-display)', fontSize: 14, fontStyle: 'italic', color: 'var(--text-muted)' }}>
+                    ✦ {ritualCompletadoHoy ? 'Carta · revelada mañana' : 'Carta · por revelar'}
+                  </div>
                 </div>
               </div>
             </div>
@@ -2749,7 +2958,7 @@ export default function Dashboard() {
           `}</style>
           <div className="bnav">
             {[
-              { label: 'Hoy',        I: Icon.sparkle, active: view === 'inicio',      action: () => setView('inicio') },
+              { label: 'Hoy',        I: Icon.sparkle, active: view === 'ritual' || view === 'inicio',  action: () => setView('ritual') },
               { label: 'Clara',      I: Icon.dots,    active: view === 'clara',       action: () => navigate('clara') },
               { label: 'Módulos',    I: Icon.book,    active: view === 'modulos' || view === 'modulo',  action: () => navigate('modulos') },
               { label: 'Tests',      I: Icon.chart,   active: view === 'tests',       action: () => setView('tests') },
