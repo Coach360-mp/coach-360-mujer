@@ -1303,25 +1303,201 @@ export default function Dashboard() {
         )
       })()}
 
-      {testResult && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: testResult.nombre === 'Agua' ? 'linear-gradient(180deg, #082f49 0%, #0c4a6e 40%, #0a0a0a 100%)' : testResult.nombre === 'Tierra' ? 'linear-gradient(180deg, #1a2e05 0%, #365314 40%, #0a0a0a 100%)' : testResult.nombre === 'Fuego' ? 'linear-gradient(180deg, #431407 0%, #7c2d12 40%, #0a0a0a 100%)' : testResult.nombre === 'Aire' ? 'linear-gradient(180deg, #2e1065 0%, #4c1d95 40%, #0a0a0a 100%)' : 'linear-gradient(180deg, #1a1410 0%, #0a0a0a 100%)', zIndex: 1000, overflowY: 'auto' }}>
-          <div style={{ padding: '20px 24px' }}><button onClick={() => { setTestResult(null); setActiveTest(null); }} style={{ background: 'transparent', border: 'none', color: '#a8a8a8', fontSize: 14, cursor: 'pointer' }}>← Cerrar</button></div>
-          <div style={{ maxWidth: 560, margin: '0 auto', padding: '20px 24px 60px' }}>
-            <div style={{ textAlign: 'center', marginBottom: 40 }}>
-              <div style={{ fontSize: 11, letterSpacing: 3, color: testResult.color || '#d4af37', textTransform: 'uppercase', marginBottom: 12 }}>Tu elemento es</div>
-              <div style={{ fontSize: 80, marginBottom: 8 }}>{testResult.icono || '✦'}</div>
-              <h1 style={{ fontFamily: 'Georgia, serif', fontSize: 44, fontWeight: 300, color: '#fff', marginBottom: 16 }}>{testResult.nombre}</h1>
-              <p style={{ fontSize: 16, color: '#d4d4d4', lineHeight: 1.6, maxWidth: 440, margin: '0 auto' }}>{testResult.descLarga || testResult.desc}</p>
+      {testResult && (() => {
+        // Port híbrido C: layout de TestResult (Fase 5 L5010-5127) + contenido textual real + radar decorativo.
+        // Soporta dos shapes: elementProfiles legacy (nombre/icono/desc/descLarga/fortalezas/sombras/recomendaciones/proximoPaso/promptClara/color)
+        // y perfiles_resultado del schema (perfil/titulo_perfil/descripcion/fortalezas/desafios/recomendacion).
+        const tituloPerfil = testResult.nombre || testResult.titulo_perfil || testResult.perfil || 'Tu perfil'
+        const descripcion = testResult.descLarga || testResult.descripcion || testResult.desc || ''
+        const fortalezas = Array.isArray(testResult.fortalezas)
+          ? testResult.fortalezas
+          : typeof testResult.fortalezas === 'string' ? testResult.fortalezas.split('\n').filter(Boolean) : []
+        const desafios = Array.isArray(testResult.sombras)
+          ? testResult.sombras
+          : Array.isArray(testResult.desafios)
+            ? testResult.desafios
+            : typeof testResult.desafios === 'string' ? testResult.desafios.split('\n').filter(Boolean) : []
+        const recomendaciones = Array.isArray(testResult.recomendaciones)
+          ? testResult.recomendaciones
+          : typeof testResult.recomendacion === 'string' ? [testResult.recomendacion] : []
+        const proximoPaso = testResult.proximoPaso || null
+
+        // Radar decorativo: 6 dimensiones hardcoded estéticas (~70-80%) — placeholder hasta tracking real.
+        const dims = [
+          { k: 'Propósito', v: 78 },
+          { k: 'Hábitos',   v: 65 },
+          { k: 'Relaciones', v: 72 },
+          { k: 'Cuerpo',    v: 60 },
+          { k: 'Emoción',   v: 80 },
+          { k: 'Mente',     v: 75 },
+        ]
+        const cx = 200, cy = 200, r = 130
+        const polyPoints = dims.map((d, i) => {
+          const a = (i / dims.length) * Math.PI * 2 - Math.PI / 2
+          const val = d.v / 100
+          return `${cx + Math.cos(a) * r * val},${cy + Math.sin(a) * r * val}`
+        }).join(' ')
+        const dotPoints = dims.map((d, i) => {
+          const a = (i / dims.length) * Math.PI * 2 - Math.PI / 2
+          const val = d.v / 100
+          return [cx + Math.cos(a) * r * val, cy + Math.sin(a) * r * val]
+        })
+
+        const cerrar = () => { setTestResult(null); setActiveTest(null) }
+        const conversarConClara = () => {
+          const prompt = testResult.promptClara || `Acabo de hacer un test y mi resultado es ${tituloPerfil}.`
+          setChatMsgs([{ r: 'u', t: prompt, createdAt: new Date().toISOString() }])
+          setTestResult(null); setActiveTest(null); setView('clara')
+        }
+
+        return (
+          <div className="dir-ritual" data-v="clara" style={{ position: 'fixed', inset: 0, zIndex: 1000, overflowY: 'auto', background: 'var(--bg)', color: 'var(--text)' }}>
+            <style>{`
+              .tr-wrap { padding: 24px 20px 80px; max-width: 1200px; margin: 0 auto; }
+              .tr-back { padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line); background: transparent; color: var(--text-muted); font-size: 12px; cursor: pointer; font-family: var(--font-body); }
+              .tr-h1 { font-size: clamp(34px, 7vw, 56px); line-height: 1; letter-spacing: -0.035em; font-weight: 400; margin: 0; }
+              .tr-grid { display: flex; flex-direction: column; gap: 24px; margin-top: 32px; }
+              .tr-radar-wrap { aspect-ratio: 1; max-width: 420px; margin: 0 auto; width: 100%; }
+              .tr-cards { display: flex; flex-direction: column; gap: 16px; }
+              @media (min-width: 768px) {
+                .tr-wrap { padding: 48px 64px 64px; }
+                .tr-grid { display: grid; grid-template-columns: 420px 1fr; gap: 56px; align-items: start; margin-top: 40px; }
+              }
+            `}</style>
+
+            <div className="tr-wrap">
+              {/* Header */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32, flexWrap: 'wrap', gap: 12 }}>
+                <button onClick={cerrar} className="tr-back">← Cerrar</button>
+              </div>
+
+              <div className="eyebrow" style={{ marginBottom: 14 }}>✦ Tu radar · después del test</div>
+              <h1 className="tr-h1" style={{ fontFamily: 'var(--font-display)' }}>
+                Así te ves <em style={{ fontStyle: 'italic', color: 'var(--v-primary)' }}>hoy</em>.
+              </h1>
+              <p style={{ fontSize: 15, color: 'var(--text-muted)', marginTop: 16, maxWidth: 520, lineHeight: 1.6 }}>
+                {testResult.titulo_perfil ? `${testResult.titulo_perfil}. ` : tituloPerfil ? `Tu perfil: ${tituloPerfil}. ` : ''}Mira las dimensiones donde más fuerza tienes hoy.
+              </p>
+
+              <div className="tr-grid">
+                {/* Radar decorativo */}
+                <div>
+                  <div className="tr-radar-wrap">
+                    <svg viewBox="0 0 400 400" width="100%" height="100%">
+                      {[0.25, 0.5, 0.75, 1].map((s, i) => {
+                        const poly = dims.map((_, j) => {
+                          const a = (j / dims.length) * Math.PI * 2 - Math.PI / 2
+                          return `${cx + Math.cos(a) * r * s},${cy + Math.sin(a) * r * s}`
+                        }).join(' ')
+                        return <polygon key={i} points={poly} fill="none" stroke="rgba(255,255,255,.06)" strokeWidth="1" />
+                      })}
+                      {dims.map((_, i) => {
+                        const a = (i / dims.length) * Math.PI * 2 - Math.PI / 2
+                        return <line key={i} x1={cx} y1={cy} x2={cx + Math.cos(a) * r} y2={cy + Math.sin(a) * r} stroke="rgba(255,255,255,.06)" strokeWidth="1" />
+                      })}
+                      <polygon
+                        points={polyPoints}
+                        fill="color-mix(in oklab, var(--v-primary) 28%, transparent)"
+                        stroke="var(--v-primary)"
+                        strokeWidth="2"
+                      />
+                      {dotPoints.map((p, i) => (
+                        <circle key={i} cx={p[0]} cy={p[1]} r="4" fill="var(--v-primary)" />
+                      ))}
+                      {dims.map((d, i) => {
+                        const a = (i / dims.length) * Math.PI * 2 - Math.PI / 2
+                        const lx = cx + Math.cos(a) * (r + 36)
+                        const ly = cy + Math.sin(a) * (r + 36)
+                        return (
+                          <g key={i}>
+                            <text x={lx} y={ly} fontSize="14" fontFamily="var(--font-display)" fill="var(--text)" textAnchor="middle" dominantBaseline="middle" fontStyle="italic">{d.k}</text>
+                          </g>
+                        )
+                      })}
+                    </svg>
+                  </div>
+                  <div style={{ textAlign: 'center', marginTop: 12, fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--text-dim)', letterSpacing: '.05em', lineHeight: 1.5 }}>
+                    Tracking dimensional personalizado próximamente.
+                  </div>
+                </div>
+
+                {/* Contenido real */}
+                <div className="tr-cards">
+                  {/* Insight principal */}
+                  <div style={{ padding: 26, background: 'linear-gradient(135deg, var(--v-tint), var(--ink-2) 80%)', border: '1px solid color-mix(in oklab, var(--v-primary) 30%, var(--line))', borderRadius: 18 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                      <img src="/clara.jpg" alt="Clara" style={{ width: 34, height: 34, borderRadius: '50%', objectFit: 'cover' }} />
+                      <div style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--v-primary)', letterSpacing: '.1em' }}>LO QUE VE CLARA</div>
+                    </div>
+                    <div style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(22px, 4vw, 26px)', lineHeight: 1.25, letterSpacing: '-0.02em', marginBottom: 10 }}>
+                      {testResult.icono ? <span style={{ marginRight: 8 }}>{testResult.icono}</span> : null}
+                      <em style={{ fontStyle: 'italic', color: 'var(--v-primary)' }}>{tituloPerfil}</em>
+                    </div>
+                    {descripcion && (
+                      <p style={{ fontSize: 14, color: 'var(--text-muted)', lineHeight: 1.55 }}>{descripcion}</p>
+                    )}
+                  </div>
+
+                  {/* Fortalezas */}
+                  {fortalezas.length > 0 && (
+                    <div style={{ padding: 22, background: 'var(--ink-2)', border: '1px solid var(--line)', borderRadius: 16 }}>
+                      <div className="eyebrow" style={{ marginBottom: 14 }}>✦ Tus fortalezas</div>
+                      {fortalezas.map((f, i) => (
+                        <div key={i} style={{ display: 'flex', gap: 12, marginBottom: 10, color: 'var(--text)', fontSize: 14, lineHeight: 1.5 }}>
+                          <span style={{ color: 'var(--v-primary)', flexShrink: 0 }}>—</span>
+                          <span style={{ color: 'var(--text-muted)' }}>{f}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Sombras / Desafíos */}
+                  {desafios.length > 0 && (
+                    <div style={{ padding: 22, background: 'var(--ink-2)', border: '1px solid var(--line)', borderRadius: 16 }}>
+                      <div className="eyebrow" style={{ marginBottom: 14 }}>Tu sombra</div>
+                      {desafios.map((s, i) => (
+                        <div key={i} style={{ display: 'flex', gap: 12, marginBottom: 10, color: 'var(--text)', fontSize: 14, lineHeight: 1.5 }}>
+                          <span style={{ color: 'var(--text-dim)', flexShrink: 0 }}>—</span>
+                          <span style={{ color: 'var(--text-muted)' }}>{s}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Recomendaciones */}
+                  {recomendaciones.length > 0 && (
+                    <div style={{ padding: 22, background: 'var(--ink-2)', border: '1px solid var(--line)', borderRadius: 16 }}>
+                      <div className="eyebrow" style={{ marginBottom: 14 }}>Para esta semana</div>
+                      {recomendaciones.map((rec, i) => (
+                        <div key={i} style={{ display: 'flex', gap: 12, marginBottom: 10, color: 'var(--text)', fontSize: 14, lineHeight: 1.5 }}>
+                          <span style={{ color: 'var(--v-primary)', flexShrink: 0, fontFamily: 'var(--font-mono)', fontWeight: 600 }}>{(i + 1).toString().padStart(2, '0')}</span>
+                          <span style={{ color: 'var(--text-muted)' }}>{rec}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Próximo paso */}
+                  {proximoPaso && (
+                    <div style={{ padding: 22, background: 'var(--v-tint)', border: '1px solid color-mix(in oklab, var(--v-primary) 30%, transparent)', borderRadius: 16 }}>
+                      <div className="eyebrow" style={{ marginBottom: 8, color: 'var(--v-primary)' }}>✦ Tu próximo paso</div>
+                      <div style={{ color: 'var(--text)', fontSize: 15, lineHeight: 1.5 }}>{proximoPaso}</div>
+                    </div>
+                  )}
+
+                  {/* CTAs */}
+                  <button onClick={conversarConClara} style={{ width: '100%', padding: '14px', borderRadius: 12, border: 'none', background: 'var(--v-primary)', color: '#0a0c0e', fontWeight: 600, fontSize: 15, cursor: 'pointer', fontFamily: 'var(--font-body)', marginTop: 4 }}>
+                    Conversar con Clara sobre esto →
+                  </button>
+                  <button onClick={cerrar} style={{ width: '100%', padding: 12, borderRadius: 12, border: '1px solid var(--line-strong)', background: 'transparent', color: 'var(--text)', fontSize: 14, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
+                    Volver al inicio
+                  </button>
+                </div>
+              </div>
             </div>
-            {testResult.fortalezas && (<div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: 24, marginBottom: 16 }}><div style={{ fontSize: 11, letterSpacing: 2, color: testResult.color, textTransform: 'uppercase', marginBottom: 14, fontWeight: 600 }}>✦ Tus fortalezas</div>{testResult.fortalezas.map((f, i) => (<div key={i} style={{ display: 'flex', gap: 12, marginBottom: 10, color: '#e5e5e5', fontSize: 14, lineHeight: 1.5 }}><span style={{ color: testResult.color, flexShrink: 0 }}>—</span><span>{f}</span></div>))}</div>)}
-            {testResult.sombras && (<div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: 24, marginBottom: 16 }}><div style={{ fontSize: 11, letterSpacing: 2, color: '#a8a8a8', textTransform: 'uppercase', marginBottom: 14, fontWeight: 600 }}>Tu sombra</div>{testResult.sombras.map((s, i) => (<div key={i} style={{ display: 'flex', gap: 12, marginBottom: 10, color: '#c4c4c4', fontSize: 14, lineHeight: 1.5 }}><span style={{ color: '#a8a8a8', flexShrink: 0 }}>—</span><span>{s}</span></div>))}</div>)}
-            {testResult.recomendaciones && (<div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: 24, marginBottom: 16 }}><div style={{ fontSize: 11, letterSpacing: 2, color: testResult.color, textTransform: 'uppercase', marginBottom: 14, fontWeight: 600 }}>Para esta semana</div>{testResult.recomendaciones.map((r, i) => (<div key={i} style={{ display: 'flex', gap: 12, marginBottom: 10, color: '#e5e5e5', fontSize: 14, lineHeight: 1.5 }}><span style={{ color: testResult.color, flexShrink: 0, fontWeight: 600 }}>{i + 1}.</span><span>{r}</span></div>))}</div>)}
-            {testResult.proximoPaso && (<div style={{ background: testResult.colorBg, border: `1px solid ${testResult.color}40`, borderRadius: 16, padding: 24, marginBottom: 24 }}><div style={{ fontSize: 11, letterSpacing: 2, color: testResult.color, textTransform: 'uppercase', marginBottom: 8, fontWeight: 600 }}>✦ Tu próximo paso</div><div style={{ color: '#fff', fontSize: 15, lineHeight: 1.5 }}>{testResult.proximoPaso}</div></div>)}
-            <button onClick={() => { const prompt = testResult.promptClara || `Acabo de hacer un test y mi resultado es ${testResult.nombre}.`; setChatMsgs([{ r: 'u', t: prompt }]); setTestResult(null); setActiveTest(null); setView('clara') }} style={{ width: '100%', background: `linear-gradient(135deg, ${testResult.color}, ${testResult.color}cc)`, color: '#0a0a0a', border: 'none', padding: '18px 24px', borderRadius: 30, fontSize: 15, fontWeight: 600, cursor: 'pointer', marginBottom: 12, fontFamily: 'inherit' }}>Conversar con {coach.name} sobre esto →</button>
-            <button onClick={() => { setTestResult(null); setActiveTest(null); }} style={{ width: '100%', background: 'transparent', color: '#a8a8a8', border: '1px solid rgba(255,255,255,0.15)', padding: '14px 24px', borderRadius: 30, fontSize: 14, cursor: 'pointer', fontFamily: 'inherit' }}>Volver al inicio</button>
           </div>
-        </div>
-      )}
+        )
+      })()}
 
       {activeHerramienta && view === 'herramienta_activa' && !herramientaCompletada && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'linear-gradient(180deg, #1a1410 0%, #0a0a0a 100%)', zIndex: 1000, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
