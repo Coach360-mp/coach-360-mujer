@@ -106,6 +106,8 @@ export default function Dashboard() {
   const [profileNotif, setProfileNotif] = useState({ ritual: true, gap: true, modulo: false, nueva: true })
   const [modulosCat, setModulosCat] = useState(0)
   const [mostrarPopupPostTest, setMostrarPopupPostTest] = useState(false)
+  const [badgesCatalogo, setBadgesCatalogo] = useState([])
+  const [badgesUsuario, setBadgesUsuario] = useState([])
   const [checkinDone, setCheckinDone] = useState(false)
   const [animoHoy, setAnimoHoy] = useState(null)
   const [equilibrio, setEquilibrio] = useState({ mente: 0, cuerpo: 0, corazon: 0, espiritu: 0 })
@@ -135,6 +137,17 @@ export default function Dashboard() {
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [chatMsgs, typing])
   useEffect(() => { checkUser() }, [])
   useEffect(() => { if (user?.id) cargarConversaciones() }, [user?.id])
+  useEffect(() => { if (user?.id) cargarBadges() }, [user?.id])
+
+  async function cargarBadges() {
+    if (!user?.id) return
+    const [{ data: catalogo }, { data: ganados }] = await Promise.all([
+      supabase.from('badges').select('id, titulo, descripcion, icono, puntos, condicion').order('puntos', { ascending: true }),
+      supabase.from('badges_usuario').select('badge_id, fecha_obtenido').eq('usuario_id', user.id),
+    ])
+    setBadgesCatalogo(catalogo || [])
+    setBadgesUsuario(ganados || [])
+  }
   useEffect(() => {
     if (testResult && perfil && !perfil?.popup_post_test_visto?.mujer) {
       setMostrarPopupPostTest(true)
@@ -1100,6 +1113,207 @@ export default function Dashboard() {
                     No hay módulos disponibles aún.
                   </div>
                 )}
+              </div>
+            </div>
+          </div>
+        )
+      })()}
+
+      {view === 'badges' && !activeTest && (() => {
+        // Port literal de BadgesSystem (fase5a.jsx L117-256) con data real de DB.
+        // Tabs de categoría omitidos (schema badges no tiene campo categoria aún).
+        const ganadosIds = new Set((badgesUsuario || []).map(bu => bu.badge_id))
+        const fechaPorBadge = {}
+        ;(badgesUsuario || []).forEach(bu => { fechaPorBadge[bu.badge_id] = bu.fecha_obtenido })
+        const totalBadges = badgesCatalogo.length
+        const ganadosCount = ganadosIds.size
+        const puntosTotales = perfil?.puntos_totales || 0
+        const nivelActual = perfil?.nivel || 1
+        const rachaActual = perfil?.racha_dias || 0
+
+        const STREAK_TREE = [
+          { d: 3,   sym: '◆',  n: 'Semilla',  m: 'Plantaste la intención.' },
+          { d: 7,   sym: '✧',  n: 'Brote',    m: 'Tu compromiso empieza a asomar.' },
+          { d: 14,  sym: '◆◆', n: 'Tallo',    m: 'La práctica se sostiene sola.' },
+          { d: 30,  sym: '❖',  n: 'Raíz',     m: 'Un mes arraigando profundamente.' },
+          { d: 60,  sym: '◈',  n: 'Copa',     m: 'Tu práctica da sombra y forma.' },
+          { d: 100, sym: '✦',  n: 'Árbol',    m: 'Te has convertido en referente para ti misma.' },
+          { d: 180, sym: '❋',  n: 'Bosque',   m: 'Tu constancia inspira a otros.' },
+          { d: 365, sym: '✺',  n: 'Estación', m: 'Un ciclo completo de transformación.' },
+        ]
+        const LEVELS = [
+          { n: 1, name: 'Comienzo',     range: '0 — 100',           d: 'Estás arrancando tu camino.' },
+          { n: 2, name: 'Búsqueda',     range: '101 — 300',         d: 'Has empezado a hacerte preguntas.' },
+          { n: 3, name: 'Exploración',  range: '301 — 700',         d: 'Conoces tus herramientas.' },
+          { n: 4, name: 'Práctica',     range: '701 — 1.500',       d: 'Tu camino ya tiene forma.' },
+          { n: 5, name: 'Profundidad',  range: '1.501 — 3.000',     d: 'Vas más allá de la superficie.' },
+          { n: 6, name: 'Integración',  range: '3.001 — 6.000',     d: 'Llevas tu aprendizaje al día a día.' },
+          { n: 7, name: 'Maestría',     range: '6.001 — 12.000',    d: 'Tu práctica se vuelve identidad.' },
+          { n: 8, name: 'Referente',    range: '12.001 — 25.000',   d: 'Otras personas aprenden de ti.' },
+          { n: 9, name: 'Ancestral',    range: '25.001+',           d: 'Habitas el camino con naturalidad.' },
+        ]
+        const fmtFecha = (iso) => iso ? new Date(iso).toLocaleDateString('es-CL', { day: 'numeric', month: 'short' }) : ''
+        const rachaActualHito = STREAK_TREE.findIndex(s => rachaActual < s.d)
+        const proximoHito = rachaActualHito >= 0 ? STREAK_TREE[rachaActualHito] : STREAK_TREE[STREAK_TREE.length - 1]
+        const hitoActual = rachaActualHito > 0 ? STREAK_TREE[rachaActualHito - 1] : null
+
+        return (
+          <div className="dir-ritual" data-v="clara" style={{ background: 'var(--bg)', color: 'var(--text)', minHeight: '100vh' }}>
+            <style>{`
+              .bg-wrap { padding: 24px 20px 80px; }
+              .bg-hero-grid { display: flex; flex-direction: column; gap: 18px; }
+              .bg-stats { display: flex; gap: 20px; flex-wrap: wrap; }
+              .bg-h1 { font-size: clamp(32px, 7vw, 56px); }
+              .bg-cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+              .bg-streak-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+              .bg-levels-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+              @media (min-width: 640px) {
+                .bg-streak-grid { grid-template-columns: repeat(8, 1fr); }
+                .bg-levels-grid { grid-template-columns: repeat(2, 1fr); }
+              }
+              @media (min-width: 768px) {
+                .bg-wrap { padding: 40px 56px 56px; }
+                .bg-hero-grid { display: grid; grid-template-columns: 1fr auto; gap: 40px; align-items: end; }
+                .bg-cards-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; }
+                .bg-levels-grid { grid-template-columns: repeat(3, 1fr); }
+              }
+            `}</style>
+
+            <div className="bg-wrap">
+              {/* Back button */}
+              <button onClick={() => navigate('perfil')} style={{ padding: '8px 14px', borderRadius: 999, border: '1px solid var(--line)', background: 'transparent', color: 'var(--text-muted)', fontSize: 12, cursor: 'pointer', fontFamily: 'var(--font-body)', marginBottom: 24 }}>← Volver</button>
+
+              {/* Hero */}
+              <div style={{ paddingBottom: 24, borderBottom: '1px solid var(--line)', marginBottom: 28 }}>
+                <div className="eyebrow" style={{ marginBottom: 12 }}>✦ Tu camino · insignias</div>
+                <div className="bg-hero-grid">
+                  <h1 className="bg-h1" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.035em', fontWeight: 400, lineHeight: 1, margin: 0 }}>
+                    {totalBadges} huellas. <em style={{ fontStyle: 'italic', color: 'var(--v-primary)' }}>{ganadosCount} encendida{ganadosCount === 1 ? '' : 's'}</em>.
+                  </h1>
+                  <div className="bg-stats">
+                    <div>
+                      <div style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(28px, 5vw, 36px)', letterSpacing: '-0.02em', color: 'var(--v-primary)' }}>{ganadosCount}/{totalBadges || '—'}</div>
+                      <div style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--text-dim)', letterSpacing: '.05em' }}>INSIGNIAS</div>
+                    </div>
+                    <div>
+                      <div style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(28px, 5vw, 36px)', letterSpacing: '-0.02em' }}>{puntosTotales}</div>
+                      <div style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--text-dim)', letterSpacing: '.05em' }}>PUNTOS</div>
+                    </div>
+                    <div>
+                      <div style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(28px, 5vw, 36px)', letterSpacing: '-0.02em' }}>{nivelActual}</div>
+                      <div style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--text-dim)', letterSpacing: '.05em' }}>NIVEL</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Grid de badges */}
+              <div className="bg-cards-grid" style={{ marginBottom: 40 }}>
+                {badgesCatalogo.length === 0 && (
+                  <div style={{ gridColumn: '1 / -1', padding: 32, textAlign: 'center', fontSize: 13, color: 'var(--text-muted)', background: 'var(--ink-2)', border: '1px solid var(--line)', borderRadius: 16 }}>
+                    Cargando insignias…
+                  </div>
+                )}
+                {badgesCatalogo.map(b => {
+                  const earned = ganadosIds.has(b.id)
+                  const fecha = fmtFecha(fechaPorBadge[b.id]).toUpperCase()
+                  return (
+                    <div key={b.id} style={{
+                      padding: 20,
+                      background: earned ? 'linear-gradient(165deg, color-mix(in oklab, var(--v-primary) 14%, var(--ink-2)) 0%, var(--ink-2) 70%)' : 'var(--ink-2)',
+                      border: `1px solid ${earned ? 'color-mix(in oklab, var(--v-primary) 35%, var(--line))' : 'var(--line)'}`,
+                      borderRadius: 16, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center',
+                      opacity: earned ? 1 : 0.55, position: 'relative', minHeight: 200,
+                    }}>
+                      {earned && (
+                        <div style={{ position: 'absolute', top: -20, right: -20, width: 70, height: 70, borderRadius: '50%', background: 'var(--v-primary)', opacity: .12, filter: 'blur(18px)', pointerEvents: 'none' }} />
+                      )}
+                      <div style={{
+                        width: 68, height: 68, borderRadius: '50%',
+                        background: earned ? 'var(--v-primary)' : 'color-mix(in oklab, var(--v-primary) 22%, var(--ink-3))',
+                        color: earned ? '#0a0c0e' : 'var(--v-primary)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, marginBottom: 12, fontFamily: 'var(--font-display)',
+                      }}>{b.icono || '✦'}</div>
+                      <div style={{ fontFamily: 'var(--font-display)', fontSize: 16, letterSpacing: '-0.015em', lineHeight: 1.2, marginBottom: 6 }}>{b.titulo}</div>
+                      <div style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.4, marginBottom: 10 }}>{b.descripcion}</div>
+                      <div style={{ marginTop: 'auto', paddingTop: 8, fontSize: 10, fontFamily: 'var(--font-mono)', color: earned ? 'var(--v-primary)' : 'var(--text-dim)', letterSpacing: '.08em' }}>
+                        {earned ? `+${b.puntos} · GANADO${fecha ? ` · ${fecha}` : ''}` : `POR GANAR · ${b.puntos}p`}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+
+              {/* Árbol de rachas */}
+              <div style={{ paddingTop: 28, borderTop: '1px solid var(--line)' }}>
+                <div className="eyebrow" style={{ marginBottom: 10 }}>Árbol de rachas · tu constancia</div>
+                <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(24px, 5vw, 36px)', letterSpacing: '-0.025em', fontWeight: 400, margin: 0, marginBottom: 22 }}>
+                  {hitoActual ? <>Vas por <em style={{ fontStyle: 'italic', color: 'var(--v-primary)' }}>{hitoActual.n}</em>. {proximoHito.n} a {proximoHito.d - rachaActual} día{proximoHito.d - rachaActual === 1 ? '' : 's'}.</>
+                              : <>Empezando. <em style={{ fontStyle: 'italic', color: 'var(--v-primary)' }}>Semilla</em> a {3 - rachaActual} día{3 - rachaActual === 1 ? '' : 's'}.</>}
+                </h2>
+
+                <div style={{ position: 'relative', padding: '24px 16px 12px', background: 'var(--ink-2)', border: '1px solid var(--line)', borderRadius: 18, overflow: 'hidden' }}>
+                  <div className="bg-streak-grid">
+                    {STREAK_TREE.map((s, i) => {
+                      const active = rachaActual >= s.d
+                      const current = i === rachaActualHito
+                      return (
+                        <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', position: 'relative' }}>
+                          <div style={{
+                            width: 56, height: 56, borderRadius: '50%',
+                            background: active ? 'var(--v-primary)' : 'var(--ink-3)',
+                            color: active ? '#0a0c0e' : 'var(--text-dim)',
+                            border: current ? '3px solid var(--v-primary-hi)' : 'none',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, fontFamily: 'var(--font-display)',
+                            marginBottom: 10, position: 'relative', zIndex: 1,
+                          }}>{s.sym}</div>
+                          <div style={{ fontFamily: 'var(--font-display)', fontSize: 13, letterSpacing: '-0.01em', marginBottom: 2, color: active ? 'var(--text)' : 'var(--text-muted)' }}>{s.n}</div>
+                          <div style={{ fontSize: 10, fontFamily: 'var(--font-mono)', color: 'var(--text-dim)', letterSpacing: '.05em', marginBottom: 4 }}>{s.d} DÍAS</div>
+                          <div style={{ fontSize: 10, color: 'var(--text-dim)', lineHeight: 1.35, fontStyle: 'italic', maxWidth: 110 }}>{s.m}</div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              {/* Niveles */}
+              <div style={{ marginTop: 36, paddingTop: 28, borderTop: '1px solid var(--line)' }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 18, gap: 16, flexWrap: 'wrap' }}>
+                  <div>
+                    <div className="eyebrow" style={{ marginBottom: 10 }}>Niveles · emocionales, no funcionales</div>
+                    <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(22px, 4.5vw, 32px)', letterSpacing: '-0.025em', fontWeight: 400, margin: 0 }}>
+                      Habitas <em style={{ fontStyle: 'italic', color: 'var(--v-primary)' }}>{LEVELS[Math.min(nivelActual - 1, LEVELS.length - 1)]?.name || 'Comienzo'}</em>. {puntosTotales} puntos acumulados.
+                    </h2>
+                  </div>
+                  <div style={{ fontSize: 11, color: 'var(--text-dim)', fontFamily: 'var(--font-mono)', letterSpacing: '.05em', textAlign: 'right', lineHeight: 1.5 }}>
+                    NO DESBLOQUEA FEATURES<br />ES UN ESPEJO
+                  </div>
+                </div>
+
+                <div className="bg-levels-grid">
+                  {LEVELS.map(l => {
+                    const current = l.n === nivelActual
+                    const past = l.n < nivelActual
+                    return (
+                      <div key={l.n} style={{
+                        padding: 18, borderRadius: 14,
+                        background: current ? 'var(--v-tint)' : 'var(--ink-2)',
+                        border: `1px solid ${current ? 'var(--v-primary)' : 'var(--line)'}`,
+                        opacity: past || current ? 1 : .55,
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, gap: 8 }}>
+                          <span style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: current ? 'var(--v-primary)' : 'var(--text-dim)', letterSpacing: '.08em' }}>NIVEL {l.n}</span>
+                          {current && <span style={{ fontSize: 10, fontFamily: 'var(--font-mono)', color: 'var(--v-primary)', letterSpacing: '.08em' }}>◉ AHORA</span>}
+                          {past && <span style={{ fontSize: 10, fontFamily: 'var(--font-mono)', color: 'var(--text-dim)', letterSpacing: '.08em' }}>✓ ATRÁS</span>}
+                        </div>
+                        <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, letterSpacing: '-0.02em', marginBottom: 4 }}>{l.name}</div>
+                        <div style={{ fontSize: 12, color: 'var(--text-muted)', fontStyle: 'italic', lineHeight: 1.5, marginBottom: 6 }}>{l.d}</div>
+                        <div style={{ fontSize: 10, fontFamily: 'var(--font-mono)', color: 'var(--text-dim)', letterSpacing: '.05em' }}>{l.range}</div>
+                      </div>
+                    )
+                  })}
+                </div>
               </div>
             </div>
           </div>
@@ -2243,6 +2457,12 @@ export default function Dashboard() {
                       )
                     })}
                   </div>
+
+                  {/* Mis insignias link */}
+                  <button onClick={() => navigate('badges')} style={{ padding: 14, borderRadius: 12, border: '1px solid var(--line)', background: 'var(--ink-2)', color: 'var(--text)', fontSize: 13, cursor: 'pointer', fontFamily: 'var(--font-body)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span>✦ Mis insignias y rachas</span>
+                    <span style={{ color: 'var(--v-primary)' }}>→</span>
+                  </button>
 
                   {/* Cerrar sesión */}
                   <button onClick={handleLogout} style={{ padding: 14, borderRadius: 12, border: '1px solid var(--line-strong)', background: 'transparent', color: 'var(--text-muted)', fontSize: 13, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
