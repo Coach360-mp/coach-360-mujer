@@ -66,9 +66,10 @@ const UNSPLASH_IMG = {
 }
 
 // ─── RitualPlanCard — port literal de Fase 5 (líneas 1515-1563) ───
-function RitualPlanCard({ plan, annual, monthlyReal, annualReal, fmt, onClick }) {
+function RitualPlanCard({ plan, annual, monthlyReal, annualReal, fmt, onClick, loading }) {
   const price = annual ? annualReal / 12 : monthlyReal
   const featured = plan.featured
+  const isLoading = loading && plan.id !== 'free'
   return (
     <div style={{
       padding: '36px 30px 30px',
@@ -97,12 +98,14 @@ function RitualPlanCard({ plan, annual, monthlyReal, annualReal, fmt, onClick })
         {annual && monthlyReal > 0 ? `${fmt(annualReal)} anual` : 'facturado mensual'}
       </div>
 
-      <button onClick={onClick} style={{
-        width: '100%', padding: '13px 16px', borderRadius: 'var(--r-pill)', border: 'none', cursor: 'pointer',
+      <button onClick={onClick} disabled={isLoading} style={{
+        width: '100%', padding: '13px 16px', borderRadius: 'var(--r-pill)', border: 'none',
+        cursor: isLoading ? 'not-allowed' : 'pointer',
         background: featured ? 'var(--v-primary)' : 'var(--ink-12)',
         color: '#0a0c0e',
         fontWeight: 600, fontSize: 14, marginBottom: 28, letterSpacing: '-0.005em', fontFamily: 'var(--font-body)',
-      }}>{plan.cta}</button>
+        opacity: isLoading ? 0.6 : 1,
+      }}>{isLoading ? 'Procesando...' : plan.cta}</button>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {plan.features.map((f, i) => (
@@ -118,9 +121,11 @@ function RitualPlanCard({ plan, annual, monthlyReal, annualReal, fmt, onClick })
 
 export default function PlanesPage() {
   const router = useRouter()
-  const [annual, setAnnual] = useState(true)
+  const [billingCycle, setBillingCycle] = useState('anual')
   const [pricing, setPricing] = useState(null)
   const [user, setUser] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const isAnnual = billingCycle === 'anual'
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUser(data?.user || null)).catch(() => setUser(null))
@@ -151,15 +156,30 @@ export default function PlanesPage() {
 
   const handleCheckout = async (planId) => {
     if (planId === 'free' || !user) { router.push('/mujer'); return }
+    if (loading) return
+    setLoading(true)
+    console.log('[checkout] Iniciando pago:', { planId, billingCycle })
     try {
       const res = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ planId, userId: user.id, userEmail: user.email, vertical: 'mujer' }),
+        body: JSON.stringify({ planId, userId: user.id, userEmail: user.email, vertical: 'mujer', billingCycle }),
       })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const data = await res.json()
-      if (data.url) window.location.href = data.url
-    } catch (err) { console.error('[planes] checkout error:', err) }
+      console.log('[checkout] Respuesta MP:', data)
+      if (data.url) {
+        window.location.href = data.url
+      } else {
+        console.error('[checkout] No url en respuesta:', data)
+        alert('Error al crear preferencia de pago')
+        setLoading(false)
+      }
+    } catch (err) {
+      console.error('[checkout] Error:', err)
+      alert('Error al procesar el pago. Intenta de nuevo.')
+      setLoading(false)
+    }
   }
 
   return (
@@ -261,15 +281,16 @@ export default function PlanesPage() {
       {/* TOGGLE */}
       <div className="hp-toggle-wrap">
         <div style={{ display: 'inline-flex', padding: 5, background: 'var(--ink-3)', borderRadius: 999, border: '1px solid var(--line)' }}>
-          {[false, true].map(v => (
-            <button key={v ? 'y' : 'm'} onClick={() => setAnnual(v)} style={{
+          {[
+            { v: 'mensual', label: 'Mensual' },
+            { v: 'anual',   label: <>Anual <span style={{ color: 'var(--v-primary)', fontSize: 11, marginLeft: 6, letterSpacing: '.1em' }}>AHORRA 20%</span></> },
+          ].map(opt => (
+            <button key={opt.v} onClick={() => setBillingCycle(opt.v)} style={{
               padding: '10px 22px', borderRadius: 999, border: 'none', cursor: 'pointer',
-              background: annual === v ? 'var(--ink-5)' : 'transparent',
-              color: annual === v ? 'var(--text)' : 'var(--text-muted)',
+              background: billingCycle === opt.v ? 'var(--ink-5)' : 'transparent',
+              color: billingCycle === opt.v ? 'var(--text)' : 'var(--text-muted)',
               fontSize: 13, fontWeight: 500, fontFamily: 'var(--font-body)',
-            }}>
-              {v ? (<>Anual <span style={{ color: 'var(--v-primary)', fontSize: 11, marginLeft: 6, letterSpacing: '.1em' }}>AHORRA 20%</span></>) : 'Mensual'}
-            </button>
+            }}>{opt.label}</button>
           ))}
         </div>
       </div>
@@ -278,7 +299,7 @@ export default function PlanesPage() {
       <div className="hp-plans">
         {PLANS.map(p => {
           const prices = getPlanPrices(p)
-          return <RitualPlanCard key={p.id} plan={p} annual={annual} monthlyReal={prices.monthly} annualReal={prices.annual} fmt={fmt} onClick={() => handleCheckout(p.id)} />
+          return <RitualPlanCard key={p.id} plan={p} annual={isAnnual} monthlyReal={prices.monthly} annualReal={prices.annual} fmt={fmt} onClick={() => handleCheckout(p.id)} loading={loading} />
         })}
       </div>
 

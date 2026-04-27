@@ -74,12 +74,17 @@ function getMercadoPagoConfig(paisCodigo) {
 export async function POST(request) {
   const supabaseAdmin = getSupabaseAdmin()
   try {
-    const { planId, userId, userEmail, vertical } = await request.json()
+    const { planId, userId, userEmail, vertical, billingCycle = 'mensual' } = await request.json()
 
     const metadata = planesMetadata[planId]
     if (!metadata) {
       return NextResponse.json({ error: 'Plan not found' }, { status: 400 })
     }
+
+    // Solo suscripciones (esencial/premium) admiten facturación anual con descuento.
+    // Las sesiones individuales y los packs ignoran billingCycle.
+    const esSuscripcion = metadata.type === 'subscription'
+    const esAnual = esSuscripcion && billingCycle === 'anual'
 
     // Obtener país del usuario desde su perfil
     let paisCodigo = PAIS_DEFAULT
@@ -129,14 +134,18 @@ export async function POST(request) {
       ? `/${vertical}/dashboard`
       : '/dashboard'
 
+    // Precio final: anual aplica solo a suscripciones, con 20% descuento sobre 12 meses
+    const precioFinal = esAnual ? Math.round(precioData.precio * 12 * 0.8) : precioData.precio
+    const tituloFinal = esSuscripcion ? `${metadata.title} (${billingCycle})` : metadata.title
+
     const preference = {
       items: [
         {
-          title: metadata.title,
+          title: tituloFinal,
           description: metadata.description,
           quantity: 1,
           currency_id: precioData.moneda,
-          unit_price: precioData.precio,
+          unit_price: precioFinal,
         },
       ],
       payer: { email: userEmail || '' },
@@ -146,12 +155,15 @@ export async function POST(request) {
         pending: `${baseUrl}${verticalPath}?payment=pending`,
       },
       auto_return: 'approved',
-      external_reference: `${userId}_${planId}_${vertical || 'mujer'}_${paisCodigo}_${Date.now()}`,
+      // external_reference: userId_planId_vertical_paisCodigo_billingCycle_timestamp
+      // El webhook actual lee parts[0..2] (userId/planId/vertical) sin tocar el resto;
+      // billingCycle queda preservado en parts[4] para extender fecha_fin_plan en el futuro.
+      external_reference: `${userId}_${planId}_${vertical || 'mujer'}_${paisCodigo}_${billingCycle}_${Date.now()}`,
       notification_url: `${baseUrl}/api/webhook`,
     }
 
     console.log('[checkout] preference:', JSON.stringify(preference, null, 2))
-    console.log('[checkout] env:', { vercel_env: process.env.VERCEL_ENV, pais: paisCodigo, token_prefix: mpConfig.accessToken?.slice(0, 8), is_test_token: mpConfig.accessToken?.startsWith('TEST-') })
+    console.log('[checkout] env:', { vercel_env: process.env.VERCEL_ENV, pais: paisCodigo, billingCycle, esSuscripcion, precioBase: precioData.precio, precioFinal, token_prefix: mpConfig.accessToken?.slice(0, 8), is_test_token: mpConfig.accessToken?.startsWith('TEST-') })
 
     const response = await fetch('https://api.mercadopago.com/checkout/preferences', {
       method: 'POST',
