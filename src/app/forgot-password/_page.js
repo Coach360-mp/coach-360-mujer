@@ -1,6 +1,8 @@
 'use client'
 import { useState } from 'react'
+import Link from 'next/link'
 import { createClient } from '@supabase/supabase-js'
+import { RealPortrait } from '@/components/design/icons'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -13,41 +15,220 @@ export default function ForgotPassword() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e) => {
+    if (e?.preventDefault) e.preventDefault()
     if (!email.trim()) return
     setLoading(true)
     setError('')
-    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+    const { error: err } = await supabase.auth.resetPasswordForEmail(email.trim(), {
       redirectTo: `${window.location.origin}/reset-password`,
     })
-    if (error) { setError('No encontramos esa dirección. Revisa el email.'); setLoading(false); return }
+    if (err) {
+      setError('No encontramos esa dirección. Revisa el email.')
+      setLoading(false)
+      return
+    }
     setEnviado(true)
     setLoading(false)
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: 'linear-gradient(180deg, #1a1410 0%, #0a0a0a 100%)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 24px', fontFamily: 'system-ui, sans-serif', color: '#fff' }}>
-      <div style={{ fontSize: 32, color: '#d4af37', marginBottom: 24 }}>✦</div>
-      <div style={{ fontSize: 11, letterSpacing: 4, color: '#d4af37', textTransform: 'uppercase', marginBottom: 32, fontWeight: 600 }}>Coach 360</div>
-      {!enviado ? (
-        <div style={{ width: '100%', maxWidth: 400, textAlign: 'center' }}>
-          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: 28, fontWeight: 300, marginBottom: 12 }}>Recupera tu acceso</h1>
-          <p style={{ fontSize: 14, color: '#a8a8a8', lineHeight: 1.6, marginBottom: 32 }}>Ingresa tu email y te enviamos un link para crear una nueva contraseña.</p>
-          <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="tu@email.com" onKeyDown={e => e.key === 'Enter' && handleSubmit()} style={{ width: '100%', background: 'rgba(212,175,55,0.06)', border: '1px solid rgba(212,175,55,0.3)', borderRadius: 14, padding: '16px 20px', color: '#fff', fontSize: 16, fontFamily: 'inherit', outline: 'none', marginBottom: 16, boxSizing: 'border-box' }} />
-          {error && <p style={{ color: '#f87171', fontSize: 13, marginBottom: 16 }}>{error}</p>}
-          <button onClick={handleSubmit} disabled={loading || !email.trim()} style={{ width: '100%', background: email.trim() ? 'linear-gradient(135deg, #d4af37, #f5c842)' : 'rgba(212,175,55,0.2)', color: email.trim() ? '#0a0a0a' : '#a8a8a8', border: 'none', padding: '16px 24px', borderRadius: 30, fontSize: 15, fontWeight: 600, cursor: email.trim() ? 'pointer' : 'default', fontFamily: 'inherit' }}>
-            {loading ? 'Enviando...' : 'Enviar link ✦'}
-          </button>
-          <a href="/" style={{ display: 'block', marginTop: 20, fontSize: 13, color: '#a8a8a8', textDecoration: 'none' }}>← Volver al inicio</a>
+    <div
+      className="dir-ritual"
+      data-v="clara"
+      style={{
+        minHeight: '100vh',
+        background: 'var(--bg)',
+        color: 'var(--text)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '32px 20px',
+      }}
+    >
+      <div style={{ width: '100%', maxWidth: 460 }}>
+        <div className="eyebrow" style={{ marginBottom: 16, textAlign: 'center' }}>
+          Recuperación de contraseña
         </div>
-      ) : (
-        <div style={{ textAlign: 'center', maxWidth: 400 }}>
-          <div style={{ fontSize: 48, marginBottom: 24 }}>✦</div>
-          <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 26, fontWeight: 300, marginBottom: 16 }}>Revisa tu email</h2>
-          <p style={{ fontSize: 15, color: '#c8c8c8', lineHeight: 1.6, marginBottom: 32 }}>Te enviamos un link a <strong style={{ color: '#d4af37' }}>{email}</strong>. Tienes 60 minutos para usarlo.</p>
-          <a href="/" style={{ fontSize: 13, color: '#a8a8a8', textDecoration: 'none' }}>← Volver al inicio</a>
+
+        <div
+          style={{
+            background: 'var(--ink-2)',
+            border: '1px solid var(--line)',
+            borderRadius: 20,
+            overflow: 'hidden',
+          }}
+        >
+          <div
+            style={{
+              padding: '12px 18px',
+              borderBottom: '1px solid var(--line)',
+              fontFamily: 'var(--font-mono)',
+              fontSize: 11,
+              color: 'var(--text-dim)',
+              letterSpacing: '.08em',
+            }}
+          >
+            /forgot-password
+          </div>
+
+          <div style={{ padding: '36px 28px 32px' }}>
+            {!enviado ? (
+              <form onSubmit={handleSubmit}>
+                <RealPortrait src="/clara.jpg" size={48} />
+                <h1
+                  style={{
+                    fontFamily: 'var(--font-display)',
+                    fontSize: 'clamp(28px, 7vw, 34px)',
+                    letterSpacing: '-0.03em',
+                    lineHeight: 1.1,
+                    fontWeight: 400,
+                    marginTop: 22,
+                    marginBottom: 10,
+                  }}
+                >
+                  ¿Olvidaste tu contraseña?
+                </h1>
+                <p
+                  style={{
+                    fontSize: 14,
+                    color: 'var(--text-muted)',
+                    lineHeight: 1.55,
+                    marginBottom: 22,
+                    maxWidth: 340,
+                  }}
+                >
+                  Escribe tu email y te enviamos un enlace para crear una nueva.
+                  El enlace dura 60 minutos.
+                </p>
+
+                <label
+                  htmlFor="email"
+                  style={{
+                    display: 'block',
+                    fontSize: 11,
+                    fontFamily: 'var(--font-mono)',
+                    color: 'var(--text-dim)',
+                    letterSpacing: '.08em',
+                    marginBottom: 6,
+                  }}
+                >
+                  EMAIL
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="tu@email.com"
+                  autoComplete="email"
+                  style={{
+                    width: '100%',
+                    padding: '13px 16px',
+                    borderRadius: 10,
+                    border: '1px solid var(--line-strong)',
+                    background: 'var(--ink-3)',
+                    color: 'var(--text)',
+                    fontSize: 14,
+                    marginBottom: 16,
+                    fontFamily: 'var(--font-sans)',
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                  }}
+                />
+
+                {error && (
+                  <p
+                    style={{
+                      color: '#f87171',
+                      fontSize: 13,
+                      marginBottom: 12,
+                      lineHeight: 1.4,
+                    }}
+                  >
+                    {error}
+                  </p>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={loading || !email.trim()}
+                  style={{
+                    width: '100%',
+                    padding: '13px',
+                    borderRadius: 12,
+                    border: 'none',
+                    background: 'var(--v-primary)',
+                    color: '#0a0c0e',
+                    fontWeight: 600,
+                    fontSize: 14,
+                    cursor: loading || !email.trim() ? 'default' : 'pointer',
+                    opacity: loading || !email.trim() ? 0.5 : 1,
+                    marginBottom: 12,
+                    fontFamily: 'var(--font-sans)',
+                  }}
+                >
+                  {loading ? 'Enviando…' : 'Enviar enlace'}
+                </button>
+
+                <Link
+                  href="/login"
+                  style={{
+                    display: 'block',
+                    fontSize: 12,
+                    color: 'var(--text-dim)',
+                    textAlign: 'center',
+                    textDecoration: 'underline',
+                  }}
+                >
+                  Volver a iniciar sesión
+                </Link>
+              </form>
+            ) : (
+              <div>
+                <RealPortrait src="/clara.jpg" size={48} />
+                <h1
+                  style={{
+                    fontFamily: 'var(--font-display)',
+                    fontSize: 'clamp(28px, 7vw, 34px)',
+                    letterSpacing: '-0.03em',
+                    lineHeight: 1.1,
+                    fontWeight: 400,
+                    marginTop: 22,
+                    marginBottom: 10,
+                  }}
+                >
+                  Revisa tu email.
+                </h1>
+                <p
+                  style={{
+                    fontSize: 14,
+                    color: 'var(--text-muted)',
+                    lineHeight: 1.55,
+                    marginBottom: 22,
+                  }}
+                >
+                  Te enviamos un enlace a{' '}
+                  <span style={{ color: 'var(--v-primary)' }}>{email}</span>.
+                  Tienes 60 minutos para usarlo.
+                </p>
+                <Link
+                  href="/login"
+                  style={{
+                    display: 'block',
+                    fontSize: 12,
+                    color: 'var(--text-dim)',
+                    textAlign: 'center',
+                    textDecoration: 'underline',
+                  }}
+                >
+                  Volver a iniciar sesión
+                </Link>
+              </div>
+            )}
+          </div>
         </div>
-      )}
+      </div>
     </div>
   )
 }
