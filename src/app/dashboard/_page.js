@@ -1164,22 +1164,144 @@ export default function Dashboard() {
         </div>
       )}
 
-      {activeTest && !testResult && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'linear-gradient(180deg, #1a1410 0%, #0a0a0a 100%)', zIndex: 1000, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
-          <div style={{ padding: '20px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <button onClick={() => { setActiveTest(null); setTestStep(0); setTestAnswers([]); }} style={{ background: 'transparent', border: 'none', color: '#a8a8a8', fontSize: 14, cursor: 'pointer' }}>← Salir</button>
-            <div style={{ fontSize: 11, letterSpacing: 2, color: '#d4af37', textTransform: 'uppercase' }}>{testStep + 1} / {testQuestions.length}</div>
-          </div>
-          <div style={{ padding: '0 24px 32px' }}><div style={{ background: 'rgba(212, 175, 55, 0.15)', borderRadius: 12, height: 4, overflow: 'hidden' }}><div style={{ background: 'linear-gradient(90deg, #d4af37, #f5c842)', height: '100%', width: `${((testStep + 1) / testQuestions.length) * 100}%`, transition: 'width 0.4s ease' }} /></div></div>
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 24px 40px', maxWidth: 560, margin: '0 auto', width: '100%' }}>
-            <div style={{ fontSize: 11, letterSpacing: 3, color: '#d4af37', textTransform: 'uppercase', marginBottom: 16, textAlign: 'center' }}>{activeTest.titulo}</div>
-            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 26, lineHeight: 1.4, marginBottom: 40, color: '#fff', textAlign: 'center', fontWeight: 300 }}>{testQuestions[testStep]?.texto}</h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {testQuestions[testStep]?.opciones?.map((opt, i) => (<button key={i} onClick={() => answerQuestion(testQuestions[testStep].valores[i])} style={{ background: 'rgba(212, 175, 55, 0.08)', border: '1px solid rgba(212, 175, 55, 0.25)', borderRadius: 14, padding: '18px 20px', color: '#fff', fontSize: 15, textAlign: 'left', cursor: 'pointer', transition: 'all 0.2s', lineHeight: 1.5, fontFamily: 'inherit' }}>{opt}</button>))}
+      {activeTest && !testResult && (() => {
+        // Port híbrido: layout de AdaptiveTest (Fase 5 L4896-5005) + opciones múltiples del proyecto actual.
+        const total = testQuestions.length || 1
+        const progress = ((testStep + 1) / total) * 100
+        const currentQ = testQuestions[testStep]
+        const respuestaElegida = (j) => {
+          const q = testQuestions[j]
+          if (!q || j >= testAnswers.length) return null
+          const val = testAnswers[j]
+          const idx = q.valores?.findIndex(v => v === val) ?? -1
+          return idx >= 0 ? { texto: q.texto, respuesta: q.opciones?.[idx] } : null
+        }
+        const anteriores = testStep > 0 ? [respuestaElegida(testStep - 2), respuestaElegida(testStep - 1)].filter(Boolean).slice(-2) : []
+        const handlePausar = () => { setActiveTest(null) } // preserva testStep/testAnswers en memoria
+
+        return (
+          <div className="dir-ritual" data-v="clara" style={{ position: 'fixed', inset: 0, zIndex: 1000, overflowY: 'auto', background: 'var(--bg)', color: 'var(--text)', display: 'flex', flexDirection: 'column' }}>
+            <style>{`
+              .at-wrap { display: flex; flex-direction: column; flex: 1; padding: 20px 20px 32px; }
+              .at-header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+              .at-header-title { flex: 1; min-width: 120px; }
+              .at-content { flex: 1; display: flex; flex-direction: column; gap: 32px; }
+              .at-right { display: none; }
+              .at-q-title { font-size: clamp(26px, 5vw, 54px); line-height: 1.05; letter-spacing: -0.03em; font-weight: 400; margin: 0 0 14px; }
+              .at-pausar { padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line); background: transparent; color: var(--text-muted); font-size: 11px; cursor: pointer; font-family: var(--font-body); white-space: nowrap; }
+              @media (min-width: 768px) {
+                .at-wrap { padding: 32px 64px; }
+                .at-header { margin-bottom: 36px; flex-wrap: nowrap; }
+                .at-content { display: grid; grid-template-columns: 1fr 320px; gap: 56px; align-items: start; }
+                .at-right { display: flex; flex-direction: column; gap: 16px; align-self: stretch; }
+              }
+            `}</style>
+
+            {/* Header */}
+            <div className="at-wrap">
+              <div className="at-header">
+                <img src="/clara.jpg" alt="Clara" style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                <div className="at-header-title">
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', letterSpacing: '.05em', textTransform: 'uppercase' }}>
+                    {activeTest.titulo} · Clara
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 6 }}>
+                    <div style={{ flex: 1, height: 2, background: 'var(--ink-3)', borderRadius: 1, overflow: 'hidden' }}>
+                      <div style={{ width: `${progress}%`, height: '100%', background: 'var(--v-primary)', transition: 'width .5s var(--ease-out)' }} />
+                    </div>
+                    <span style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>{testStep + 1} / {total}</span>
+                  </div>
+                </div>
+                <button onClick={handlePausar} className="at-pausar">Pausar · guardo avance</button>
+              </div>
+
+              {/* Content */}
+              <div className="at-content">
+                {/* Left: pregunta + opciones */}
+                <div>
+                  <div className="eyebrow" style={{ marginBottom: 18, color: 'var(--v-primary)' }}>✦ Pregunta {testStep + 1}</div>
+                  <h2 className="at-q-title" style={{ fontFamily: 'var(--font-display)' }}>
+                    {currentQ?.texto}
+                  </h2>
+                  <p style={{ fontSize: 14, color: 'var(--text-muted)', fontStyle: 'italic', marginBottom: 28 }}>
+                    No hay respuesta correcta. Elige la que se sienta más verdadera.
+                  </p>
+
+                  {/* Opciones múltiples estilo ritual */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    {currentQ?.opciones?.map((opt, i) => (
+                      <button
+                        key={i}
+                        onClick={() => answerQuestion(currentQ.valores[i])}
+                        style={{
+                          padding: '16px 20px',
+                          background: 'var(--ink-2)',
+                          border: '1px solid var(--line)',
+                          borderRadius: 14,
+                          color: 'var(--text)',
+                          fontSize: 15,
+                          textAlign: 'left',
+                          cursor: 'pointer',
+                          lineHeight: 1.5,
+                          fontFamily: 'var(--font-body)',
+                          transition: 'all var(--d-fast) var(--ease-out)',
+                        }}
+                        onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'color-mix(in oklab, var(--v-primary) 50%, var(--line))'; e.currentTarget.style.background = 'var(--v-tint)' }}
+                        onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--line)'; e.currentTarget.style.background = 'var(--ink-2)' }}
+                      >
+                        {opt}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Back navigation */}
+                  <div style={{ display: 'flex', gap: 12, marginTop: 32, flexWrap: 'wrap' }}>
+                    <button
+                      onClick={() => setTestStep(s => Math.max(0, s - 1))}
+                      disabled={testStep === 0}
+                      style={{
+                        padding: '12px 22px', borderRadius: 12, border: '1px solid var(--line-strong)',
+                        background: 'transparent', color: 'var(--text-muted)', fontSize: 14,
+                        cursor: testStep === 0 ? 'default' : 'pointer', opacity: testStep === 0 ? .3 : 1,
+                        fontFamily: 'var(--font-body)',
+                      }}
+                    >← Atrás</button>
+                  </div>
+                </div>
+
+                {/* Right: coach context */}
+                <div className="at-right">
+                  <div style={{ padding: 22, background: 'var(--ink-2)', border: '1px solid var(--line)', borderRadius: 16 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                      <img src="/clara.jpg" alt="Clara" style={{ width: 34, height: 34, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                      <div style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', letterSpacing: '.05em' }}>NOTA DE CLARA</div>
+                    </div>
+                    <div style={{ fontFamily: 'var(--font-display)', fontSize: 17, lineHeight: 1.4, fontStyle: 'italic' }}>
+                      "Tómate el tiempo que necesites. No hay prisa — tus respuestas son para ti."
+                    </div>
+                  </div>
+
+                  {anteriores.length > 0 && (
+                    <div style={{ padding: 20, background: 'var(--ink-2)', border: '1px solid var(--line)', borderRadius: 16 }}>
+                      <div className="eyebrow" style={{ marginBottom: 12 }}>Del bloque anterior</div>
+                      {anteriores.map((a, i) => (
+                        <div key={i} style={{ paddingBottom: 10, marginBottom: 10, borderBottom: i < anteriores.length - 1 ? '1px solid var(--line)' : 'none' }}>
+                          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 3, lineHeight: 1.4 }}>{a.texto}</div>
+                          <div style={{ fontSize: 13, fontStyle: 'italic', color: 'var(--v-primary)' }}>{a.respuesta}</div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div style={{ padding: 14, background: 'var(--ink-3)', border: '1px solid var(--line)', borderRadius: 12, fontSize: 11, color: 'var(--text-dim)', fontFamily: 'var(--font-mono)', lineHeight: 1.5, textAlign: 'center' }}>
+                    tus respuestas solo las ve Clara. cifrado end-to-end.
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )
+      })()}
 
       {testResult && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: testResult.nombre === 'Agua' ? 'linear-gradient(180deg, #082f49 0%, #0c4a6e 40%, #0a0a0a 100%)' : testResult.nombre === 'Tierra' ? 'linear-gradient(180deg, #1a2e05 0%, #365314 40%, #0a0a0a 100%)' : testResult.nombre === 'Fuego' ? 'linear-gradient(180deg, #431407 0%, #7c2d12 40%, #0a0a0a 100%)' : testResult.nombre === 'Aire' ? 'linear-gradient(180deg, #2e1065 0%, #4c1d95 40%, #0a0a0a 100%)' : 'linear-gradient(180deg, #1a1410 0%, #0a0a0a 100%)', zIndex: 1000, overflowY: 'auto' }}>
