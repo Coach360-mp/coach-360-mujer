@@ -45,6 +45,30 @@ const COACH_CONFIG = {
     },
     // Plan card copy en pop-ups y planes free
     upsellPlanEsencial: 'Plan Esencial te da chat sin límite diario y todos los módulos.',
+    planes: [
+      { id: 'free', nombre: 'Gratis', features: ['Clara como tu coach', '3 conversaciones por semana', '2 tests básicos', 'Check-in diario', 'Mi Equilibrio'] },
+      { id: 'esencial', nombre: 'Esencial', popular: true, features: ['Clara sin límites', 'Conversaciones ilimitadas', 'Todos los tests y herramientas', 'Todos los módulos', 'Mi Equilibrio completo', 'Acceso solo a Coach 360 Mujer'] },
+      { id: 'premium', nombre: 'Premium', features: ['Todo lo de Esencial', 'Acceso a las 3 verticales (Mujer + General + Líderes)', 'Memoria cruzada entre coaches', 'Coaching con voz', 'Acceso anticipado a nuevo contenido', 'Soporte prioritario'] },
+    ],
+    dimensiones: [
+      { key: 'mente',    label: 'Mente',    desc: '¿Alimentaste tu mente hoy?',     color: '#6366f1' },
+      { key: 'cuerpo',   label: 'Cuerpo',   desc: '¿Te moviste hoy?',                color: '#10b981' },
+      { key: 'corazon',  label: 'Corazón',  desc: '¿Cómo estás emocionalmente?',     color: '#f59e0b' },
+      { key: 'espiritu', label: 'Espíritu', desc: '¿Tuviste un momento de calma?',   color: '#8b5cf6' },
+    ],
+    habitosSugeridos: {
+      mente:    ['Leer 20 minutos', 'Meditar', 'Escribir en un diario', 'Aprender algo nuevo', 'Hacer un puzzle', 'Escuchar un podcast', 'Desconectarme del celular 1 hora', 'Journaling matutino'],
+      cuerpo:   ['Caminar 30 minutos', 'Pilates', 'Gimnasio', 'Yoga', 'Tomar 2 litros de agua', 'Dormir 8 horas', 'Comer 5 porciones de verduras', 'Estirarme 10 minutos'],
+      corazon:  ['Llamar a alguien querido', 'Expresar agradecimiento', 'Journaling emocional', 'Conectar con amigas', 'Cuidar a alguien', 'Escribir lo que sentí hoy', 'Pasar tiempo con mi pareja', 'Tiempo con mis hijos'],
+      espiritu: ['Meditación guiada', 'Caminar en naturaleza', 'Oración', 'Momento de silencio', 'Respiración consciente', 'Leer algo inspirador', 'Gratitud al dormir', 'Contemplación'],
+    },
+    animos: [
+      { label: 'Difícil',   value: 1 },
+      { label: 'Regular',   value: 2 },
+      { label: 'Bien',      value: 3 },
+      { label: 'Muy bien',  value: 4 },
+      { label: 'Increíble', value: 5 },
+    ],
   },
 
   general: {
@@ -86,6 +110,30 @@ const COACH_CONFIG = {
       equilibrio_7: 'Equilibrio sostenido siete días. No es perfección — es atención.',
     },
     upsellPlanEsencial: 'Plan Esencial te da chat sin límite diario y todos los módulos.',
+    planes: [
+      { id: 'free', nombre: 'Gratis', features: ['Leo como tu coach', '3 conversaciones por semana', 'Check-in diario', 'Hábitos básicos'] },
+      { id: 'esencial', nombre: 'Esencial', popular: true, features: ['Leo sin límites', 'Conversaciones ilimitadas', 'Todos los tests y herramientas', 'Mi Equilibrio completo', 'Acceso solo a Coach 360 General'] },
+      { id: 'premium', nombre: 'Premium', features: ['Todo lo de Esencial', 'Acceso a las 3 verticales (Mujer + General + Líderes)', 'Memoria cruzada entre coaches', 'Acceso anticipado a nuevo contenido', 'Soporte prioritario'] },
+    ],
+    dimensiones: [
+      { key: 'mente',    label: 'Mente',       desc: '¿Alimentaste tu enfoque hoy?',         color: '#6366f1' },
+      { key: 'cuerpo',   label: 'Cuerpo',      desc: '¿Moviste tu cuerpo?',                  color: '#10b981' },
+      { key: 'corazon',  label: 'Relaciones',  desc: '¿Conectaste con alguien?',             color: '#f59e0b' },
+      { key: 'espiritu', label: 'Propósito',   desc: '¿Trabajaste en lo importante?',        color: '#8b5cf6' },
+    ],
+    habitosSugeridos: {
+      mente:    ['Leer 30 minutos', 'Deep work 90 min', 'Meditar', 'Aprender algo técnico', 'Desconexión digital', 'Journaling', 'Podcast formativo', 'Revisar metas'],
+      cuerpo:   ['Gimnasio', 'Correr', 'HIIT', 'Caminar 10k pasos', 'Ayuno intermitente', 'Dormir 7+ horas', 'Hidratación', 'Estiramiento'],
+      corazon:  ['Llamar a alguien', 'Networking 1:1', 'Quality time familia', 'Mensaje intencional', 'Practicar agradecimiento', 'Pedir feedback', 'Resolver un conflicto', 'Mentoría'],
+      espiritu: ['Revisar objetivos', 'Trabajar en el proyecto importante', 'Planificar el día', 'Review semanal', 'Lectura inspiradora', 'Momento de claridad', 'Reflexión estratégica', 'Decisión difícil'],
+    },
+    animos: [
+      { label: 'Difícil',   value: 1 },
+      { label: 'Regular',   value: 2 },
+      { label: 'Bien',      value: 3 },
+      { label: 'Muy bien',  value: 4 },
+      { label: 'En fuego',  value: 5 },
+    ],
   },
 
   lideres: {
@@ -125,6 +173,30 @@ const COACH_CONFIG = {
       equilibrio_7: 'Siete días de equilibrio. No es soft — es lo que sostiene la dureza.',
     },
     upsellPlanEsencial: 'Plan Esencial te da chat sin límite diario y todos los módulos.',
+    planes: [
+      { id: 'free', nombre: 'Gratis', features: ['Marco como tu coach', '3 conversaciones por semana', 'Check-in diario', 'Hábitos básicos de liderazgo'] },
+      { id: 'esencial', nombre: 'Esencial', popular: true, features: ['Marco sin límites', 'Conversaciones ilimitadas', 'Todos los tests y herramientas ejecutivos', 'Mi Equilibrio completo', 'Acceso solo a Coach 360 Líderes'] },
+      { id: 'premium', nombre: 'Premium', features: ['Todo lo de Esencial', 'Acceso a las 3 verticales (Mujer + General + Líderes)', 'Memoria cruzada entre coaches', 'Sesiones 1:1 con coaches humanos', 'Acceso anticipado a nuevo contenido', 'Soporte prioritario'] },
+    ],
+    dimensiones: [
+      { key: 'mente',    label: 'Mente',    desc: '¿Pensaste con claridad hoy?',         color: '#818cf8' },
+      { key: 'cuerpo',   label: 'Cuerpo',   desc: '¿Cuidaste tu energía?',                color: '#34d399' },
+      { key: 'corazon',  label: 'Corazón',  desc: '¿Conectaste con tu equipo?',           color: '#f472b6' },
+      { key: 'espiritu', label: 'Espíritu', desc: '¿Trabajaste en lo importante?',        color: '#fbbf24' },
+    ],
+    habitosSugeridos: {
+      mente:    ['Revisar métricas del equipo', 'Deep work 90 min', 'Revisar prioridades', 'Leer algo estratégico', 'Journaling ejecutivo', 'Pensar sin interrupciones', 'Revisar decisiones de la semana', 'Meditar'],
+      cuerpo:   ['Gimnasio', 'Correr', 'Dormir 7+ horas', 'No revisar mail antes de las 9', 'Caminar entre reuniones', 'Hidratarme', 'Pausa de 10 min cada 2 horas', 'Almuerzo sin pantalla'],
+      corazon:  ['1:1 con alguien del equipo', 'Dar un feedback concreto', 'Reconocer un logro público', 'Escuchar sin interrumpir', 'Preguntar cómo están', 'Conectar con un par', 'Mentoría', 'Resolver un conflicto pendiente'],
+      espiritu: ['Revisar OKRs', 'Trabajo profundo en proyecto clave', 'Planificar la semana', 'Review de resultados', 'Decisión difícil postergada', 'Pensar a 90 días', 'Eliminar una reunión', 'Delegar algo'],
+    },
+    animos: [
+      { label: 'Cansado',     value: 1 },
+      { label: 'Presionado',  value: 2 },
+      { label: 'Enfocado',    value: 3 },
+      { label: 'Claro',       value: 4 },
+      { label: 'Motivado',    value: 5 },
+    ],
   },
 }
 
