@@ -65,16 +65,42 @@ const EVALUADORES = {
   racha_3: async ({ perfil }) => Math.max(perfil?.racha_dias || 0, perfil?.mejor_racha || 0) >= 3,
   racha_7: async ({ perfil }) => Math.max(perfil?.racha_dias || 0, perfil?.mejor_racha || 0) >= 7,
   racha_30: async ({ perfil }) => Math.max(perfil?.racha_dias || 0, perfil?.mejor_racha || 0) >= 30,
+  // primera_voz: gated por el evento mismo — al disparar voz_usada, el usuario ya usó voz.
+  primera_voz: async () => true,
+  // checkin_semanal: 7 días distintos con check-in en los últimos 7 días.
+  checkin_semanal: async ({ userId }) => {
+    const desde = new Date(Date.now() - 7 * 86400000).toISOString()
+    const { data } = await supabase
+      .from('daily_checkins')
+      .select('created_at')
+      .eq('user_id', userId)
+      .gte('created_at', desde)
+    const dias = new Set((data || []).map(r => (r.created_at || '').split('T')[0]).filter(Boolean))
+    return dias.size >= 7
+  },
+  // equilibrio_7: 7 días distintos con al menos un hábito completado en los últimos 7 días.
+  equilibrio_7: async ({ userId }) => {
+    const desdeFecha = new Date(Date.now() - 7 * 86400000).toISOString().split('T')[0]
+    const { data } = await supabase
+      .from('habitos_completados')
+      .select('fecha')
+      .eq('user_id', userId)
+      .gte('fecha', desdeFecha)
+    const dias = new Set((data || []).map(r => r.fecha).filter(Boolean))
+    return dias.size >= 7
+  },
 }
 
 // Códigos disparados por cada evento (para chequear sólo lo relevante).
 export const EVENTOS_BADGES = {
   chat_enviado:        ['primera_conversacion_clara'],
+  voz_usada:           ['primera_voz'],
   herramienta_completada: ['primera_herramienta'],
   test_completado:     ['primer_test', 'todos_tests'],
   modulo_iniciado:     ['primer_modulo'],
   modulo_completado:   ['modulo_completado'],
-  ritual_diario:       ['racha_3', 'racha_7', 'racha_30'],
+  ritual_diario:       ['racha_3', 'racha_7', 'racha_30', 'checkin_semanal'],
+  habito_completado:   ['equilibrio_7'],
 }
 
 // Otorga los badges nuevos cuya condición se cumpla. Evita duplicados consultando primero.

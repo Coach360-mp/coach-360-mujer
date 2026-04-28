@@ -438,7 +438,10 @@ export default function CoachDashboard({ vertical = 'mujer' }) {
         try {
           const res = await fetch('/api/transcribir', { method: 'POST', body: formData })
           const data = await res.json()
-          if (data.transcripcion) { setChatInput(data.transcripcion) }
+          if (data.transcripcion) {
+            setChatInput(data.transcripcion)
+            chequearBadges('voz_usada')
+          }
         } catch (e) { console.error('Transcripcion error:', e) }
       }
       mediaRecorder.start()
@@ -508,6 +511,7 @@ export default function CoachDashboard({ vertical = 'mujer' }) {
       setHabitosCompletados(prev => [...prev, habitoId])
       const habito = habitosUsuario.find(h => h.id === habitoId)
       await sumarPuntos('habito', 3, habito ? `Hábito: ${habito.nombre}` : 'Hábito completado')
+      chequearBadges('habito_completado')
     }
   }
 
