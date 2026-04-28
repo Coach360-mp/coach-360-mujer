@@ -9,6 +9,7 @@ import { TestShareModal, CertificateModal } from '@/components/design/ShareModal
 import { BadgeCelebrationModal } from '@/components/design/BadgeCelebrationModal'
 import { evaluarYOtorgarBadges } from '@/lib/badges'
 import { getCoachConfig } from '@/lib/coachConfig'
+import { useVerticalAccess } from '@/lib/hooks/useVerticalAccess'
 
 const diasSemana = ['L', 'M', 'X', 'J', 'V', 'S', 'D']
 
@@ -17,6 +18,7 @@ export default function CoachDashboard({ vertical = 'mujer' }) {
   const coaches = config.coachesPorPlan
   const coachName = config.coach.name
   const coachImg = config.coach.img
+  const { canAccessMujer, canAccessLideres, canAccessCoach360 } = useVerticalAccess()
   const planes = config.planes
   const dimensiones = config.dimensiones
   const habitosSugeridos = config.habitosSugeridos
@@ -775,8 +777,43 @@ export default function CoachDashboard({ vertical = 'mujer' }) {
                 )
               })}
 
+              {/* Otras experiencias — switcher cross-vertical filtrado por género */}
+              {(() => {
+                const verticalesDisponibles = [
+                  { id: 'general', label: 'Coach 360', desc: 'Coaching general', img: '/leo.jpg', path: '/general/dashboard', visible: canAccessCoach360 },
+                  { id: 'mujer',   label: 'Mujer',     desc: 'Contexto de mujer',   img: '/clara.jpg', path: '/mujer/dashboard',   visible: canAccessMujer },
+                  { id: 'lideres', label: 'Líderes',   desc: 'Liderazgo ejecutivo', img: '/marco.jpg', path: '/lideres/dashboard', visible: canAccessLideres },
+                ].filter(v => v.visible && v.id !== vertical)
+                if (verticalesDisponibles.length === 0) return null
+                return (
+                  <div style={{ marginTop: 24, paddingTop: 16, borderTop: '1px solid var(--line)' }}>
+                    <div className="eyebrow" style={{ marginBottom: 10, padding: '0 4px' }}>Otras experiencias</div>
+                    {verticalesDisponibles.map(v => (
+                      <button
+                        key={v.id}
+                        onClick={() => { setMenuAbierto(false); router.push(v.path) }}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: 10, width: '100%',
+                          padding: '10px 12px', border: 'none', borderRadius: 10,
+                          background: 'transparent', color: 'var(--text-muted)',
+                          cursor: 'pointer', textAlign: 'left',
+                          fontFamily: 'var(--font-body)', marginBottom: 4,
+                        }}
+                      >
+                        <img src={v.img} alt="" style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: 13, color: 'var(--text)', fontWeight: 500 }}>{v.label}</div>
+                          <div className="font-mono" style={{ fontSize: 10, color: 'var(--text-dim)', letterSpacing: '.05em' }}>{v.desc}</div>
+                        </div>
+                        <Icon.arrow s={11} />
+                      </button>
+                    ))}
+                  </div>
+                )
+              })()}
+
               {/* Plan card — datos reales del perfil */}
-              <div style={{ marginTop: 'auto', padding: 14, borderRadius: 14, background: 'var(--ink-3)', border: '1px solid var(--line)', fontSize: 12 }}>
+              <div style={{ marginTop: 16, padding: 14, borderRadius: 14, background: 'var(--ink-3)', border: '1px solid var(--line)', fontSize: 12 }}>
                 <div className="eyebrow" style={{ marginBottom: 6, color: 'var(--v-primary)' }}>
                   ✦ {perfil?.plan_actual === 'free' ? 'Plan Gratis' : perfil?.plan_actual === 'esencial' ? 'Plan Esencial' : 'Plan Premium'}
                 </div>
