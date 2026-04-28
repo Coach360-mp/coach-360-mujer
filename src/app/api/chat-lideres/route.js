@@ -279,7 +279,7 @@ Responde SOLO en este formato JSON exacto:
 export async function POST(request) {
   const supabaseAdmin = getSupabaseAdmin()
   try {
-    const { messages, userId } = await request.json()
+    const { messages, userId, conversacionId } = await request.json()
 
     const { data: perfil } = await supabaseAdmin
       .from('perfiles').select('plan_actual').eq('id', userId).single()
@@ -334,7 +334,41 @@ Si detectas crisis emocional grave, acoso, abuso o violencia:
       extraerInsightYGuardar(supabaseAdmin, userId, [...messages, { role: 'assistant', content: reply }], 'lideres', 'marco')
     }
 
-    return NextResponse.json({ reply })
+    // Persistir conversación en conversaciones_marco + mensajes_marco
+    let finalConvId = conversacionId
+    try {
+      if (finalConvId && userId) {
+        const { data: convExiste } = await supabaseAdmin
+          .from('conversaciones_marco')
+          .select('id').eq('id', finalConvId).eq('usuario_id', userId).maybeSingle()
+        if (!convExiste) {
+          console.warn('[chat-lideres] conversacionId no pertenece al user, creando nueva')
+          finalConvId = null
+        }
+      }
+      if (!finalConvId && userId) {
+        const lastUserMsg = messages[messages.length - 1]?.content || ''
+        const { data: newConv } = await supabaseAdmin
+          .from('conversaciones_marco')
+          .insert({ usuario_id: userId, titulo: lastUserMsg.slice(0, 40) })
+          .select('id').single()
+        finalConvId = newConv?.id
+      }
+      if (finalConvId) {
+        const lastUserMsg = messages[messages.length - 1]?.content || ''
+        await supabaseAdmin.from('mensajes_marco').insert([
+          { conversacion_id: finalConvId, rol: 'user', contenido: lastUserMsg },
+          { conversacion_id: finalConvId, rol: 'assistant', contenido: reply },
+        ])
+        await supabaseAdmin.from('conversaciones_marco')
+          .update({ ultimo_mensaje: new Date().toISOString() })
+          .eq('id', finalConvId)
+      }
+    } catch (err) {
+      console.error('[chat-lideres] Error persistiendo conversación:', err)
+    }
+
+    return NextResponse.json({ reply, conversacionId: finalConvId })
   } catch (error) {
     console.error('Chat error:', error)
     return NextResponse.json({ reply: 'Hubo un error. Intenta de nuevo.' }, { status: 500 })
