@@ -3,36 +3,48 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
+import { Sigil } from '@/components/design/icons'
 
 const areasVida = [
-  { id: 'salud', label: 'Salud y energía física' },
-  { id: 'carrera', label: 'Carrera y crecimiento profesional' },
-  { id: 'finanzas', label: 'Finanzas y libertad económica' },
+  { id: 'salud',      label: 'Salud y energía física' },
+  { id: 'carrera',    label: 'Carrera y crecimiento profesional' },
+  { id: 'finanzas',   label: 'Finanzas y libertad económica' },
   { id: 'relaciones', label: 'Relaciones y vínculos' },
-  { id: 'mental', label: 'Claridad mental y enfoque' },
-  { id: 'proposito', label: 'Propósito y sentido' },
-  { id: 'tiempo', label: 'Gestión del tiempo' },
-  { id: 'habitos', label: 'Construir hábitos sólidos' },
+  { id: 'mental',     label: 'Claridad mental y enfoque' },
+  { id: 'proposito',  label: 'Propósito y sentido' },
+  { id: 'tiempo',     label: 'Gestión del tiempo' },
+  { id: 'habitos',    label: 'Construir hábitos sólidos' },
 ]
 
 const estiloActual = [
   { id: 'disciplinado', label: 'Soy disciplinado pero estancado' },
-  { id: 'disperso', label: 'Me cuesta enfocarme' },
-  { id: 'ambicioso', label: 'Tengo muchas metas pero pocos resultados' },
-  { id: 'agotado', label: 'Estoy agotado, necesito reset' },
-  { id: 'empezando', label: 'Estoy empezando algo nuevo' },
-  { id: 'cambio', label: 'Quiero un cambio profundo' },
+  { id: 'disperso',     label: 'Me cuesta enfocarme' },
+  { id: 'ambicioso',    label: 'Tengo muchas metas pero pocos resultados' },
+  { id: 'agotado',      label: 'Estoy agotado, necesito reset' },
+  { id: 'empezando',    label: 'Estoy empezando algo nuevo' },
+  { id: 'cambio',       label: 'Quiero un cambio profundo' },
 ]
 
 const compromiso = [
-  { id: 'bajo', label: '10 minutos al día', desc: 'Mínimo viable' },
-  { id: 'medio', label: '20-30 minutos al día', desc: 'Ritmo constante' },
-  { id: 'alto', label: '1 hora al día o más', desc: 'Transformación acelerada' },
+  { id: 'bajo',  label: '10 minutos al día',          desc: 'Mínimo viable' },
+  { id: 'medio', label: '20-30 minutos al día',       desc: 'Ritmo constante' },
+  { id: 'alto',  label: '1 hora al día o más',         desc: 'Transformación acelerada' },
 ]
+
+const stepsLabels = [
+  { n: 1, label: 'Bienvenida' },
+  { n: 2, label: 'Nombre' },
+  { n: 3, label: 'Áreas' },
+  { n: 4, label: 'Momento' },
+  { n: 5, label: 'Compromiso' },
+  { n: 6, label: 'Objetivo' },
+  { n: 7, label: 'Obstáculo' },
+]
+const TOTAL = stepsLabels.length
 
 export default function OnboardingGeneral() {
   const [consentimientoAceptado, setConsentimientoAceptado] = useState(false)
-  const [step, setStep] = useState(0)
+  const [step, setStep] = useState(1)
   const [user, setUser] = useState(null)
   const [nombre, setNombre] = useState('')
   const [areasSel, setAreasSel] = useState([])
@@ -57,28 +69,34 @@ export default function OnboardingGeneral() {
       .eq('vertical', 'general')
       .maybeSingle()
 
-    if (onboarding) {
-      router.push('/general/dashboard')
-      return
-    }
+    if (onboarding) { router.push('/general/dashboard'); return }
 
     const { data: profile } = await supabase.from('perfiles').select('nombre').eq('id', user.id).single()
-    if (profile?.nombre) {
-      setNombre(profile.nombre)
-    } else if (user.user_metadata?.full_name) {
-      setNombre(user.user_metadata.full_name.split(' ')[0])
-    }
+    if (profile?.nombre) setNombre(profile.nombre)
+    else if (user.user_metadata?.full_name) setNombre(user.user_metadata.full_name.split(' ')[0])
   }
 
-  const toggleArea = (id) => {
+  const toggleArea = (id) =>
     setAreasSel(prev => prev.includes(id) ? prev.filter(a => a !== id) : [...prev, id].slice(-3))
+
+  const next = () => setStep(s => Math.min(TOTAL, s + 1))
+  const back = () => setStep(s => Math.max(1, s - 1))
+
+  const canContinue = () => {
+    switch (step) {
+      case 2: return nombre.trim().length > 0
+      case 3: return areasSel.length > 0
+      case 4: return estilo !== null
+      case 5: return nivelCompromiso !== null
+      case 6: return objetivo90.trim().length > 0
+      default: return true
+    }
   }
 
   const completeOnboarding = async () => {
     if (!user) return
     setGuardando(true)
     try {
-      // Actualizar perfil: agregar general a las verticales activas
       const { data: perfilActual } = await supabase.from('perfiles').select('active_verticals').eq('id', user.id).single()
       const verticalesActuales = perfilActual?.active_verticals || []
       const nuevasVerticales = verticalesActuales.includes('general') ? verticalesActuales : [...verticalesActuales, 'general']
@@ -100,32 +118,30 @@ export default function OnboardingGeneral() {
         respuesta_libre: `Objetivo: ${objetivo90}. Obstáculo: ${obstaculo}`,
       }, { onConflict: 'user_id,vertical' })
 
-      // Guardar contexto para que Leo lo use
       const contextos = [
-        { key: 'areas_vida', value: areasSel.join(', ') },
-        { key: 'estilo_actual', value: estilo },
-        { key: 'compromiso_diario', value: nivelCompromiso },
-        { key: 'objetivo_90_dias', value: objetivo90 },
+        { key: 'areas_vida',         value: areasSel.join(', ') },
+        { key: 'estilo_actual',      value: estilo },
+        { key: 'compromiso_diario',  value: nivelCompromiso },
+        { key: 'objetivo_90_dias',   value: objetivo90 },
         { key: 'obstaculo_principal', value: obstaculo },
       ].filter(c => c.value)
-
       if (contextos.length > 0) {
         await supabase.from('user_context').insert(
           contextos.map(c => ({
-            user_id: user.id,
-            vertical: 'general',
-            context_key: c.key,
-            context_value: c.value,
-            source_coach: 'onboarding',
+            user_id: user.id, vertical: 'general',
+            context_key: c.key, context_value: c.value, source_coach: 'onboarding',
           }))
         )
       }
 
-      // Enviar email de bienvenida Leo
       try {
-        const { data: { user: u } } = await supabase.auth.getUser()
-        if (u) await fetch('/api/emails/bienvenida', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: u.id, vertical: 'general' }) })
+        await fetch('/api/emails/bienvenida', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: user.id, vertical: 'general' }),
+        })
       } catch (e) { console.error('Error email bienvenida:', e) }
+
       router.push('/general/dashboard')
     } catch (err) {
       console.error('Error guardando onboarding:', err)
@@ -133,203 +149,137 @@ export default function OnboardingGeneral() {
     }
   }
 
-  const next = () => setStep(s => s + 1)
-  const back = () => setStep(s => Math.max(0, s - 1))
-
-  const totalSteps = 7
-  const canContinue = () => {
-    switch (step) {
-      case 1: return nombre.trim().length > 0
-      case 2: return areasSel.length > 0
-      case 3: return estilo !== null
-      case 4: return nivelCompromiso !== null
-      case 5: return objetivo90.trim().length > 0
-      default: return true
-    }
-  }
-
-  if (!consentimientoAceptado) return (
-    <div style={{ minHeight: '100vh', background: 'linear-gradient(180deg, #1a1410 0%, #0a0a0a 100%)', color: '#fff', fontFamily: 'system-ui, sans-serif', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 24px' }}>
-      <div style={{ fontSize: 32, color: '#14b8a6', marginBottom: 16 }}>◈</div>
-      <div style={{ fontSize: 11, letterSpacing: 4, color: '#14b8a6', textTransform: 'uppercase', marginBottom: 32, fontWeight: 600 }}>Coach 360</div>
-      <div style={{ maxWidth: 480, width: '100%' }}>
-        <h1 style={{ fontFamily: 'Georgia, serif', fontSize: 26, fontWeight: 300, marginBottom: 16, textAlign: 'center' }}>Antes de empezar</h1>
-        <p style={{ fontSize: 14, color: '#c8c8c8', lineHeight: 1.7, marginBottom: 24, textAlign: 'center' }}>Coach 360 recopila datos sobre tu bienestar emocional, estado de ánimo y resultados de tests de autoconocimiento. Estos son <strong style={{ color: '#14b8a6' }}>datos sensibles</strong> según la Ley N° 19.628 de Chile y requieren tu consentimiento explícito.</p>
-        <div style={{ background: 'rgba(20,184,166,0.06)', border: '1px solid rgba(20,184,166,0.2)', borderRadius: 16, padding: '20px 24px', marginBottom: 24 }}>
-          <p style={{ fontSize: 13, color: '#c8c8c8', lineHeight: 1.8, margin: 0 }}>Al continuar, autorizas a Coach 360 a recopilar y procesar tus datos personales y sensibles para personalizar tu experiencia de coaching. Tus datos no se venden a terceros. Puedes revocar este consentimiento en cualquier momento escribiendo a privacidad@micoach360.com.</p>
+  // ── Gate de consentimiento ──
+  if (!consentimientoAceptado) {
+    return (
+      <div className="dir-ritual" data-v="leo" style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--text)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 20px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 32 }}>
+          <Sigil s={20} />
+          <span style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 500 }}>Coach 360</span>
         </div>
-        <p style={{ fontSize: 12, color: '#888', textAlign: 'center', marginBottom: 28 }}>Lee nuestra <a href='/privacidad' target='_blank' style={{ color: '#14b8a6', textDecoration: 'none' }}>Política de Privacidad completa</a> para más detalles.</p>
-        <button onClick={() => setConsentimientoAceptado(true)} style={{ width: '100%', background: '#14b8a6', color: '#fff', border: 'none', padding: '18px 24px', borderRadius: 30, fontSize: 15, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', marginBottom: 12 }}>Acepto y quiero continuar</button>
-        <a href='/' style={{ display: 'block', textAlign: 'center', fontSize: 13, color: '#888', textDecoration: 'none' }}>No acepto — volver al inicio</a>
-      </div>
-    </div>
-  )
-
-  return (
-    <div style={{
-      minHeight: '100vh',
-      background: 'linear-gradient(180deg, #042f2e 0%, #0a0a0a 100%)',
-      color: '#fff',
-      fontFamily: 'system-ui, -apple-system, sans-serif',
-      display: 'flex',
-      flexDirection: 'column',
-    }}>
-      <div style={{ padding: '24px 20px 0' }}>
-        {step > 0 && (
-          <button onClick={back} style={{
-            background: 'transparent', border: 'none', color: '#a8a8a8',
-            fontSize: 14, cursor: 'pointer', marginBottom: 16,
-          }}>← Anterior</button>
-        )}
-        <div style={{ display: 'flex', gap: 6 }}>
-          {Array.from({ length: totalSteps }).map((_, i) => (
-            <div key={i} style={{
-              flex: 1, height: 3, borderRadius: 4,
-              background: i <= step ? '#14b8a6' : 'rgba(255,255,255,0.1)',
-              transition: 'all 0.3s',
-            }} />
-          ))}
-        </div>
-      </div>
-
-      <div style={{
-        flex: 1,
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        padding: '20px 24px 40px',
-        maxWidth: 560,
-        margin: '0 auto',
-        width: '100%',
-      }}>
-
-        {step === 0 && (
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 48, marginBottom: 24, color: '#14b8a6' }}>✦</div>
-            <div style={{ fontSize: 11, letterSpacing: 4, color: '#14b8a6', textTransform: 'uppercase', marginBottom: 16, fontWeight: 600 }}>
-              Coach 360
-            </div>
-            <h1 style={{
-              fontFamily: 'Georgia, serif',
-              fontSize: 40,
-              fontWeight: 300,
-              lineHeight: 1.2,
-              marginBottom: 20,
-            }}>
-              Antes de empezar,<br /><span style={{ fontStyle: 'italic', color: '#14b8a6' }}>hablemos claro.</span>
-            </h1>
-            <p style={{ fontSize: 16, color: '#c8c8c8', lineHeight: 1.6, maxWidth: 420, margin: '0 auto 40px' }}>
-              Leo no da vueltas. Antes de trabajar juntos necesita saber qué quieres lograr, qué te está frenando y cuánto estás dispuesto a comprometerte.
+        <div style={{ maxWidth: 480, width: '100%' }}>
+          <div className="eyebrow" style={{ marginBottom: 14, textAlign: 'center' }}>✦ Antes de empezar</div>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(26px, 5vw, 34px)', fontWeight: 400, letterSpacing: '-0.03em', lineHeight: 1.1, marginBottom: 20, textAlign: 'center' }}>
+            Sobre tus datos
+          </h1>
+          <p style={{ fontSize: 15, color: 'var(--text-muted)', lineHeight: 1.7, marginBottom: 20, textAlign: 'center' }}>
+            Coach 360 recopila datos sobre tu bienestar emocional, estado de ánimo y resultados de tests. Estos son <strong style={{ color: 'var(--text)' }}>datos sensibles</strong> según la Ley N° 19.628 de Chile y requieren tu consentimiento explícito.
+          </p>
+          <div style={{ background: 'var(--ink-2)', border: '1px solid var(--line)', borderRadius: 14, padding: '20px 24px', marginBottom: 20 }}>
+            <p style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.8, margin: 0 }}>
+              Al continuar, autorizas a Coach 360 a recopilar y procesar tus datos personales y sensibles para personalizar tu experiencia de coaching. Tus datos no se venden a terceros. Puedes revocar este consentimiento en cualquier momento escribiendo a privacidad@micoach360.com.
             </p>
           </div>
-        )}
+          <p style={{ fontSize: 12, color: 'var(--text-dim)', textAlign: 'center', marginBottom: 24 }}>
+            Lee nuestra <a href='/privacidad' target='_blank' style={{ color: 'var(--v-primary)', textDecoration: 'none' }}>Política de Privacidad completa</a>.
+          </p>
+          <button onClick={() => setConsentimientoAceptado(true)} style={{ width: '100%', padding: '14px 20px', borderRadius: 12, border: 'none', background: 'var(--v-primary)', color: '#0a0c0e', fontWeight: 600, fontSize: 15, cursor: 'pointer', fontFamily: 'var(--font-body)', marginBottom: 10 }}>
+            Acepto y quiero continuar ✦
+          </button>
+          <a href='/general' style={{ display: 'block', textAlign: 'center', fontSize: 13, color: 'var(--text-dim)', textDecoration: 'none' }}>No acepto — volver al inicio</a>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="dir-ritual" data-v="leo" style={{ background: 'var(--bg)', color: 'var(--text)', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <style>{`
+        .of-top { padding: 20px 20px 0; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .of-steps-desktop { display: none; }
+        .of-step-mobile { margin-left: auto; font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); letter-spacing: .05em; }
+        .of-progress-bar { display: flex; gap: 4px; padding: 12px 20px 0; }
+        .of-content { flex: 1; padding: 32px 20px 48px; display: flex; flex-direction: column; gap: 32px; max-width: 560px; margin: 0 auto; width: 100%; box-sizing: border-box; }
+        .of-h1 { font-family: var(--font-display); font-size: clamp(28px, 6vw, 44px); letter-spacing: -0.03em; font-weight: 400; line-height: 1.1; margin: 0; }
+        .of-input { width: 100%; background: var(--ink-3); border: 1px solid var(--line-strong); border-radius: 12px; padding: 14px 16px; color: var(--text); font-size: 15px; font-family: var(--font-sans); outline: none; box-sizing: border-box; }
+        .of-textarea { width: 100%; min-height: 140px; background: var(--ink-3); border: 1px solid var(--line-strong); border-radius: 12px; padding: 16px; color: var(--text); font-size: 15px; line-height: 1.6; font-family: var(--font-sans); resize: vertical; outline: none; box-sizing: border-box; }
+        .of-option { background: var(--ink-2); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; color: var(--text); font-size: 14px; text-align: left; cursor: pointer; font-family: var(--font-sans); transition: all 200ms; display: flex; align-items: center; gap: 12px; }
+        .of-option:hover { border-color: var(--line-strong); }
+        .of-option.sel { background: var(--v-tint); border-color: var(--v-primary); }
+        .of-check { width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid var(--text-dim); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .of-check.sel { border-color: var(--v-primary); background: var(--v-primary); color: #0a0c0e; font-size: 10px; font-weight: 700; }
+        .of-nav { display: flex; gap: 10px; margin-top: 24px; flex-wrap: wrap; }
+        .of-btn-prim { padding: 13px 22px; border-radius: 12px; border: none; background: var(--v-primary); color: #0a0c0e; font-weight: 600; font-size: 14px; cursor: pointer; font-family: var(--font-sans); flex: 1; min-width: 200px; }
+        .of-btn-prim:disabled { opacity: .4; cursor: default; }
+        .of-btn-sec { padding: 13px 22px; border-radius: 12px; border: 1px solid var(--line-strong); background: transparent; color: var(--text); font-size: 14px; cursor: pointer; font-family: var(--font-sans); }
+        @media (min-width: 768px) {
+          .of-top { padding: 28px 64px 0; flex-wrap: nowrap; }
+          .of-steps-desktop { display: flex; align-items: center; gap: 14px; margin-left: auto; }
+          .of-step-mobile { display: none; }
+          .of-progress-bar { display: none; }
+          .of-content { padding: 60px 80px; max-width: 720px; }
+        }
+      `}</style>
+
+      {/* Top bar */}
+      <div className="of-top">
+        <Sigil s={20} />
+        <span style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 500 }}>Coach 360</span>
+
+        <div className="of-steps-desktop">
+          {stepsLabels.map((s) => (
+            <div key={s.n} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <div style={{
+                width: 24, height: 24, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                background: step >= s.n ? 'var(--v-primary)' : 'var(--ink-4)',
+                color: step >= s.n ? '#0a0c0e' : 'var(--text-muted)',
+                fontSize: 11, fontFamily: 'var(--font-mono)', fontWeight: 600,
+              }}>{s.n}</div>
+              <span style={{ fontSize: 11, color: step === s.n ? 'var(--text)' : 'var(--text-dim)', fontFamily: 'var(--font-mono)', letterSpacing: '.05em' }}>{s.label}</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="of-step-mobile">PASO {step} / {TOTAL}</div>
+      </div>
+
+      <div className="of-progress-bar">
+        {stepsLabels.map((s) => (
+          <div key={s.n} style={{ flex: 1, height: 3, borderRadius: 4, background: step >= s.n ? 'var(--v-primary)' : 'var(--ink-4)', transition: 'background 200ms' }} />
+        ))}
+      </div>
+
+      {/* Content */}
+      <div className="of-content">
+        <div className="eyebrow">Paso {step} de {TOTAL}</div>
 
         {step === 1 && (
           <div>
-            <div style={{ fontSize: 11, letterSpacing: 3, color: '#14b8a6', textTransform: 'uppercase', marginBottom: 12, textAlign: 'center' }}>
-              Empecemos
-            </div>
-            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 32, fontWeight: 300, lineHeight: 1.3, marginBottom: 12, textAlign: 'center' }}>
-              ¿Cómo te llamas?
-            </h2>
-            <p style={{ fontSize: 14, color: '#a8a8a8', textAlign: 'center', marginBottom: 40 }}>
-              Leo te va a tratar por tu nombre
+            <h1 className="of-h1" style={{ marginBottom: 14 }}>
+              Antes de empezar, <em style={{ fontStyle: 'italic', color: 'var(--v-primary)' }}>hablemos claro</em>.
+            </h1>
+            <p style={{ fontSize: 15, color: 'var(--text-muted)', lineHeight: 1.6, maxWidth: 460 }}>
+              Leo no da vueltas. Antes de trabajar contigo necesita saber qué quieres lograr, qué te frena y cuánto estás dispuesto a comprometerte.
             </p>
-            <input
-              type="text"
-              value={nombre}
-              onChange={(e) => setNombre(e.target.value)}
-              placeholder="Tu nombre"
-              autoFocus
-              style={{
-                width: '100%',
-                background: 'rgba(20, 184, 166, 0.06)',
-                border: '1px solid rgba(20, 184, 166, 0.3)',
-                borderRadius: 14,
-                padding: '18px 20px',
-                color: '#fff',
-                fontSize: 18,
-                textAlign: 'center',
-                fontFamily: 'inherit',
-                outline: 'none',
-              }}
-            />
           </div>
         )}
 
         {step === 2 && (
           <div>
-            <div style={{ fontSize: 11, letterSpacing: 3, color: '#14b8a6', textTransform: 'uppercase', marginBottom: 12, textAlign: 'center' }}>
-              Paso 1 de 5
-            </div>
-            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 28, fontWeight: 300, lineHeight: 1.3, marginBottom: 12, textAlign: 'center' }}>
-              ¿Qué áreas de tu vida quieres trabajar?
-            </h2>
-            <p style={{ fontSize: 13, color: '#a8a8a8', textAlign: 'center', marginBottom: 28 }}>
-              Elige hasta 3. Leo se enfoca en pocas cosas, bien hechas.
-            </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {areasVida.map(a => {
-                const selected = areasSel.includes(a.id)
-                return (
-                  <button key={a.id} onClick={() => toggleArea(a.id)} style={{
-                    background: selected ? 'rgba(20, 184, 166, 0.15)' : 'rgba(255,255,255,0.03)',
-                    border: `1px solid ${selected ? '#14b8a6' : 'rgba(255,255,255,0.1)'}`,
-                    borderRadius: 14,
-                    padding: '16px 18px',
-                    color: '#fff',
-                    fontSize: 14,
-                    textAlign: 'left',
-                    cursor: 'pointer',
-                    fontFamily: 'inherit',
-                    transition: 'all 0.2s',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 12,
-                  }}>
-                    <div style={{
-                      width: 20, height: 20, borderRadius: '50%',
-                      border: `2px solid ${selected ? '#14b8a6' : 'rgba(255,255,255,0.3)'}`,
-                      background: selected ? '#14b8a6' : 'transparent',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      color: '#0a0a0a', fontSize: 11, fontWeight: 700, flexShrink: 0,
-                    }}>{selected && '✓'}</div>
-                    {a.label}
-                  </button>
-                )
-              })}
-            </div>
+            <h1 className="of-h1" style={{ marginBottom: 10 }}>¿Cómo te llamas?</h1>
+            <p style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 20 }}>Leo te va a tratar por tu nombre.</p>
+            <input
+              type="text"
+              className="of-input"
+              value={nombre}
+              onChange={(e) => setNombre(e.target.value)}
+              placeholder="Tu nombre"
+              autoFocus
+            />
           </div>
         )}
 
         {step === 3 && (
           <div>
-            <div style={{ fontSize: 11, letterSpacing: 3, color: '#14b8a6', textTransform: 'uppercase', marginBottom: 12, textAlign: 'center' }}>
-              Paso 2 de 5
-            </div>
-            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 28, fontWeight: 300, lineHeight: 1.3, marginBottom: 12, textAlign: 'center' }}>
-              ¿Cómo describirías tu momento actual?
-            </h2>
-            <p style={{ fontSize: 13, color: '#a8a8a8', textAlign: 'center', marginBottom: 28 }}>
-              Sé honesto — Leo trabaja mejor con la verdad
-            </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {estiloActual.map(e => {
-                const selected = estilo === e.id
+            <h1 className="of-h1" style={{ marginBottom: 10 }}>¿Qué <em style={{ fontStyle: 'italic', color: 'var(--v-primary)' }}>áreas</em> quieres trabajar?</h1>
+            <p style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 20 }}>Elige hasta 3. Leo se enfoca en pocas cosas, bien hechas.</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {areasVida.map(a => {
+                const sel = areasSel.includes(a.id)
                 return (
-                  <button key={e.id} onClick={() => setEstilo(e.id)} style={{
-                    background: selected ? 'rgba(20, 184, 166, 0.15)' : 'rgba(255,255,255,0.03)',
-                    border: `1px solid ${selected ? '#14b8a6' : 'rgba(255,255,255,0.1)'}`,
-                    borderRadius: 14,
-                    padding: '16px 18px',
-                    color: '#fff',
-                    fontSize: 14,
-                    textAlign: 'left',
-                    cursor: 'pointer',
-                    fontFamily: 'inherit',
-                    transition: 'all 0.2s',
-                  }}>
-                    {e.label}
+                  <button key={a.id} type="button" onClick={() => toggleArea(a.id)} className={`of-option ${sel ? 'sel' : ''}`}>
+                    <div className={`of-check ${sel ? 'sel' : ''}`}>{sel && '✓'}</div>
+                    {a.label}
                   </button>
                 )
               })}
@@ -339,32 +289,15 @@ export default function OnboardingGeneral() {
 
         {step === 4 && (
           <div>
-            <div style={{ fontSize: 11, letterSpacing: 3, color: '#14b8a6', textTransform: 'uppercase', marginBottom: 12, textAlign: 'center' }}>
-              Paso 3 de 5
-            </div>
-            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 28, fontWeight: 300, lineHeight: 1.3, marginBottom: 12, textAlign: 'center' }}>
-              ¿Cuánto tiempo puedes dedicarle?
-            </h2>
-            <p style={{ fontSize: 13, color: '#a8a8a8', textAlign: 'center', marginBottom: 28 }}>
-              Leo adapta su ritmo al tuyo. Mejor prometer poco y cumplir.
-            </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {compromiso.map(c => {
-                const selected = nivelCompromiso === c.id
+            <h1 className="of-h1" style={{ marginBottom: 10 }}>¿Cómo describirías tu <em style={{ fontStyle: 'italic', color: 'var(--v-primary)' }}>momento actual</em>?</h1>
+            <p style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 20 }}>Sé honesto — Leo trabaja mejor con la verdad.</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {estiloActual.map(e => {
+                const sel = estilo === e.id
                 return (
-                  <button key={c.id} onClick={() => setNivelCompromiso(c.id)} style={{
-                    background: selected ? 'rgba(20, 184, 166, 0.15)' : 'rgba(255,255,255,0.03)',
-                    border: `1px solid ${selected ? '#14b8a6' : 'rgba(255,255,255,0.1)'}`,
-                    borderRadius: 14,
-                    padding: '18px 20px',
-                    color: '#fff',
-                    textAlign: 'left',
-                    cursor: 'pointer',
-                    fontFamily: 'inherit',
-                    transition: 'all 0.2s',
-                  }}>
-                    <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 4 }}>{c.label}</div>
-                    <div style={{ fontSize: 12, color: '#a8a8a8' }}>{c.desc}</div>
+                  <button key={e.id} type="button" onClick={() => setEstilo(e.id)} className={`of-option ${sel ? 'sel' : ''}`}>
+                    <div className={`of-check ${sel ? 'sel' : ''}`}>{sel && '✓'}</div>
+                    {e.label}
                   </button>
                 )
               })}
@@ -374,114 +307,66 @@ export default function OnboardingGeneral() {
 
         {step === 5 && (
           <div>
-            <div style={{ fontSize: 11, letterSpacing: 3, color: '#14b8a6', textTransform: 'uppercase', marginBottom: 12, textAlign: 'center' }}>
-              Paso 4 de 5
+            <h1 className="of-h1" style={{ marginBottom: 10 }}>¿Cuánto tiempo puedes <em style={{ fontStyle: 'italic', color: 'var(--v-primary)' }}>dedicarle</em>?</h1>
+            <p style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 20 }}>Leo adapta su ritmo al tuyo. Mejor prometer poco y cumplir.</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {compromiso.map(c => {
+                const sel = nivelCompromiso === c.id
+                return (
+                  <button key={c.id} type="button" onClick={() => setNivelCompromiso(c.id)} className={`of-option ${sel ? 'sel' : ''}`} style={{ alignItems: 'flex-start', flexDirection: 'column', gap: 4, padding: '14px 18px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, width: '100%' }}>
+                      <div className={`of-check ${sel ? 'sel' : ''}`}>{sel && '✓'}</div>
+                      <span style={{ fontSize: 14, fontWeight: 600 }}>{c.label}</span>
+                    </div>
+                    <div style={{ fontSize: 12, color: 'var(--text-dim)', fontFamily: 'var(--font-mono)', letterSpacing: '.05em', marginLeft: 30 }}>{c.desc}</div>
+                  </button>
+                )
+              })}
             </div>
-            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 28, fontWeight: 300, lineHeight: 1.3, marginBottom: 12, textAlign: 'center' }}>
-              ¿Qué quieres lograr en 90 días?
-            </h2>
-            <p style={{ fontSize: 13, color: '#a8a8a8', textAlign: 'center', marginBottom: 28 }}>
-              Sé concreto. "Estar mejor" no cuenta. "Correr 5km sin parar" sí.
-            </p>
-            <textarea
-              value={objetivo90}
-              onChange={(e) => setObjetivo90(e.target.value)}
-              placeholder="En 90 días quiero..."
-              style={{
-                width: '100%',
-                minHeight: 140,
-                background: 'rgba(20, 184, 166, 0.06)',
-                border: '1px solid rgba(20, 184, 166, 0.3)',
-                borderRadius: 14,
-                padding: 18,
-                color: '#fff',
-                fontSize: 15,
-                lineHeight: 1.6,
-                fontFamily: 'inherit',
-                resize: 'vertical',
-                outline: 'none',
-              }}
-            />
           </div>
         )}
 
         {step === 6 && (
           <div>
-            <div style={{ fontSize: 11, letterSpacing: 3, color: '#14b8a6', textTransform: 'uppercase', marginBottom: 12, textAlign: 'center' }}>
-              Paso 5 de 5
-            </div>
-            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 28, fontWeight: 300, lineHeight: 1.3, marginBottom: 12, textAlign: 'center' }}>
-              ¿Qué te ha frenado hasta ahora?
-            </h2>
-            <p style={{ fontSize: 13, color: '#a8a8a8', textAlign: 'center', marginBottom: 28 }}>
-              Leo necesita saber cuál es tu mayor obstáculo real. (Opcional)
-            </p>
+            <h1 className="of-h1" style={{ marginBottom: 10 }}>¿Qué quieres lograr en <em style={{ fontStyle: 'italic', color: 'var(--v-primary)' }}>90 días</em>?</h1>
+            <p style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 20 }}>Sé concreto. "Estar mejor" no cuenta. "Correr 5km sin parar" sí.</p>
             <textarea
-              value={obstaculo}
-              onChange={(e) => setObstaculo(e.target.value)}
-              placeholder="Lo que me ha frenado es..."
-              style={{
-                width: '100%',
-                minHeight: 140,
-                background: 'rgba(20, 184, 166, 0.06)',
-                border: '1px solid rgba(20, 184, 166, 0.3)',
-                borderRadius: 14,
-                padding: 18,
-                color: '#fff',
-                fontSize: 15,
-                lineHeight: 1.6,
-                fontFamily: 'inherit',
-                resize: 'vertical',
-                outline: 'none',
-              }}
+              className="of-textarea"
+              value={objetivo90}
+              onChange={(e) => setObjetivo90(e.target.value)}
+              placeholder="En 90 días quiero..."
+              autoFocus
             />
           </div>
         )}
 
-      </div>
-
-      <div style={{ padding: '0 24px 32px', maxWidth: 560, margin: '0 auto', width: '100%' }}>
-        {step < totalSteps - 1 ? (
-          <button
-            onClick={next}
-            disabled={!canContinue()}
-            style={{
-              width: '100%',
-              background: canContinue() ? 'linear-gradient(135deg, #14b8a6, #0d9488)' : 'rgba(20, 184, 166, 0.2)',
-              color: canContinue() ? '#fff' : '#a8a8a8',
-              border: 'none',
-              padding: '18px 24px',
-              borderRadius: 30,
-              fontSize: 15,
-              fontWeight: 600,
-              cursor: canContinue() ? 'pointer' : 'default',
-              fontFamily: 'inherit',
-              transition: 'all 0.2s',
-            }}
-          >
-            {step === 0 ? 'Empezar ✦' : 'Siguiente →'}
-          </button>
-        ) : (
-          <button
-            onClick={completeOnboarding}
-            disabled={guardando}
-            style={{
-              width: '100%',
-              background: 'linear-gradient(135deg, #14b8a6, #0d9488)',
-              color: '#fff',
-              border: 'none',
-              padding: '18px 24px',
-              borderRadius: 30,
-              fontSize: 15,
-              fontWeight: 600,
-              cursor: guardando ? 'default' : 'pointer',
-              fontFamily: 'inherit',
-              opacity: guardando ? 0.6 : 1,
-            }}
-          >
-            {guardando ? 'Guardando...' : 'Conocer a Leo ✦'}
-          </button>
+        {step === 7 && (
+          <div>
+            <h1 className="of-h1" style={{ marginBottom: 10 }}>¿Qué te ha <em style={{ fontStyle: 'italic', color: 'var(--v-primary)' }}>frenado</em>?</h1>
+            <p style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 20 }}>Leo necesita saber cuál es tu mayor obstáculo real. Opcional.</p>
+            <textarea
+              className="of-textarea"
+              value={obstaculo}
+              onChange={(e) => setObstaculo(e.target.value)}
+              placeholder="Lo que me ha frenado es..."
+            />
+          </div>
         )}
+
+        <div className="of-nav">
+          {step > 1 && (
+            <button onClick={back} className="of-btn-sec">← Anterior</button>
+          )}
+          {step < TOTAL ? (
+            <button onClick={next} disabled={!canContinue()} className="of-btn-prim">
+              {step === 1 ? 'Empezar' : 'Siguiente'} →
+            </button>
+          ) : (
+            <button onClick={completeOnboarding} disabled={guardando} className="of-btn-prim">
+              {guardando ? 'Guardando…' : 'Conocer a Leo ✦'}
+            </button>
+          )}
+        </div>
       </div>
     </div>
   )
