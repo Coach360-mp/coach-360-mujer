@@ -5,60 +5,65 @@ import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import { Sigil } from '@/components/design/icons'
 
-// ─── Datos (híbrido: diseño Fase 5 OnboardingFlow + campos reales del proyecto) ───
+// Onboarding universal Coach 360. Captura nombre, género y data ontológica genérica.
+// Si la usuaria luego entra a /mujer o /lideres, hará el sub-onboarding específico.
 
-const focos = [
-  { id: 'estres',     label: 'Manejar mejor mi estrés y ansiedad',   sym: '✦' },
-  { id: 'relaciones', label: 'Mejorar mis relaciones y vínculos',     sym: '·' },
-  { id: 'proposito',  label: 'Encontrar más propósito y sentido',     sym: '→' },
-  { id: 'confianza',  label: 'Fortalecer mi confianza y autoestima',  sym: '○' },
-  { id: 'cambio',     label: 'Navegar un cambio o transición',        sym: '—' },
-  { id: 'liderazgo',  label: 'Desarrollar mi liderazgo',              sym: '◇' },
+const generos = [
+  { id: 'mujer',                 label: 'Mujer' },
+  { id: 'hombre',                label: 'Hombre' },
+  { id: 'prefiero_no_responder', label: 'Prefiero no responder' },
 ]
 
-const moods = ['difícil', 'regular', 'bien', 'muy bien', 'increíble']
-
-// Paso 4 (nuevo, agregado para preservar captura de momento_vida)
-const momentosVida = [
-  { id: 'cambio',                  label: 'En un momento de cambio' },
-  { id: 'crecimiento_personal',    label: 'En crecimiento personal' },
-  { id: 'incertidumbre',           label: 'Navegando incertidumbre' },
-  { id: 'construyendo',            label: 'Construyendo algo nuevo' },
-  { id: 'transicion_profesional',  label: 'En transición profesional' },
+const areasVida = [
+  { id: 'salud',      label: 'Salud y energía física' },
+  { id: 'carrera',    label: 'Carrera y crecimiento profesional' },
+  { id: 'finanzas',   label: 'Finanzas y libertad económica' },
+  { id: 'relaciones', label: 'Relaciones y vínculos' },
+  { id: 'mental',     label: 'Claridad mental y enfoque' },
+  { id: 'proposito',  label: 'Propósito y sentido' },
+  { id: 'tiempo',     label: 'Gestión del tiempo' },
+  { id: 'habitos',    label: 'Construir hábitos sólidos' },
 ]
 
-// Paso 5 (nuevo, agregado para preservar captura de identidad)
-const identidades = [
-  { id: 'mama',           label: 'Mamá / Papá' },
-  { id: 'emprendedora',   label: 'Emprendedor/a' },
-  { id: 'lidera',         label: 'Lidero equipos' },
-  { id: 'independiente',  label: 'Profesional independiente' },
-  { id: 'busqueda',       label: 'En búsqueda laboral' },
+const estiloActual = [
+  { id: 'disciplinado', label: 'Soy disciplinado/a pero estancado/a' },
+  { id: 'disperso',     label: 'Me cuesta enfocarme' },
+  { id: 'ambicioso',    label: 'Tengo muchas metas pero pocos resultados' },
+  { id: 'agotado',      label: 'Estoy agotado/a, necesito reset' },
+  { id: 'empezando',    label: 'Estoy empezando algo nuevo' },
+  { id: 'cambio',       label: 'Quiero un cambio profundo' },
+]
+
+const compromiso = [
+  { id: 'bajo',  label: '10 minutos al día',    desc: 'Mínimo viable' },
+  { id: 'medio', label: '20-30 minutos al día', desc: 'Ritmo constante' },
+  { id: 'alto',  label: '1 hora al día o más',   desc: 'Transformación acelerada' },
 ]
 
 const stepsLabels = [
   { n: 1, label: 'Bienvenida' },
-  { n: 2, label: 'Objetivos' },
-  { n: 3, label: 'Check-in' },
-  { n: 4, label: 'Momento' },
-  { n: 5, label: 'Identidad' },
-  { n: 6, label: 'Primer test' },
-  { n: 7, label: 'Tour' },
-  { n: 8, label: 'Plan' },
+  { n: 2, label: 'Nombre' },
+  { n: 3, label: 'Género' },
+  { n: 4, label: 'Áreas' },
+  { n: 5, label: 'Momento' },
+  { n: 6, label: 'Compromiso' },
+  { n: 7, label: 'Objetivo' },
+  { n: 8, label: 'Obstáculo' },
 ]
+const TOTAL = stepsLabels.length
 
 export default function Onboarding() {
   const router = useRouter()
   const [consentimientoAceptado, setConsentimientoAceptado] = useState(false)
   const [user, setUser] = useState(null)
-  const [nombre, setNombre] = useState('')
   const [step, setStep] = useState(1)
-  const [focoSel, setFocoSel] = useState(null)
-  const [mood, setMood] = useState(null)
-  const [notaCheckin, setNotaCheckin] = useState('')
-  const [momentos, setMomentos] = useState([])
-  const [identidadSel, setIdentidadSel] = useState([])
-  const [respuestaLibre, setRespuestaLibre] = useState('')
+  const [nombre, setNombre] = useState('')
+  const [genero, setGenero] = useState(null)
+  const [areasSel, setAreasSel] = useState([])
+  const [estilo, setEstilo] = useState(null)
+  const [nivelCompromiso, setNivelCompromiso] = useState(null)
+  const [objetivo90, setObjetivo90] = useState('')
+  const [obstaculo, setObstaculo] = useState('')
   const [guardando, setGuardando] = useState(false)
 
   useEffect(() => { checkUser() }, [])
@@ -67,87 +72,100 @@ export default function Onboarding() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { router.push('/'); return }
     setUser(user)
-    const { data: profile } = await supabase.from('perfiles').select('onboarding_completado, nombre').eq('id', user.id).single()
-    if (profile?.onboarding_completado) { router.push('/dashboard'); return }
+    const { data: profile } = await supabase
+      .from('perfiles').select('onboarding_completado, nombre').eq('id', user.id).maybeSingle()
+    if (profile?.onboarding_completado) { router.push('/general/dashboard'); return }
     if (profile?.nombre) setNombre(profile.nombre)
     else if (user.user_metadata?.full_name) setNombre(user.user_metadata.full_name.split(' ')[0])
   }
 
-  const toggleMomento = (id) =>
-    setMomentos(prev => prev.includes(id) ? prev.filter(m => m !== id) : [...prev, id].slice(-2))
-  const toggleIdentidad = (id) =>
-    setIdentidadSel(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id].slice(-3))
+  const toggleArea = (id) =>
+    setAreasSel(prev => prev.includes(id) ? prev.filter(a => a !== id) : [...prev, id].slice(-3))
+
+  const next = () => setStep(s => Math.min(TOTAL, s + 1))
+  const back = () => setStep(s => Math.max(1, s - 1))
 
   const canContinue = () => {
     switch (step) {
-      case 2: return focoSel !== null
-      case 3: return mood !== null
-      case 4: return momentos.length > 0
-      case 5: return identidadSel.length > 0
+      case 2: return nombre.trim().length > 0
+      case 3: return genero !== null
+      case 4: return areasSel.length > 0
+      case 5: return estilo !== null
+      case 6: return nivelCompromiso !== null
+      case 7: return objetivo90.trim().length > 0
       default: return true
     }
   }
-
-  const next = () => setStep(s => Math.min(8, s + 1))
-  const back = () => setStep(s => Math.max(1, s - 1))
 
   const completeOnboarding = async () => {
     if (!user) return
     setGuardando(true)
     try {
-      await supabase.from('perfiles').update({
-        nombre: nombre || user.user_metadata?.full_name || '',
+      // 1. Guardar nombre + género en user_preferences (vía API)
+      await fetch('/api/user/preferences', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id, nombre: nombre.trim(), genero }),
+      })
+
+      // 2. Marcar onboarding completado en perfiles + setear vertical inicial
+      await supabase.from('perfiles').upsert({
+        id: user.id,
+        nombre: nombre.trim(),
         onboarding_completado: true,
-        current_vertical: 'mujer',
-        active_verticals: ['mujer'],
-      }).eq('id', user.id)
+        current_vertical: 'general',
+        active_verticals: ['general'],
+      }, { onConflict: 'id' })
 
-      const bienestar_inicial = { mood: mood != null ? moods[mood] : null, nota: notaCheckin || null }
-
+      // 3. Guardar respuestas en onboarding_respuestas (compat con tablas existentes)
       await supabase.from('onboarding_respuestas').upsert({
         user_id: user.id,
-        vertical: 'mujer',
-        momento_vida: momentos,
-        identidad: identidadSel,
-        foco_inicial: focoSel,
-        bienestar_inicial,
-        respuesta_libre: respuestaLibre,
+        vertical: 'general',
+        momento_vida: [estilo],
+        identidad: areasSel,
+        foco_inicial: nivelCompromiso,
+        bienestar_inicial: { compromiso: nivelCompromiso, genero },
+        respuesta_libre: `Objetivo: ${objetivo90}. Obstáculo: ${obstaculo}`,
       }, { onConflict: 'user_id,vertical' })
 
+      // 4. user_context para que el coach lo use
       const contextos = [
-        { key: 'momento_vida', value: momentos.join(', ') },
-        { key: 'identidad',    value: identidadSel.join(', ') },
-        { key: 'foco_inicial', value: focoSel },
-        { key: 'respuesta_libre', value: respuestaLibre },
+        { key: 'genero',              value: genero },
+        { key: 'areas_vida',          value: areasSel.join(', ') },
+        { key: 'estilo_actual',       value: estilo },
+        { key: 'compromiso_diario',   value: nivelCompromiso },
+        { key: 'objetivo_90_dias',    value: objetivo90 },
+        { key: 'obstaculo_principal', value: obstaculo },
       ].filter(c => c.value)
       if (contextos.length > 0) {
         await supabase.from('user_context').insert(
           contextos.map(c => ({
-            user_id: user.id, vertical: 'mujer',
+            user_id: user.id, vertical: 'general',
             context_key: c.key, context_value: c.value, source_coach: 'onboarding',
           }))
         )
       }
 
+      // 5. Email bienvenida (no bloqueante)
       try {
-        await fetch('/api/emails/bienvenida', {
+        fetch('/api/emails/bienvenida', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId: user.id, vertical: 'mujer' }),
+          body: JSON.stringify({ userId: user.id, vertical: 'general' }),
         })
       } catch (e) { console.error('Error email bienvenida:', e) }
 
-      router.push('/dashboard')
+      router.push('/general/dashboard')
     } catch (err) {
       console.error('Error guardando onboarding:', err)
       setGuardando(false)
     }
   }
 
-  // ── GATE: Consentimiento (estilo ritual dark consistente) ──
+  // ── Gate consentimiento ──
   if (!consentimientoAceptado) {
     return (
-      <div className="dir-ritual" data-v="clara" style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--text)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 20px' }}>
+      <div className="dir-ritual" data-v="leo" style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--text)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 20px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 32 }}>
           <Sigil s={20} />
           <span style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 500 }}>Coach 360</span>
@@ -178,34 +196,37 @@ export default function Onboarding() {
   }
 
   return (
-    <div className="dir-ritual" data-v="clara" style={{ background: 'var(--bg)', color: 'var(--text)', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <div className="dir-ritual" data-v="leo" style={{ background: 'var(--bg)', color: 'var(--text)', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <style>{`
         .of-top { padding: 20px 20px 0; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
         .of-steps-desktop { display: none; }
         .of-step-mobile { margin-left: auto; font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); letter-spacing: .05em; }
         .of-progress-bar { display: flex; gap: 4px; padding: 12px 20px 0; }
-        .of-content { flex: 1; padding: 32px 20px 48px; display: flex; flex-direction: column; gap: 32px; }
-        .of-right { display: none; }
-        .of-h1-xl { font-size: clamp(36px, 8vw, 60px); }
-        .of-h1-lg { font-size: clamp(30px, 6vw, 52px); }
-        .of-h1-md { font-size: clamp(28px, 5.5vw, 48px); }
-        .of-nav { display: flex; gap: 10px; margin-top: 40px; flex-wrap: wrap; }
+        .of-content { flex: 1; padding: 32px 20px 48px; display: flex; flex-direction: column; gap: 32px; max-width: 560px; margin: 0 auto; width: 100%; box-sizing: border-box; }
+        .of-h1 { font-family: var(--font-display); font-size: clamp(28px, 6vw, 44px); letter-spacing: -0.03em; font-weight: 400; line-height: 1.1; margin: 0; }
+        .of-input { width: 100%; background: var(--ink-3); border: 1px solid var(--line-strong); border-radius: 12px; padding: 14px 16px; color: var(--text); font-size: 15px; font-family: var(--font-sans); outline: none; box-sizing: border-box; }
+        .of-textarea { width: 100%; min-height: 140px; background: var(--ink-3); border: 1px solid var(--line-strong); border-radius: 12px; padding: 16px; color: var(--text); font-size: 15px; line-height: 1.6; font-family: var(--font-sans); resize: vertical; outline: none; box-sizing: border-box; }
+        .of-option { background: var(--ink-2); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; color: var(--text); font-size: 14px; text-align: left; cursor: pointer; font-family: var(--font-sans); transition: all 200ms; display: flex; align-items: center; gap: 12px; }
+        .of-option:hover { border-color: var(--line-strong); }
+        .of-option.sel { background: var(--v-tint); border-color: var(--v-primary); }
+        .of-check { width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid var(--text-dim); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .of-check.sel { border-color: var(--v-primary); background: var(--v-primary); color: #0a0c0e; font-size: 10px; font-weight: 700; }
+        .of-nav { display: flex; gap: 10px; margin-top: 24px; flex-wrap: wrap; }
+        .of-btn-prim { padding: 13px 22px; border-radius: 12px; border: none; background: var(--v-primary); color: #0a0c0e; font-weight: 600; font-size: 14px; cursor: pointer; font-family: var(--font-sans); flex: 1; min-width: 200px; }
+        .of-btn-prim:disabled { opacity: .4; cursor: default; }
+        .of-btn-sec { padding: 13px 22px; border-radius: 12px; border: 1px solid var(--line-strong); background: transparent; color: var(--text); font-size: 14px; cursor: pointer; font-family: var(--font-sans); }
         @media (min-width: 768px) {
           .of-top { padding: 28px 64px 0; flex-wrap: nowrap; }
           .of-steps-desktop { display: flex; align-items: center; gap: 14px; margin-left: auto; }
           .of-step-mobile { display: none; }
           .of-progress-bar { display: none; }
-          .of-content { padding: 60px 80px; display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; }
-          .of-right { display: block; position: relative; height: 520px; border-radius: 20px; overflow: hidden; border: 1px solid var(--line); }
+          .of-content { padding: 60px 80px; max-width: 720px; }
         }
       `}</style>
 
-      {/* Top bar con logo + steps */}
       <div className="of-top">
         <Sigil s={20} />
         <span style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 500 }}>Coach 360</span>
-
-        {/* Desktop: steps horizontales */}
         <div className="of-steps-desktop">
           {stepsLabels.map((s) => (
             <div key={s.n} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -219,299 +240,139 @@ export default function Onboarding() {
             </div>
           ))}
         </div>
-
-        {/* Mobile: solo contador */}
-        <div className="of-step-mobile">PASO {step} / 8</div>
+        <div className="of-step-mobile">PASO {step} / {TOTAL}</div>
       </div>
 
-      {/* Mobile: progress bar */}
       <div className="of-progress-bar">
         {stepsLabels.map((s) => (
-          <div key={s.n} style={{ flex: 1, height: 3, borderRadius: 4, background: step >= s.n ? 'var(--v-primary)' : 'var(--ink-4)', transition: 'background var(--d-med) var(--ease-out)' }} />
+          <div key={s.n} style={{ flex: 1, height: 3, borderRadius: 4, background: step >= s.n ? 'var(--v-primary)' : 'var(--ink-4)', transition: 'background 200ms' }} />
         ))}
       </div>
 
-      {/* Content */}
       <div className="of-content">
-        <div>
-          <div className="eyebrow" style={{ marginBottom: 18 }}>Paso {step} de 8</div>
+        <div className="eyebrow">Paso {step} de {TOTAL}</div>
 
-          {/* ── PASO 1 — Bienvenida ── */}
-          {step === 1 && (
-            <>
-              <h1 className="of-h1-xl" style={{ fontFamily: 'var(--font-display)', lineHeight: 1, letterSpacing: '-0.035em', fontWeight: 400, margin: 0 }}>
-                Hola, soy <em style={{ fontStyle: 'italic', color: 'var(--v-primary)' }}>Clara</em>.
-              </h1>
-              <p style={{ fontSize: 17, color: 'var(--text-muted)', lineHeight: 1.6, marginTop: 20, maxWidth: 440 }}>
-                {nombre ? `Gusto en conocerte, ${nombre}. ` : ''}Voy a acompañarte en los próximos días. Antes de empezar, necesito conocerte un poco. No hay respuestas correctas — solo las tuyas.
-              </p>
-            </>
-          )}
-
-          {/* ── PASO 2 — Objetivos (foco_inicial) ── */}
-          {step === 2 && (
-            <>
-              <h1 className="of-h1-md" style={{ fontFamily: 'var(--font-display)', lineHeight: 1.05, letterSpacing: '-0.03em', fontWeight: 400, margin: 0 }}>
-                ¿Qué te trae aquí <em style={{ fontStyle: 'italic', color: 'var(--v-primary)' }}>hoy</em>?
-              </h1>
-              <p style={{ fontSize: 15, color: 'var(--text-muted)', lineHeight: 1.6, marginTop: 16, marginBottom: 24 }}>
-                Elige el foco que más resuene. Podemos cambiarlo cuando quieras.
-              </p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {focos.map((f) => {
-                  const selected = focoSel === f.id
-                  return (
-                    <button key={f.id} onClick={() => setFocoSel(f.id)} style={{
-                      padding: '14px 18px',
-                      border: `1px solid ${selected ? 'var(--v-primary)' : 'var(--line)'}`,
-                      background: selected ? 'var(--v-tint)' : 'var(--ink-2)',
-                      borderRadius: 12, display: 'flex', alignItems: 'center', gap: 12,
-                      cursor: 'pointer', color: 'var(--text)', fontSize: 14, textAlign: 'left',
-                      fontFamily: 'var(--font-body)',
-                    }}>
-                      <span style={{ color: 'var(--v-primary)', fontSize: 18, fontFamily: 'var(--font-display)', width: 20 }}>{f.sym}</span>
-                      {f.label}
-                    </button>
-                  )
-                })}
-              </div>
-            </>
-          )}
-
-          {/* ── PASO 3 — Check-in (bienestar_inicial) ── */}
-          {step === 3 && (
-            <>
-              <h1 className="of-h1-lg" style={{ fontFamily: 'var(--font-display)', lineHeight: 1, letterSpacing: '-0.03em', fontWeight: 400, margin: 0 }}>
-                ¿Cómo llegas <em style={{ fontStyle: 'italic', color: 'var(--v-primary)' }}>hoy</em>?
-              </h1>
-              <p style={{ fontSize: 15, color: 'var(--text-muted)', lineHeight: 1.6, marginTop: 16, marginBottom: 24 }}>
-                Una palabra basta. Esto me ayuda a empezar desde donde estás.
-              </p>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 8, marginBottom: 20 }}>
-                {moods.map((m, i) => {
-                  const selected = mood === i
-                  return (
-                    <button key={m} onClick={() => setMood(i)} style={{
-                      padding: '16px 4px',
-                      border: `1px solid ${selected ? 'var(--v-primary)' : 'var(--line)'}`,
-                      background: selected ? 'var(--v-primary)' : 'transparent',
-                      color: selected ? '#0a0c0e' : 'var(--text)',
-                      borderRadius: 12, cursor: 'pointer', fontSize: 12,
-                      fontWeight: selected ? 600 : 400, textTransform: 'capitalize',
-                      fontFamily: 'var(--font-body)',
-                    }}>{m}</button>
-                  )
-                })}
-              </div>
-              <textarea
-                value={notaCheckin}
-                onChange={(e) => setNotaCheckin(e.target.value)}
-                placeholder="Una frase sobre cómo estás... (opcional)"
-                style={{
-                  width: '100%', padding: 16, minHeight: 90, background: 'var(--ink-2)',
-                  border: '1px solid var(--line)', borderRadius: 12, color: 'var(--text)',
-                  fontSize: 14, resize: 'none', fontFamily: 'var(--font-body)', outline: 'none',
-                }}
-              />
-            </>
-          )}
-
-          {/* ── PASO 4 — Momento de vida (NUEVO — preserva captura real) ── */}
-          {step === 4 && (
-            <>
-              <h1 className="of-h1-md" style={{ fontFamily: 'var(--font-display)', lineHeight: 1.05, letterSpacing: '-0.03em', fontWeight: 400, margin: 0 }}>
-                ¿En qué momento <em style={{ fontStyle: 'italic', color: 'var(--v-primary)' }}>estás</em>?
-              </h1>
-              <p style={{ fontSize: 15, color: 'var(--text-muted)', lineHeight: 1.6, marginTop: 16, marginBottom: 24 }}>
-                Puedes elegir más de uno — máximo 2.
-              </p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {momentosVida.map((m) => {
-                  const selected = momentos.includes(m.id)
-                  return (
-                    <button key={m.id} onClick={() => toggleMomento(m.id)} style={{
-                      padding: '14px 18px',
-                      border: `1px solid ${selected ? 'var(--v-primary)' : 'var(--line)'}`,
-                      background: selected ? 'var(--v-tint)' : 'var(--ink-2)',
-                      borderRadius: 12, display: 'flex', alignItems: 'center', gap: 12,
-                      cursor: 'pointer', color: 'var(--text)', fontSize: 14, textAlign: 'left',
-                      fontFamily: 'var(--font-body)',
-                    }}>
-                      <span style={{
-                        width: 18, height: 18, borderRadius: 4,
-                        border: `1.5px solid ${selected ? 'var(--v-primary)' : 'var(--line-strong)'}`,
-                        background: selected ? 'var(--v-primary)' : 'transparent',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                      }}>
-                        {selected && (
-                          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="#0a0c0e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 8.5l3 3 7-7"/></svg>
-                        )}
-                      </span>
-                      {m.label}
-                    </button>
-                  )
-                })}
-              </div>
-            </>
-          )}
-
-          {/* ── PASO 5 — Identidad + visión 90 días (NUEVO) ── */}
-          {step === 5 && (
-            <>
-              <h1 className="of-h1-md" style={{ fontFamily: 'var(--font-display)', lineHeight: 1.05, letterSpacing: '-0.03em', fontWeight: 400, margin: 0 }}>
-                Cuéntame un poco <em style={{ fontStyle: 'italic', color: 'var(--v-primary)' }}>de ti</em>.
-              </h1>
-              <p style={{ fontSize: 15, color: 'var(--text-muted)', lineHeight: 1.6, marginTop: 16, marginBottom: 24 }}>
-                Elige las identidades que te describan (máximo 3).
-              </p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
-                {identidades.map((idt) => {
-                  const selected = identidadSel.includes(idt.id)
-                  return (
-                    <button key={idt.id} onClick={() => toggleIdentidad(idt.id)} style={{
-                      padding: '14px 18px',
-                      border: `1px solid ${selected ? 'var(--v-primary)' : 'var(--line)'}`,
-                      background: selected ? 'var(--v-tint)' : 'var(--ink-2)',
-                      borderRadius: 12, display: 'flex', alignItems: 'center', gap: 12,
-                      cursor: 'pointer', color: 'var(--text)', fontSize: 14, textAlign: 'left',
-                      fontFamily: 'var(--font-body)',
-                    }}>
-                      <span style={{
-                        width: 18, height: 18, borderRadius: 4,
-                        border: `1.5px solid ${selected ? 'var(--v-primary)' : 'var(--line-strong)'}`,
-                        background: selected ? 'var(--v-primary)' : 'transparent',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                      }}>
-                        {selected && (
-                          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="#0a0c0e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 8.5l3 3 7-7"/></svg>
-                        )}
-                      </span>
-                      {idt.label}
-                    </button>
-                  )
-                })}
-              </div>
-              <div className="eyebrow" style={{ marginBottom: 10 }}>¿Qué quieres que sea diferente en 90 días?</div>
-              <textarea
-                value={respuestaLibre}
-                onChange={(e) => setRespuestaLibre(e.target.value)}
-                placeholder="Comparte lo que quieras trabajar..."
-                style={{
-                  width: '100%', padding: 16, minHeight: 110, background: 'var(--ink-2)',
-                  border: '1px solid var(--line)', borderRadius: 12, color: 'var(--text)',
-                  fontSize: 14, resize: 'vertical', fontFamily: 'var(--font-body)', outline: 'none', lineHeight: 1.5,
-                }}
-              />
-            </>
-          )}
-
-          {/* ── PASO 6 — Primer test ── */}
-          {step === 6 && (
-            <>
-              <h1 className="of-h1-md" style={{ fontFamily: 'var(--font-display)', lineHeight: 1.05, letterSpacing: '-0.03em', fontWeight: 400, margin: 0 }}>
-                Un test <em style={{ fontStyle: 'italic', color: 'var(--v-primary)' }}>breve</em> para partir.
-              </h1>
-              <p style={{ fontSize: 15, color: 'var(--text-muted)', lineHeight: 1.6, marginTop: 16, marginBottom: 24, maxWidth: 440 }}>
-                20 preguntas sobre cómo funcionas. Al terminar te voy a dar una foto de tu momento actual — algo más preciso que intuiciones.
-              </p>
-              <div style={{ padding: 20, background: 'var(--ink-2)', border: '1px solid var(--line)', borderRadius: 14, marginBottom: 20 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                  <div style={{ width: 54, height: 54, borderRadius: 12, background: 'var(--v-tint)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, color: 'var(--v-primary)', flexShrink: 0 }}>✦</div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontFamily: 'var(--font-display)', fontSize: 20 }}>Radar ontológico</div>
-                    <div style={{ fontSize: 12, color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>20 preguntas · 8 min</div>
-                  </div>
-                  <span style={{ fontSize: 10, padding: '4px 10px', borderRadius: 999, background: 'var(--v-primary)', color: '#0a0c0e', fontWeight: 600, flexShrink: 0 }}>RECOMENDADO</span>
-                </div>
-              </div>
-              <div style={{ fontSize: 13, color: 'var(--text-muted)', fontStyle: 'italic' }}>— o saltar por ahora, lo haces cuando quieras.</div>
-            </>
-          )}
-
-          {/* ── PASO 7 — Tour ── */}
-          {step === 7 && (
-            <>
-              <h1 className="of-h1-lg" style={{ fontFamily: 'var(--font-display)', lineHeight: 1.05, letterSpacing: '-0.03em', fontWeight: 400, margin: 0 }}>
-                Esto es lo que <em style={{ fontStyle: 'italic', color: 'var(--v-primary)' }}>tienes</em>.
-              </h1>
-              <p style={{ fontSize: 15, color: 'var(--text-muted)', lineHeight: 1.6, marginTop: 16, marginBottom: 20, maxWidth: 420 }}>
-                Un tour rápido en 4 lugares.
-              </p>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                {[
-                  ['Conversación', 'Hablar con Clara cuando quieras.'],
-                  ['Módulos', 'Micro-cursos de 5-15 min.'],
-                  ['Tests', 'Auto-conocimiento con evidencia.'],
-                  ['Equilibrio', 'Cómo vas en las 4 dimensiones.'],
-                ].map(([t, d], i) => (
-                  <div key={i} style={{ padding: 16, background: 'var(--ink-2)', border: '1px solid var(--line)', borderRadius: 12 }}>
-                    <div style={{ fontFamily: 'var(--font-display)', fontSize: 16, marginBottom: 4 }}>{t}</div>
-                    <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.5 }}>{d}</div>
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
-
-          {/* ── PASO 8 — Plan ── */}
-          {step === 8 && (
-            <>
-              <h1 className="of-h1-md" style={{ fontFamily: 'var(--font-display)', lineHeight: 1.05, letterSpacing: '-0.03em', fontWeight: 400, margin: 0 }}>
-                Empieza <em style={{ fontStyle: 'italic', color: 'var(--v-primary)' }}>gratis</em>.
-              </h1>
-              <p style={{ fontSize: 15, color: 'var(--text-muted)', lineHeight: 1.6, marginTop: 16, marginBottom: 20, maxWidth: 460 }}>
-                Sin tarjeta. Sin compromiso. Cuando sientas que te hace falta más, está ahí.
-              </p>
-              <div style={{ padding: 22, background: 'var(--v-tint)', border: '1px solid color-mix(in oklab, var(--v-primary) 30%, transparent)', borderRadius: 14, marginBottom: 14 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 10 }}>
-                  <span style={{ fontFamily: 'var(--font-display)', fontSize: 22 }}>Gratis</span>
-                  <span style={{ fontFamily: 'var(--font-display)', fontSize: 28 }}>$0</span>
-                </div>
-                <div style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.6 }}>1 vertical · 5 mensajes al día · tests básicos · módulos introductorios.</div>
-              </div>
-              <button onClick={completeOnboarding} disabled={guardando} style={{
-                width: '100%', padding: '14px', borderRadius: 12, border: 'none',
-                background: 'var(--v-primary)', color: '#0a0c0e', fontWeight: 600, fontSize: 15,
-                cursor: guardando ? 'default' : 'pointer', marginBottom: 10, opacity: guardando ? 0.6 : 1,
-                fontFamily: 'var(--font-body)',
-              }}>
-                {guardando ? 'Guardando...' : 'Continuar gratis'}
-              </button>
-              <div style={{ textAlign: 'center', fontSize: 12, color: 'var(--text-dim)' }}>
-                o <a onClick={() => router.push('/planes')} style={{ textDecoration: 'underline', cursor: 'pointer' }}>ver planes</a>
-              </div>
-            </>
-          )}
-
-          {/* Nav buttons */}
-          <div className="of-nav">
-            <button onClick={back} disabled={step === 1} style={{
-              padding: '12px 22px', borderRadius: 12, border: '1px solid var(--line-strong)',
-              background: 'transparent', color: 'var(--text-muted)', fontSize: 14,
-              cursor: step === 1 ? 'default' : 'pointer', opacity: step === 1 ? .3 : 1,
-              fontFamily: 'var(--font-body)',
-            }}>← Atrás</button>
-            {step < 8 && (
-              <button onClick={next} disabled={!canContinue()} style={{
-                padding: '12px 22px', borderRadius: 12, border: 'none',
-                background: canContinue() ? 'var(--text)' : 'var(--ink-4)',
-                color: canContinue() ? 'var(--bg)' : 'var(--text-dim)',
-                fontWeight: 600, fontSize: 14, cursor: canContinue() ? 'pointer' : 'default',
-                fontFamily: 'var(--font-body)',
-              }}>Continuar →</button>
-            )}
+        {step === 1 && (
+          <div>
+            <h1 className="of-h1" style={{ marginBottom: 14 }}>
+              Bienvenida a <em style={{ fontStyle: 'italic', color: 'var(--v-primary)' }}>Coach 360</em>.
+            </h1>
+            <p style={{ fontSize: 15, color: 'var(--text-muted)', lineHeight: 1.6, maxWidth: 460 }}>
+              Antes de trabajar contigo necesitamos saber qué quieres lograr, qué te frena y cuánto puedes comprometerte. Te toma 5 minutos.
+            </p>
           </div>
-        </div>
+        )}
 
-        {/* Right visual — coach portrait (solo desktop) */}
-        <div className="of-right">
-          <img src="/clara.jpg" alt="Clara" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, transparent 50%, rgba(10,12,14,.85))' }} />
-          <div style={{ position: 'absolute', bottom: 28, left: 28, right: 28, color: '#fff' }}>
-            <div className="eyebrow" style={{ color: 'color-mix(in oklab, var(--v-primary) 80%, white)', marginBottom: 8 }}>✦ Tu coach</div>
-            <div style={{ fontFamily: 'var(--font-display)', fontSize: 32, letterSpacing: '-0.02em', marginBottom: 6 }}>Clara</div>
-            <div style={{ fontSize: 14, opacity: .8, fontStyle: 'italic' }}>"Más claridad, más poder. Más tú."</div>
+        {step === 2 && (
+          <div>
+            <h1 className="of-h1" style={{ marginBottom: 10 }}>¿Cómo te llamas?</h1>
+            <p style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 20 }}>Para tratarte por tu nombre.</p>
+            <input type="text" className="of-input" value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Tu nombre" autoFocus />
           </div>
+        )}
+
+        {step === 3 && (
+          <div>
+            <h1 className="of-h1" style={{ marginBottom: 10 }}>¿Cómo te <em style={{ fontStyle: 'italic', color: 'var(--v-primary)' }}>identificas</em>?</h1>
+            <p style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 20 }}>Esto define qué herramientas adicionales te aparecen.</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {generos.map(g => {
+                const sel = genero === g.id
+                return (
+                  <button key={g.id} type="button" onClick={() => setGenero(g.id)} className={`of-option ${sel ? 'sel' : ''}`}>
+                    <div className={`of-check ${sel ? 'sel' : ''}`}>{sel && '✓'}</div>
+                    {g.label}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        {step === 4 && (
+          <div>
+            <h1 className="of-h1" style={{ marginBottom: 10 }}>¿Qué <em style={{ fontStyle: 'italic', color: 'var(--v-primary)' }}>áreas</em> quieres trabajar?</h1>
+            <p style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 20 }}>Elige hasta 3. Es por dónde empezamos.</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {areasVida.map(a => {
+                const sel = areasSel.includes(a.id)
+                return (
+                  <button key={a.id} type="button" onClick={() => toggleArea(a.id)} className={`of-option ${sel ? 'sel' : ''}`}>
+                    <div className={`of-check ${sel ? 'sel' : ''}`}>{sel && '✓'}</div>
+                    {a.label}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        {step === 5 && (
+          <div>
+            <h1 className="of-h1" style={{ marginBottom: 10 }}>¿Cómo describirías tu <em style={{ fontStyle: 'italic', color: 'var(--v-primary)' }}>momento actual</em>?</h1>
+            <p style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 20 }}>Sé honesto/a — funcionamos mejor con la verdad.</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {estiloActual.map(e => {
+                const sel = estilo === e.id
+                return (
+                  <button key={e.id} type="button" onClick={() => setEstilo(e.id)} className={`of-option ${sel ? 'sel' : ''}`}>
+                    <div className={`of-check ${sel ? 'sel' : ''}`}>{sel && '✓'}</div>
+                    {e.label}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        {step === 6 && (
+          <div>
+            <h1 className="of-h1" style={{ marginBottom: 10 }}>¿Cuánto tiempo puedes <em style={{ fontStyle: 'italic', color: 'var(--v-primary)' }}>dedicarle</em>?</h1>
+            <p style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 20 }}>Mejor prometer poco y cumplir.</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {compromiso.map(c => {
+                const sel = nivelCompromiso === c.id
+                return (
+                  <button key={c.id} type="button" onClick={() => setNivelCompromiso(c.id)} className={`of-option ${sel ? 'sel' : ''}`} style={{ alignItems: 'flex-start', flexDirection: 'column', gap: 4, padding: '14px 18px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, width: '100%' }}>
+                      <div className={`of-check ${sel ? 'sel' : ''}`}>{sel && '✓'}</div>
+                      <span style={{ fontSize: 14, fontWeight: 600 }}>{c.label}</span>
+                    </div>
+                    <div style={{ fontSize: 12, color: 'var(--text-dim)', fontFamily: 'var(--font-mono)', letterSpacing: '.05em', marginLeft: 30 }}>{c.desc}</div>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        {step === 7 && (
+          <div>
+            <h1 className="of-h1" style={{ marginBottom: 10 }}>¿Qué quieres lograr en <em style={{ fontStyle: 'italic', color: 'var(--v-primary)' }}>90 días</em>?</h1>
+            <p style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 20 }}>Sé concreto/a. "Estar mejor" no cuenta.</p>
+            <textarea className="of-textarea" value={objetivo90} onChange={(e) => setObjetivo90(e.target.value)} placeholder="En 90 días quiero..." autoFocus />
+          </div>
+        )}
+
+        {step === 8 && (
+          <div>
+            <h1 className="of-h1" style={{ marginBottom: 10 }}>¿Qué te ha <em style={{ fontStyle: 'italic', color: 'var(--v-primary)' }}>frenado</em>?</h1>
+            <p style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 20 }}>Tu mayor obstáculo real. Opcional.</p>
+            <textarea className="of-textarea" value={obstaculo} onChange={(e) => setObstaculo(e.target.value)} placeholder="Lo que me ha frenado es..." />
+          </div>
+        )}
+
+        <div className="of-nav">
+          {step > 1 && <button onClick={back} className="of-btn-sec">← Anterior</button>}
+          {step < TOTAL ? (
+            <button onClick={next} disabled={!canContinue()} className="of-btn-prim">
+              {step === 1 ? 'Empezar' : 'Siguiente'} →
+            </button>
+          ) : (
+            <button onClick={completeOnboarding} disabled={guardando} className="of-btn-prim">
+              {guardando ? 'Guardando…' : 'Empezar mi Coach 360 ✦'}
+            </button>
+          )}
         </div>
       </div>
     </div>
