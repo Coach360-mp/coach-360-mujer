@@ -5,6 +5,7 @@ import { solicitarPermisoNotificaciones } from '@/lib/firebase'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import { Icon } from '@/components/design/icons'
+import { TestShareModal, CertificateModal } from '@/components/design/ShareModals'
 
 const coaches = {
   free: { name: 'Clara', photo: '/clara.jpg', credential: 'Coach certificada', desc: 'Tu compañera de crecimiento. Te escucha, te hace preguntas poderosas y te ayuda a ver con más claridad.' },
@@ -125,6 +126,8 @@ export default function Dashboard() {
   const [isRecording, setIsRecording] = useState(false)
   const [progresoModulos, setProgresoModulos] = useState([])
   const [activeModulo, setActiveModulo] = useState(null)
+  const [shareTestOpen, setShareTestOpen] = useState(false)
+  const [certificadoModulo, setCertificadoModulo] = useState(null)
   const [menuAbierto, setMenuAbierto] = useState(false)
   const [primerasSesion, setPrimeraSesion] = useState(false)
   const [sesionPaso, setSesionPaso] = useState(0)
@@ -1000,6 +1003,15 @@ export default function Dashboard() {
             <button onClick={() => { setChatMsgs([{ r: 'u', t: `Quiero hablar sobre el módulo "${activeModulo.titulo}". ¿Cómo me ayudas a aprovecharlo mejor?` }]); navigate('clara') }} style={{ width: '100%', background: 'transparent', border: '1px solid var(--gold-light)', color: 'var(--text)', padding: '14px 24px', borderRadius: 30, fontSize: 14, cursor: 'pointer', fontFamily: 'inherit' }}>
               Hablar con Clara sobre este módulo ✦
             </button>
+            {progresoModulos?.find(p => p.modulo_id === activeModulo.id)?.completado && (
+              <button onClick={() => {
+                const prog = progresoModulos?.find(p => p.modulo_id === activeModulo.id)
+                setCertificadoModulo({ titulo: activeModulo.titulo, fecha: prog?.fecha_completado })
+              }} style={{ width: '100%', background: 'transparent', border: '1px solid var(--v-primary)', color: 'var(--v-primary)', padding: '14px 24px', borderRadius: 30, fontSize: 14, cursor: 'pointer', fontFamily: 'inherit', marginTop: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Descargar certificado
+              </button>
+            )}
           </div>
         </div>
       )}
@@ -1911,6 +1923,10 @@ export default function Dashboard() {
                   {/* CTAs */}
                   <button onClick={conversarConClara} style={{ width: '100%', padding: '14px', borderRadius: 12, border: 'none', background: 'var(--v-primary)', color: '#0a0c0e', fontWeight: 600, fontSize: 15, cursor: 'pointer', fontFamily: 'var(--font-body)', marginTop: 4 }}>
                     Conversar con Clara sobre esto →
+                  </button>
+                  <button onClick={() => setShareTestOpen(true)} style={{ width: '100%', padding: 12, borderRadius: 12, border: '1px solid var(--line-strong)', background: 'transparent', color: 'var(--text)', fontSize: 14, cursor: 'pointer', fontFamily: 'var(--font-body)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+                    Compartir mi perfil
                   </button>
                   <button onClick={cerrar} style={{ width: '100%', padding: 12, borderRadius: 12, border: '1px solid var(--line-strong)', background: 'transparent', color: 'var(--text)', fontSize: 14, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
                     Volver al inicio
@@ -2976,6 +2992,25 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+
+      <TestShareModal
+        open={shareTestOpen}
+        onClose={() => setShareTestOpen(false)}
+        perfil={testResult?.nombre || testResult?.titulo_perfil || testResult?.perfil || 'Tu perfil'}
+        descripcion={testResult?.descLarga || testResult?.descripcion || testResult?.desc || ''}
+        tags={Array.isArray(testResult?.tags) ? testResult.tags : []}
+        vertical="mujer"
+      />
+
+      <CertificateModal
+        open={!!certificadoModulo}
+        onClose={() => setCertificadoModulo(null)}
+        userName={perfil?.nombre_preferido || perfil?.nombre || 'Tu nombre'}
+        moduloTitulo={certificadoModulo?.titulo || ''}
+        fechaCompletado={certificadoModulo?.fecha}
+        vertical="mujer"
+        coachTag="Coach certificada"
+      />
     </div>
   )
 }
