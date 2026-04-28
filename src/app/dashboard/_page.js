@@ -6,6 +6,8 @@ import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import { Icon } from '@/components/design/icons'
 import { TestShareModal, CertificateModal } from '@/components/design/ShareModals'
+import { BadgeCelebrationModal } from '@/components/design/BadgeCelebrationModal'
+import { evaluarYOtorgarBadges } from '@/lib/badges'
 
 const coaches = {
   free: { name: 'Clara', photo: '/clara.jpg', credential: 'Coach certificada', desc: 'Tu compañera de crecimiento. Te escucha, te hace preguntas poderosas y te ayuda a ver con más claridad.' },
@@ -128,6 +130,7 @@ export default function Dashboard() {
   const [activeModulo, setActiveModulo] = useState(null)
   const [shareTestOpen, setShareTestOpen] = useState(false)
   const [certificadoModulo, setCertificadoModulo] = useState(null)
+  const [badgeQueue, setBadgeQueue] = useState([])
   const [menuAbierto, setMenuAbierto] = useState(false)
   const [primerasSesion, setPrimeraSesion] = useState(false)
   const [sesionPaso, setSesionPaso] = useState(0)
@@ -199,6 +202,7 @@ export default function Dashboard() {
         setRitualCompletadoHoy(true)
         if (data.racha_dias != null) {
           setPerfil(prev => ({ ...(prev || {}), racha_dias: data.racha_dias, mejor_racha: data.mejor_racha }))
+          chequearBadges('ritual_diario', { ...(perfil || {}), racha_dias: data.racha_dias, mejor_racha: data.mejor_racha })
         }
       }
     } catch (err) {
@@ -408,6 +412,7 @@ export default function Dashboard() {
         try {
           fetch('/api/emails/resultado-test', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: user.id, vertical: 'mujer', testTitulo: activeTest.titulo, perfilResultado: profile.nombre }) })
         } catch (e) { console.error('Error email resultado-test:', e) }
+        chequearBadges('test_completado')
       }
     }
   }
@@ -422,6 +427,7 @@ export default function Dashboard() {
       try {
         await supabase.from('resultados_test').insert({ usuario_id: user.id, test_id: null, puntaje_total: 0, perfil_resultado: `Herramienta: ${activeHerramienta.titulo}`, respuestas: { reflexion: herramientaReflexion, herramienta_id: activeHerramienta.id } })
         await sumarPuntos('herramienta_completada', 15, `Herramienta: ${activeHerramienta.titulo}`)
+        chequearBadges('herramienta_completada')
       } catch (err) { console.error('Error guardando reflexión:', err) }
     }
   }
@@ -453,6 +459,7 @@ export default function Dashboard() {
       if (mensajesDelUsuario === 0) {
         sumarPuntos('conversacion_coach', 5, `Conversación con ${coach.name}`)
       }
+      chequearBadges('chat_enviado')
     } catch {
       setTyping(false)
       setChatMsgs(prev => [...prev, { r: 'a', t: 'Perdona, hubo un error. ¿Puedes intentar de nuevo? ✦', createdAt: new Date().toISOString() }])
@@ -566,6 +573,24 @@ export default function Dashboard() {
     setConfigurandoHabitos(true)
     setConfigDimension(0)
     setHabitosSeleccionados({ mente: [], cuerpo: [], corazon: [], espiritu: [] })
+  }
+
+  const chequearBadges = async (evento, perfilOverride = null) => {
+    if (!user?.id) return
+    try {
+      const nuevos = await evaluarYOtorgarBadges({
+        userId: user.id,
+        perfil: perfilOverride || perfil,
+        vertical: 'mujer',
+        evento,
+      })
+      if (nuevos.length > 0) {
+        setBadgeQueue(prev => [...prev, ...nuevos])
+        cargarBadges()
+      }
+    } catch (e) {
+      console.error('[badges] chequearBadges:', e)
+    }
   }
 
   const sumarPuntos = async (accion, puntos, descripcion = null) => {
@@ -996,7 +1021,12 @@ export default function Dashboard() {
               const completado = nuevoPct >= 100
               await supabase.from('progreso_modulos').upsert({ usuario_id: user.id, modulo_id: activeModulo.id, porcentaje_avance: nuevoPct, completado, fecha_completado: completado ? new Date().toISOString() : null }, { onConflict: 'usuario_id,modulo_id' })
               setProgresoModulos(prev => { const filtered = prev.filter(p => p.modulo_id !== activeModulo.id); return [...filtered, { modulo_id: activeModulo.id, porcentaje_avance: nuevoPct, completado }] })
-              if (completado) { await sumarPuntos('modulo_completado', 50, `Módulo: ${activeModulo.titulo}`) }
+              if (completado) {
+                await sumarPuntos('modulo_completado', 50, `Módulo: ${activeModulo.titulo}`)
+                await chequearBadges('modulo_completado')
+              } else if (nuevoPct > 0) {
+                await chequearBadges('modulo_iniciado')
+              }
             }} style={{ width: '100%', background: 'linear-gradient(135deg, #d4af37, #f5c842)', color: '#0a0a0a', border: 'none', padding: '16px 24px', borderRadius: 30, fontSize: 15, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', marginBottom: 12 }}>
               {progresoModulos?.find(p => p.modulo_id === activeModulo.id)?.completado ? 'Módulo completado ✦' : progresoModulos?.find(p => p.modulo_id === activeModulo.id)?.porcentaje_avance > 0 ? 'Continuar módulo →' : 'Comenzar módulo →'}
             </button>
@@ -3010,6 +3040,13 @@ export default function Dashboard() {
         fechaCompletado={certificadoModulo?.fecha}
         vertical="mujer"
         coachTag="Coach certificada"
+      />
+
+      <BadgeCelebrationModal
+        open={badgeQueue.length > 0}
+        badge={badgeQueue[0] || null}
+        onClose={() => setBadgeQueue(prev => prev.slice(1))}
+        vertical="mujer"
       />
     </div>
   )
