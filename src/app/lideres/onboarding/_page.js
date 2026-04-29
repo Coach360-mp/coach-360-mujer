@@ -82,7 +82,7 @@ export default function OnboardingLideres() {
       .eq('vertical', 'lideres')
       .maybeSingle()
 
-    if (onboarding) { router.push('/lideres/dashboard'); return }
+    if (onboarding) { router.push('/dashboard?tab=lideres'); return }
 
     const { data: profile } = await supabase.from('perfiles').select('nombre').eq('id', user.id).single()
     if (profile?.nombre) setNombre(profile.nombre)
@@ -155,7 +155,7 @@ export default function OnboardingLideres() {
         })
       } catch (e) { console.error('Error email bienvenida:', e) }
 
-      router.push('/lideres/dashboard')
+      router.push('/dashboard?tab=lideres')
     } catch (err) {
       console.error('Error guardando onboarding:', err)
       setGuardando(false)

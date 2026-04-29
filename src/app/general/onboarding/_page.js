@@ -69,7 +69,7 @@ export default function OnboardingGeneral() {
       .eq('vertical', 'general')
       .maybeSingle()
 
-    if (onboarding) { router.push('/general/dashboard'); return }
+    if (onboarding) { router.push('/dashboard?tab=coach360'); return }
 
     const { data: profile } = await supabase.from('perfiles').select('nombre').eq('id', user.id).single()
     if (profile?.nombre) setNombre(profile.nombre)
@@ -142,7 +142,7 @@ export default function OnboardingGeneral() {
         })
       } catch (e) { console.error('Error email bienvenida:', e) }
 
-      router.push('/general/dashboard')
+      router.push('/dashboard?tab=coach360')
     } catch (err) {
       console.error('Error guardando onboarding:', err)
       setGuardando(false)

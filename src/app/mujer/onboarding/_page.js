@@ -61,7 +61,7 @@ export default function MujerOnboarding() {
       .eq('user_id', user.id)
       .eq('vertical', 'mujer')
       .maybeSingle()
-    if (existente) { router.push('/mujer/dashboard'); return }
+    if (existente) { router.push('/dashboard?tab=mujer'); return }
   }
 
   const toggleMomento = (id) =>
@@ -116,7 +116,7 @@ export default function MujerOnboarding() {
         )
       }
 
-      router.push('/mujer/dashboard')
+      router.push('/dashboard?tab=mujer')
     } catch (err) {
       console.error('Error guardando onboarding mujer:', err)
       setGuardando(false)

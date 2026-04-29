@@ -1,6 +1,12 @@
 'use client'
-import CoachDashboard from '@/components/dashboard/CoachDashboard'
 
-export default function DashboardLideresPage() {
-  return <CoachDashboard vertical="lideres" />
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+
+export default function DashboardLideresRedirect() {
+  const router = useRouter()
+  useEffect(() => {
+    router.replace('/dashboard?tab=lideres')
+  }, [router])
+  return null
 }

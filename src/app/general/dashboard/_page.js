@@ -1,6 +1,12 @@
 'use client'
-import CoachDashboard from '@/components/dashboard/CoachDashboard'
 
-export default function DashboardGeneralPage() {
-  return <CoachDashboard vertical="general" />
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+
+export default function DashboardGeneralRedirect() {
+  const router = useRouter()
+  useEffect(() => {
+    router.replace('/dashboard?tab=coach360')
+  }, [router])
+  return null
 }
