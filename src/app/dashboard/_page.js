@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import CoachDashboard from '@/components/dashboard/CoachDashboard'
 import TabBar from '@/components/dashboard/TabBar'
+import VerticalLockedView from '@/components/dashboard/VerticalLockedView'
 import { useVerticalAccess } from '@/lib/hooks/useVerticalAccess'
 import { verticalUItoBD } from '@/lib/constants'
 
@@ -48,12 +49,19 @@ export default function DashboardPage() {
     router.replace(`/dashboard?${sp.toString()}`, { scroll: false })
   }
 
+  const tabActual = access[tab]
+  const enPreview = tabActual?.preview
+
   return (
     <div>
       {tabsVisibles.length > 1 && (
         <TabBar tabs={tabsVisibles} active={tab} onChange={cambiarTab} />
       )}
-      <CoachDashboard key={tab} vertical={verticalUItoBD(tab)} />
+      {enPreview ? (
+        <VerticalLockedView vertical={tab} />
+      ) : (
+        <CoachDashboard key={tab} vertical={verticalUItoBD(tab)} />
+      )}
     </div>
   )
 }

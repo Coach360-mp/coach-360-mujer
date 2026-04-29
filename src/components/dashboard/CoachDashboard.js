@@ -838,8 +838,11 @@ export default function CoachDashboard({ vertical = 'mujer' }) {
                 )}
               </div>
 
-              {/* Cerrar sesión — replicado del menú legacy eliminado */}
-              <button onClick={handleLogout} style={{ marginTop: 12, padding: '10px 12px', background: 'transparent', border: 'none', color: 'var(--text-dim)', fontSize: 12, cursor: 'pointer', fontFamily: 'var(--font-body)', textAlign: 'left', borderRadius: 10 }}>
+              {/* Configuración + cerrar sesión */}
+              <button onClick={() => { setMenuAbierto(false); router.push('/configuracion') }} style={{ marginTop: 12, padding: '10px 12px', background: 'transparent', border: 'none', color: 'var(--text-muted)', fontSize: 13, cursor: 'pointer', fontFamily: 'var(--font-body)', textAlign: 'left', borderRadius: 10 }}>
+                Configuración
+              </button>
+              <button onClick={handleLogout} style={{ padding: '10px 12px', background: 'transparent', border: 'none', color: 'var(--text-dim)', fontSize: 12, cursor: 'pointer', fontFamily: 'var(--font-body)', textAlign: 'left', borderRadius: 10 }}>
                 Cerrar sesión
               </button>
             </aside>
