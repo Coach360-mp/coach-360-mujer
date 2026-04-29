@@ -331,7 +331,9 @@ export default function CoachDashboard({ vertical = 'mujer' }) {
         titulo_perfil: perfilData.titulo_perfil,
         descLarga: perfilData.descripcion,
         desc: perfilData.descripcion,
-        fortalezas: perfilData.fortalezas ? perfilData.fortalezas.split('. ').filter(Boolean) : [],
+        fortalezas: Array.isArray(perfilData.fortalezas)
+          ? perfilData.fortalezas
+          : (typeof perfilData.fortalezas === 'string' ? perfilData.fortalezas.split('. ').filter(Boolean) : []),
         sombras: perfilData.desafios ? perfilData.desafios.split('. ').filter(Boolean) : [],
         recomendaciones: perfilData.recomendacion ? [perfilData.recomendacion] : [],
         proximoPaso: perfilData.recomendacion || '',
