@@ -1,19 +1,25 @@
 'use client'
 
 import { useUserPreferences } from './useUserPreferences'
+import { getVerticalAccess } from '@/lib/access/getVerticalAccess'
 
-// Devuelve { canAccessMujer, canAccessLideres, canAccessCoach360, loading, error }.
-// Reglas:
-//   - Coach 360: siempre.
-//   - Líderes: siempre.
-//   - Mujer: solo si genero ∈ {'mujer', 'prefiero_no_responder'} o no hay preferencias guardadas (caso default).
+// Devuelve { coach360, mujer, lideres, plan, genero, loading, error }.
+// Cada vertical: { visible, accesible, preview }.
+// Reglas en src/lib/access/getVerticalAccess.js.
 export function useVerticalAccess() {
   const { preferences, loading, error } = useUserPreferences()
   const genero = preferences?.genero || 'prefiero_no_responder'
+  const plan = preferences?.plan_actual || 'free'
+
+  const access = getVerticalAccess(plan, genero)
+
   return {
-    canAccessCoach360: true,
-    canAccessLideres: true,
-    canAccessMujer: genero !== 'hombre',
+    ...access,
+    // Compat con consumers existentes que usan canAccessMujer/Lideres/Coach360
+    canAccessCoach360: access.coach360.accesible,
+    canAccessMujer:    access.mujer.accesible || access.mujer.preview, // visible si preview o accesible
+    canAccessLideres:  access.lideres.accesible || access.lideres.preview,
+    plan,
     genero,
     loading,
     error,
