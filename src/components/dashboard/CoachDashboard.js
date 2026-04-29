@@ -183,11 +183,14 @@ export default function CoachDashboard({ vertical = 'mujer' }) {
   }
 
   async function cargarConversaciones() {
-    if (!user?.id || !config.conversacionesTable) return
+    if (!user?.id) return
+    // Tabla unificada `conversaciones` filtrada por coach + vertical
     const { data } = await supabase
-      .from(config.conversacionesTable)
+      .from('conversaciones')
       .select('id, titulo, fecha_inicio, ultimo_mensaje')
       .eq('usuario_id', user.id)
+      .eq('coach', config.dataV)
+      .eq('vertical', config.vertical)
       .eq('activa', true)
       .order('ultimo_mensaje', { ascending: false })
       .limit(20)
@@ -195,9 +198,8 @@ export default function CoachDashboard({ vertical = 'mujer' }) {
   }
 
   async function abrirConversacion(convId) {
-    if (!config.mensajesTable) return
     const { data } = await supabase
-      .from(config.mensajesTable)
+      .from('mensajes')
       .select('rol, contenido, fecha')
       .eq('conversacion_id', convId)
       .order('fecha', { ascending: true })
@@ -2212,7 +2214,7 @@ export default function CoachDashboard({ vertical = 'mujer' }) {
           )}
 
           <div className="ch-wrap">
-            {/* Columna 1: Sidebar — historial real de conversaciones_clara */}
+            {/* Columna 1: Sidebar — historial real desde tabla unificada `conversaciones` */}
             <aside className={`ch-sidebar ${chatSidebarAbierto ? 'open' : ''}`}>
               <button className="ch-sidebar-close" onClick={() => setChatSidebarAbierto(false)} aria-label="Cerrar">
                 <Icon.close s={14} />

@@ -20,8 +20,7 @@ const COACH_CONFIG = {
     },
     // Endpoints + tablas
     chatEndpoint: '/api/chat',
-    conversacionesTable: 'conversaciones_clara',
-    mensajesTable: 'mensajes_clara',
+    // chat persistido en tabla unificada `conversaciones` + `mensajes` (filtrado por coach + vertical)
     // Rutas
     landingPath: '/',
     onboardingPath: '/onboarding',
@@ -88,8 +87,7 @@ const COACH_CONFIG = {
       premium:  { name: 'Leo', photo: '/leo.jpg', credential: 'Coach Estratégico · 3 verticales', desc: 'Te ayuda a pasar del saber al hacer — hábitos, decisiones, resultados concretos.' },
     },
     chatEndpoint: '/api/chat-general',
-    conversacionesTable: 'conversaciones_leo',
-    mensajesTable: 'mensajes_leo',
+    // chat unificado: filtra por coach='leo' + vertical='general'
     landingPath: '/general',
     onboardingPath: '/general/onboarding',
     saludoFresco: (nombre) => `${nombre ? nombre + '.' : 'Hola.'}\n\nSoy Leo. Trabajo contigo para pasar del saber al hacer — hábitos, decisiones, resultados concretos.\n\n¿Qué quieres resolver hoy?`,
@@ -151,8 +149,7 @@ const COACH_CONFIG = {
       premium:  { name: 'Marco', photo: '/marco.jpg', credential: 'Coach Ejecutivo · 3 verticales', desc: 'Te acompaña en decisiones de liderazgo, conversaciones difíciles y construcción de equipo.' },
     },
     chatEndpoint: '/api/chat-lideres',
-    conversacionesTable: 'conversaciones_marco',
-    mensajesTable: 'mensajes_marco',
+    // chat unificado: filtra por coach='marco' + vertical='lideres'
     landingPath: '/lideres',
     onboardingPath: '/lideres/onboarding',
     saludoFresco: (nombre) => `${nombre ? nombre + '.' : 'Hola.'}\n\nSoy Marco. Trabajo con líderes en lo que pesa — decisiones difíciles, conversaciones incómodas, construir equipo de verdad.\n\n¿Qué tienes encima esta semana?`,

@@ -334,12 +334,13 @@ Si detectas crisis emocional grave, acoso, abuso o violencia:
       extraerInsightYGuardar(supabaseAdmin, userId, [...messages, { role: 'assistant', content: reply }], 'lideres', 'marco')
     }
 
-    // Persistir conversación en conversaciones_marco + mensajes_marco
+    // Persistir conversación en tabla unificada `conversaciones` + `mensajes`
+    // Tagged con coach='marco', vertical='lideres'
     let finalConvId = conversacionId
     try {
       if (finalConvId && userId) {
         const { data: convExiste } = await supabaseAdmin
-          .from('conversaciones_marco')
+          .from('conversaciones')
           .select('id').eq('id', finalConvId).eq('usuario_id', userId).maybeSingle()
         if (!convExiste) {
           console.warn('[chat-lideres] conversacionId no pertenece al user, creando nueva')
@@ -349,18 +350,18 @@ Si detectas crisis emocional grave, acoso, abuso o violencia:
       if (!finalConvId && userId) {
         const lastUserMsg = messages[messages.length - 1]?.content || ''
         const { data: newConv } = await supabaseAdmin
-          .from('conversaciones_marco')
-          .insert({ usuario_id: userId, titulo: lastUserMsg.slice(0, 40) })
+          .from('conversaciones')
+          .insert({ usuario_id: userId, coach: 'marco', vertical: 'lideres', titulo: lastUserMsg.slice(0, 40) })
           .select('id').single()
         finalConvId = newConv?.id
       }
       if (finalConvId) {
         const lastUserMsg = messages[messages.length - 1]?.content || ''
-        await supabaseAdmin.from('mensajes_marco').insert([
+        await supabaseAdmin.from('mensajes').insert([
           { conversacion_id: finalConvId, rol: 'user', contenido: lastUserMsg },
           { conversacion_id: finalConvId, rol: 'assistant', contenido: reply },
         ])
-        await supabaseAdmin.from('conversaciones_marco')
+        await supabaseAdmin.from('conversaciones')
           .update({ ultimo_mensaje: new Date().toISOString() })
           .eq('id', finalConvId)
       }

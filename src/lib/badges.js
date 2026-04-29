@@ -8,10 +8,12 @@ import { supabase } from './supabase'
 // Cada función recibe { userId, perfil, vertical }.
 const EVALUADORES = {
   primera_conversacion_clara: async ({ userId }) => {
+    // Badge legacy con código clara-specific. Cuenta conversaciones con coach='clara' en tabla unificada.
     const { count } = await supabase
-      .from('conversaciones_clara')
+      .from('conversaciones')
       .select('id', { count: 'exact', head: true })
       .eq('usuario_id', userId)
+      .eq('coach', 'clara')
     return (count || 0) >= 1
   },
   primera_herramienta: async ({ userId }) => {

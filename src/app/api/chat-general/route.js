@@ -315,12 +315,13 @@ Si detectas crisis emocional grave, ideas de autolesión o violencia, responde c
       extraerInsightYGuardar(supabaseAdmin, userId, [...messages, { role: 'assistant', content: reply }], 'general', 'leo')
     }
 
-    // Persistir conversación en conversaciones_leo + mensajes_leo
+    // Persistir conversación en tabla unificada `conversaciones` + `mensajes`
+    // Tagged con coach='leo', vertical='general'
     let finalConvId = conversacionId
     try {
       if (finalConvId && userId) {
         const { data: convExiste } = await supabaseAdmin
-          .from('conversaciones_leo')
+          .from('conversaciones')
           .select('id').eq('id', finalConvId).eq('usuario_id', userId).maybeSingle()
         if (!convExiste) {
           console.warn('[chat-general] conversacionId no pertenece al user, creando nueva')
@@ -330,18 +331,18 @@ Si detectas crisis emocional grave, ideas de autolesión o violencia, responde c
       if (!finalConvId && userId) {
         const lastUserMsg = messages[messages.length - 1]?.content || ''
         const { data: newConv } = await supabaseAdmin
-          .from('conversaciones_leo')
-          .insert({ usuario_id: userId, titulo: lastUserMsg.slice(0, 40) })
+          .from('conversaciones')
+          .insert({ usuario_id: userId, coach: 'leo', vertical: 'general', titulo: lastUserMsg.slice(0, 40) })
           .select('id').single()
         finalConvId = newConv?.id
       }
       if (finalConvId) {
         const lastUserMsg = messages[messages.length - 1]?.content || ''
-        await supabaseAdmin.from('mensajes_leo').insert([
+        await supabaseAdmin.from('mensajes').insert([
           { conversacion_id: finalConvId, rol: 'user', contenido: lastUserMsg },
           { conversacion_id: finalConvId, rol: 'assistant', contenido: reply },
         ])
-        await supabaseAdmin.from('conversaciones_leo')
+        await supabaseAdmin.from('conversaciones')
           .update({ ultimo_mensaje: new Date().toISOString() })
           .eq('id', finalConvId)
       }
