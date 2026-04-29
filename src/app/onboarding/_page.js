@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import { Sigil } from '@/components/design/icons'
+import { recomendarCoach } from '@/lib/recomendarCoach'
+import { canSelectCoach } from '@/lib/access/getCoachAccess'
 
 // Onboarding universal Coach 360. Captura nombre, género y data ontológica genérica.
 // Si la usuaria luego entra a /mujer o /lideres, hará el sub-onboarding específico.
@@ -49,8 +51,15 @@ const stepsLabels = [
   { n: 6, label: 'Compromiso' },
   { n: 7, label: 'Objetivo' },
   { n: 8, label: 'Obstáculo' },
+  { n: 9, label: 'Tu coach' },
 ]
 const TOTAL = stepsLabels.length
+
+const COACH_INFO = {
+  leo:   { nombre: 'Leo',   img: '/leo.jpg',   tag: 'Estratégico · práctico', desc: 'Te ayuda a EJECUTAR' },
+  clara: { nombre: 'Clara', img: '/clara.jpg', tag: 'Empática · exploratoria', desc: 'Te ayuda a TRANSFORMAR' },
+  marco: { nombre: 'Marco', img: '/marco.jpg', tag: 'Ejecutivo · desafiante', desc: 'Te ayuda a LIDERAR' },
+}
 
 export default function Onboarding() {
   const router = useRouter()
@@ -64,7 +73,16 @@ export default function Onboarding() {
   const [nivelCompromiso, setNivelCompromiso] = useState(null)
   const [objetivo90, setObjetivo90] = useState('')
   const [obstaculo, setObstaculo] = useState('')
+  const [coachElegido, setCoachElegido] = useState(null)
   const [guardando, setGuardando] = useState(false)
+
+  // Recomendación derivada al entrar al paso 9
+  const recomendacion = recomendarCoach({
+    areas: areasSel,
+    momento: estilo,
+    identidad: [],
+    genero,
+  })
 
   useEffect(() => { checkUser() }, [])
 
@@ -93,6 +111,7 @@ export default function Onboarding() {
       case 5: return estilo !== null
       case 6: return nivelCompromiso !== null
       case 7: return objetivo90.trim().length > 0
+      case 9: return coachElegido !== null
       default: return true
     }
   }
@@ -101,11 +120,24 @@ export default function Onboarding() {
     if (!user) return
     setGuardando(true)
     try {
-      // 1. Guardar nombre + género en user_preferences (vía API)
+      // 1. Guardar nombre + género + coach en user_preferences (vía API)
+      // El coach efectivo: el elegido si tiene acceso por plan, sino default Leo (free).
+      const coachEfectivo = coachElegido && canSelectCoach(coachElegido, 'free')
+        ? coachElegido
+        : (coachElegido === 'leo' ? 'leo' : 'leo')
       await fetch('/api/user/preferences', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user.id, nombre: nombre.trim(), genero }),
+        body: JSON.stringify({
+          userId: user.id,
+          nombre: nombre.trim(),
+          genero,
+          coach_actual: coachEfectivo,
+          coach_recomendado: recomendacion.coach,
+          coach_elegido_inicial: coachElegido,
+          acepto_recomendacion: coachElegido === recomendacion.coach,
+          areas_interes: areasSel,
+        }),
       })
 
       // 2. Marcar onboarding completado en perfiles + setear vertical inicial
@@ -359,6 +391,54 @@ export default function Onboarding() {
             <h1 className="of-h1" style={{ marginBottom: 10 }}>¿Qué te ha <em style={{ fontStyle: 'italic', color: 'var(--v-primary)' }}>frenado</em>?</h1>
             <p style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 20 }}>Tu mayor obstáculo real. Opcional.</p>
             <textarea className="of-textarea" value={obstaculo} onChange={(e) => setObstaculo(e.target.value)} placeholder="Lo que me ha frenado es..." />
+          </div>
+        )}
+
+        {step === 9 && (
+          <div>
+            <h1 className="of-h1" style={{ marginBottom: 10 }}>
+              Te recomendamos <em style={{ fontStyle: 'italic', color: 'var(--v-primary)' }}>{COACH_INFO[recomendacion.coach].nombre}</em>.
+            </h1>
+            <p style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 20, lineHeight: 1.6 }}>
+              {recomendacion.motivo}
+            </p>
+            <p style={{ fontSize: 13, color: 'var(--text-dim)', marginBottom: 16, fontFamily: 'var(--font-mono)', letterSpacing: '.05em' }}>
+              ELEGÍ TU COACH:
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {['leo', 'clara', 'marco'].map((c) => {
+                const sel = coachElegido === c
+                const recomendado = c === recomendacion.coach
+                const requierePago = c !== 'leo'
+                const info = COACH_INFO[c]
+                return (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => setCoachElegido(c)}
+                    className={`of-option ${sel ? 'sel' : ''}`}
+                    style={{ alignItems: 'flex-start', padding: '14px 16px', gap: 14 }}
+                  >
+                    <img src={info.img} alt={info.nombre} style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                    <div style={{ flex: 1, textAlign: 'left' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
+                        <span style={{ fontSize: 15, fontWeight: 600 }}>{info.nombre}</span>
+                        {recomendado && <span style={{ fontSize: 9, padding: '2px 8px', borderRadius: 999, background: 'var(--v-primary)', color: '#0a0c0e', fontFamily: 'var(--font-mono)', letterSpacing: '.08em', fontWeight: 700 }}>RECOMENDADO</span>}
+                        {requierePago && <span style={{ fontSize: 9, padding: '2px 8px', borderRadius: 999, background: 'var(--ink-3)', color: 'var(--text-dim)', fontFamily: 'var(--font-mono)', letterSpacing: '.08em' }}>PLAN ESENCIAL+</span>}
+                      </div>
+                      <div style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.4 }}>{info.desc}</div>
+                      <div style={{ fontSize: 11, color: 'var(--text-dim)', fontFamily: 'var(--font-mono)', letterSpacing: '.05em', marginTop: 4 }}>{info.tag}</div>
+                    </div>
+                    <div className={`of-check ${sel ? 'sel' : ''}`} style={{ marginTop: 12 }}>{sel && '✓'}</div>
+                  </button>
+                )
+              })}
+            </div>
+            {coachElegido && coachElegido !== 'leo' && (
+              <p style={{ marginTop: 14, fontSize: 12, color: 'var(--text-dim)', lineHeight: 1.55, padding: '10px 14px', background: 'var(--ink-3)', borderRadius: 10, border: '1px solid var(--line)' }}>
+                ✦ {COACH_INFO[coachElegido].nombre} requiere plan Esencial. Vas a empezar con Leo y podés cambiar cuando subas de plan.
+              </p>
+            )}
           </div>
         )}
 
