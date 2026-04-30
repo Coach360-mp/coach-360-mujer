@@ -86,8 +86,18 @@ export default function Onboarding() {
   useEffect(() => { checkUser() }, [])
 
   async function checkUser() {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { router.push('/'); return }
+    // getSession() lee localStorage (síncrono) — más confiable que getUser() (network call)
+    // justo después de signup. Reintenta una vez si falla por race condition.
+    let { data: { session } } = await supabase.auth.getSession()
+    if (!session?.user) {
+      // Esperar 200ms y reintentar antes de redirigir — la sesión recién creada
+      // puede no estar propagada aún
+      await new Promise(r => setTimeout(r, 200))
+      const retry = await supabase.auth.getSession()
+      session = retry.data.session
+    }
+    if (!session?.user) { router.push('/'); return }
+    const user = session.user
     setUser(user)
     const { data: profile } = await supabase
       .from('perfiles').select('onboarding_completado, nombre').eq('id', user.id).maybeSingle()

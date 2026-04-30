@@ -95,6 +95,14 @@ export default function HomePage() {
       email: authEmail.trim(), password: authPassword,
     })
     if (error) { setAuthError(error.message); setAuthLoading(false); return }
+
+    // Si Supabase tiene "Confirm email" ON, data.session es null → usuario debe verificar email primero.
+    if (!data.session) {
+      setAuthLoading(false)
+      setAuthError('Te enviamos un email a ' + authEmail.trim() + '. Confirmá tu cuenta y volvé a iniciar sesión.')
+      return
+    }
+
     if (data.user && authNombre.trim()) {
       try { await supabase.from('perfiles').update({ nombre: authNombre.trim() }).eq('id', data.user.id) } catch {}
     }
@@ -109,6 +117,11 @@ export default function HomePage() {
       email: authEmail.trim(), password: authPassword,
     })
     if (error) { setAuthError(error.message); setAuthLoading(false); return }
+    if (!data.session) {
+      setAuthLoading(false)
+      setAuthError('No pudimos iniciar sesión. Confirmá que el email esté verificado.')
+      return
+    }
     const { data: perfil } = await supabase
       .from('perfiles').select('onboarding_completado, current_vertical')
       .eq('id', data.user.id).maybeSingle()
