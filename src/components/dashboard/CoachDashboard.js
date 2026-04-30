@@ -2223,7 +2223,7 @@ export default function CoachDashboard({ vertical = 'mujer' }) {
                 <Icon.close s={14} />
               </button>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '4px 8px', marginBottom: 18 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '4px 8px', marginBottom: 16 }}>
                 <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round">
                   <circle cx="12" cy="12" r="10" />
                   <circle cx="12" cy="12" r="5.5" opacity=".55" />
@@ -2232,9 +2232,77 @@ export default function CoachDashboard({ vertical = 'mujer' }) {
                 <span style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: 16 }}>Coach 360</span>
               </div>
 
-              <button onClick={nuevaConversacion} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', border: '1px solid var(--line-strong)', borderRadius: 10, background: 'transparent', color: 'var(--text)', fontSize: 13, cursor: 'pointer', marginBottom: 18, justifyContent: 'flex-start', fontFamily: 'var(--font-body)' }}>
-                <span style={{ color: 'var(--v-primary)' }}>✦</span> Nueva conversación
-              </button>
+              {/* Coach chooser pill */}
+              <div style={{ padding: '10px 12px', background: 'var(--ink-3)', borderRadius: 12, border: '1px solid var(--line)', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{ width: 32, height: 32, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, background: 'var(--ink-3)' }}>
+                  <img src={coachImg} alt={coachName} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 13, fontWeight: 600 }}>{coachName}</div>
+                  <div className="font-mono" style={{ fontSize: 10, color: 'var(--text-muted)' }}>tu coach</div>
+                </div>
+              </div>
+
+              {/* Menú nav (6 items) */}
+              {[
+                { label: 'Hoy', I: Icon.sparkle, active: false, action: () => navigate('ritual') },
+                { label: 'Conversación', I: Icon.dots, active: true, action: () => navigate('clara') },
+                { label: 'Módulos', I: Icon.book, active: false, action: () => navigate('modulos') },
+                { label: 'Tests', I: Icon.chart, active: false, action: () => navigate('tests') },
+                { label: 'Mi equilibrio', I: Icon.compass, active: false, action: () => navigate('equilibrio') },
+                { label: 'Progreso', I: Icon.chart, active: false, action: () => navigate('perfil') },
+              ].map((item, i) => {
+                const ItemIcon = item.I
+                return (
+                  <button key={i} onClick={() => { item.action(); setChatSidebarAbierto(false) }} style={{
+                    display: 'flex', alignItems: 'center', gap: 12, padding: '9px 12px', border: 'none', borderRadius: 10,
+                    background: item.active ? 'var(--v-tint)' : 'transparent',
+                    color: item.active ? 'var(--text)' : 'var(--text-muted)',
+                    fontSize: 13, cursor: 'pointer', textAlign: 'left', fontFamily: 'var(--font-body)',
+                  }}>
+                    <ItemIcon />
+                    <span>{item.label}</span>
+                    {item.active && <span style={{ marginLeft: 'auto', width: 4, height: 4, borderRadius: 2, background: 'var(--v-primary)' }} />}
+                  </button>
+                )
+              })}
+
+              {/* Otras experiencias — switcher cross-vertical filtrado por género */}
+              {(() => {
+                const verticalesDisponibles = [
+                  { id: 'general', label: 'Coach 360', desc: 'Coaching general',     img: '/leo.jpg',   path: '/dashboard?tab=coach360', visible: canAccessCoach360 },
+                  { id: 'mujer',   label: 'Mujer',     desc: 'Contexto de mujer',     img: '/clara.jpg', path: '/dashboard?tab=mujer',    visible: canAccessMujer },
+                  { id: 'lideres', label: 'Líderes',   desc: 'Liderazgo ejecutivo',   img: '/marco.jpg', path: '/dashboard?tab=lideres',  visible: canAccessLideres },
+                ].filter(v => v.visible && v.id !== vertical)
+                if (verticalesDisponibles.length === 0) return null
+                return (
+                  <div style={{ marginTop: 16, paddingTop: 14, borderTop: '1px solid var(--line)' }}>
+                    <div className="eyebrow" style={{ marginBottom: 8, padding: '0 4px' }}>Otras experiencias</div>
+                    {verticalesDisponibles.map(v => (
+                      <button key={v.id} onClick={() => { setChatSidebarAbierto(false); router.push(v.path) }} style={{
+                        display: 'flex', alignItems: 'center', gap: 10, width: '100%',
+                        padding: '8px 12px', border: 'none', borderRadius: 10,
+                        background: 'transparent', color: 'var(--text-muted)',
+                        cursor: 'pointer', textAlign: 'left',
+                        fontFamily: 'var(--font-body)', marginBottom: 2,
+                      }}>
+                        <img src={v.img} alt="" style={{ width: 24, height: 24, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: 12, color: 'var(--text)', fontWeight: 500 }}>{v.label}</div>
+                        </div>
+                        <Icon.arrow s={10} />
+                      </button>
+                    ))}
+                  </div>
+                )
+              })()}
+
+              <div style={{ marginTop: 16, paddingTop: 14, borderTop: '1px solid var(--line)' }}>
+                <div className="eyebrow" style={{ marginBottom: 8, padding: '0 4px' }}>Conversaciones</div>
+                <button onClick={nuevaConversacion} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', border: '1px solid var(--line-strong)', borderRadius: 10, background: 'transparent', color: 'var(--text)', fontSize: 13, cursor: 'pointer', marginBottom: 12, justifyContent: 'flex-start', fontFamily: 'var(--font-body)', width: '100%' }}>
+                  <span style={{ color: 'var(--v-primary)' }}>✦</span> Nueva conversación
+                </button>
+              </div>
 
               {(() => {
                 const g = agruparConvs(conversaciones)
@@ -2287,6 +2355,13 @@ export default function CoachDashboard({ vertical = 'mujer' }) {
                   <div style={{ height: '100%', width: `${Math.min(100, Math.round(((perfil?.mensajes_chat_hoy || 0) / (perfil?.plan_actual === 'free' ? 5 : 400)) * 100))}%`, background: 'var(--v-primary)', transition: 'width .4s var(--ease-out)' }} />
                 </div>
               </div>
+
+              <button onClick={() => { setChatSidebarAbierto(false); router.push('/configuracion') }} style={{ marginTop: 10, padding: '9px 12px', background: 'transparent', border: 'none', color: 'var(--text-muted)', fontSize: 13, cursor: 'pointer', fontFamily: 'var(--font-body)', textAlign: 'left', borderRadius: 10 }}>
+                Configuración
+              </button>
+              <button onClick={handleLogout} style={{ padding: '9px 12px', background: 'transparent', border: 'none', color: 'var(--text-dim)', fontSize: 12, cursor: 'pointer', fontFamily: 'var(--font-body)', textAlign: 'left', borderRadius: 10 }}>
+                Cerrar sesión
+              </button>
             </aside>
 
             {/* Columna 2: Chat central */}

@@ -43,15 +43,14 @@ const compromiso = [
 ]
 
 const stepsLabels = [
-  { n: 1, label: 'Bienvenida' },
-  { n: 2, label: 'Nombre' },
-  { n: 3, label: 'Género' },
-  { n: 4, label: 'Áreas' },
-  { n: 5, label: 'Momento' },
-  { n: 6, label: 'Compromiso' },
-  { n: 7, label: 'Objetivo' },
-  { n: 8, label: 'Obstáculo' },
-  { n: 9, label: 'Tu coach' },
+  { n: 1, label: 'Nombre' },
+  { n: 2, label: 'Género' },
+  { n: 3, label: 'Áreas' },
+  { n: 4, label: 'Momento' },
+  { n: 5, label: 'Compromiso' },
+  { n: 6, label: 'Objetivo' },
+  { n: 7, label: 'Obstáculo' },
+  { n: 8, label: 'Tu coach' },
 ]
 const TOTAL = stepsLabels.length
 
@@ -76,7 +75,7 @@ export default function Onboarding() {
   const [coachElegido, setCoachElegido] = useState(null)
   const [guardando, setGuardando] = useState(false)
 
-  // Recomendación derivada al entrar al paso 9
+  // Recomendación derivada al entrar al paso 8 (Tu coach)
   const recomendacion = recomendarCoach({
     areas: areasSel,
     momento: estilo,
@@ -105,13 +104,13 @@ export default function Onboarding() {
 
   const canContinue = () => {
     switch (step) {
-      case 2: return nombre.trim().length > 0
-      case 3: return genero !== null
-      case 4: return areasSel.length > 0
-      case 5: return estilo !== null
-      case 6: return nivelCompromiso !== null
-      case 7: return objetivo90.trim().length > 0
-      case 9: return coachElegido !== null
+      case 1: return nombre.trim().length > 0
+      case 2: return genero !== null
+      case 3: return areasSel.length > 0
+      case 4: return estilo !== null
+      case 5: return nivelCompromiso !== null
+      case 6: return objetivo90.trim().length > 0
+      case 8: return coachElegido !== null
       default: return true
     }
   }
@@ -286,24 +285,13 @@ export default function Onboarding() {
 
         {step === 1 && (
           <div>
-            <h1 className="of-h1" style={{ marginBottom: 14 }}>
-              Bienvenida a <em style={{ fontStyle: 'italic', color: 'var(--v-primary)' }}>Coach 360</em>.
-            </h1>
-            <p style={{ fontSize: 15, color: 'var(--text-muted)', lineHeight: 1.6, maxWidth: 460 }}>
-              Antes de trabajar contigo necesitamos saber qué quieres lograr, qué te frena y cuánto puedes comprometerte. Te toma 5 minutos.
-            </p>
-          </div>
-        )}
-
-        {step === 2 && (
-          <div>
             <h1 className="of-h1" style={{ marginBottom: 10 }}>¿Cómo te llamas?</h1>
             <p style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 20 }}>Para tratarte por tu nombre.</p>
             <input type="text" className="of-input" value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Tu nombre" autoFocus />
           </div>
         )}
 
-        {step === 3 && (
+        {step === 2 && (
           <div>
             <h1 className="of-h1" style={{ marginBottom: 10 }}>¿Cómo te <em style={{ fontStyle: 'italic', color: 'var(--v-primary)' }}>identificas</em>?</h1>
             <p style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 20 }}>Esto define qué herramientas adicionales te aparecen.</p>
@@ -321,7 +309,7 @@ export default function Onboarding() {
           </div>
         )}
 
-        {step === 4 && (
+        {step === 3 && (
           <div>
             <h1 className="of-h1" style={{ marginBottom: 10 }}>¿Qué <em style={{ fontStyle: 'italic', color: 'var(--v-primary)' }}>áreas</em> quieres trabajar?</h1>
             <p style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 20 }}>Elige hasta 3. Es por dónde empezamos.</p>
@@ -339,7 +327,7 @@ export default function Onboarding() {
           </div>
         )}
 
-        {step === 5 && (
+        {step === 4 && (
           <div>
             <h1 className="of-h1" style={{ marginBottom: 10 }}>¿Cómo describirías tu <em style={{ fontStyle: 'italic', color: 'var(--v-primary)' }}>momento actual</em>?</h1>
             <p style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 20 }}>Sé honesto/a — funcionamos mejor con la verdad.</p>
@@ -357,7 +345,7 @@ export default function Onboarding() {
           </div>
         )}
 
-        {step === 6 && (
+        {step === 5 && (
           <div>
             <h1 className="of-h1" style={{ marginBottom: 10 }}>¿Cuánto tiempo puedes <em style={{ fontStyle: 'italic', color: 'var(--v-primary)' }}>dedicarle</em>?</h1>
             <p style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 20 }}>Mejor prometer poco y cumplir.</p>
@@ -378,7 +366,7 @@ export default function Onboarding() {
           </div>
         )}
 
-        {step === 7 && (
+        {step === 6 && (
           <div>
             <h1 className="of-h1" style={{ marginBottom: 10 }}>¿Qué quieres lograr en <em style={{ fontStyle: 'italic', color: 'var(--v-primary)' }}>90 días</em>?</h1>
             <p style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 20 }}>Sé concreto/a. "Estar mejor" no cuenta.</p>
@@ -386,7 +374,7 @@ export default function Onboarding() {
           </div>
         )}
 
-        {step === 8 && (
+        {step === 7 && (
           <div>
             <h1 className="of-h1" style={{ marginBottom: 10 }}>¿Qué te ha <em style={{ fontStyle: 'italic', color: 'var(--v-primary)' }}>frenado</em>?</h1>
             <p style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 20 }}>Tu mayor obstáculo real. Opcional.</p>
@@ -394,7 +382,7 @@ export default function Onboarding() {
           </div>
         )}
 
-        {step === 9 && (
+        {step === 8 && (
           <div>
             <h1 className="of-h1" style={{ marginBottom: 10 }}>
               Te recomendamos <em style={{ fontStyle: 'italic', color: 'var(--v-primary)' }}>{COACH_INFO[recomendacion.coach].nombre}</em>.
@@ -446,7 +434,7 @@ export default function Onboarding() {
           {step > 1 && <button onClick={back} className="of-btn-sec">← Anterior</button>}
           {step < TOTAL ? (
             <button onClick={next} disabled={!canContinue()} className="of-btn-prim">
-              {step === 1 ? 'Empezar' : 'Siguiente'} →
+              Siguiente →
             </button>
           ) : (
             <button onClick={completeOnboarding} disabled={guardando} className="of-btn-prim">
