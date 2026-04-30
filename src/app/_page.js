@@ -38,6 +38,14 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true)
   const [openFaq, setOpenFaq] = useState(null)
 
+  // Auth modal state
+  const [authMode, setAuthMode] = useState(null) // null | 'login' | 'signup'
+  const [authEmail, setAuthEmail] = useState('')
+  const [authPassword, setAuthPassword] = useState('')
+  const [authNombre, setAuthNombre] = useState('')
+  const [authLoading, setAuthLoading] = useState(false)
+  const [authError, setAuthError] = useState('')
+
   useEffect(() => { checkUser() }, [])
 
   async function checkUser() {
@@ -61,8 +69,58 @@ export default function HomePage() {
     setLoading(false)
   }
 
-  const handleCTA = () => {
+  const openAuth = (mode) => {
+    setAuthMode(mode)
+    setAuthError('')
+  }
+  const closeAuth = () => {
+    setAuthMode(null)
+    setAuthEmail(''); setAuthPassword(''); setAuthNombre(''); setAuthError('')
+  }
+  const handleCTA = () => openAuth('signup')
+
+  const handleGoogle = async () => {
+    setAuthError('')
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: `${window.location.origin}/` },
+    })
+    if (error) setAuthError(error.message)
+  }
+
+  const handleSignup = async (e) => {
+    e.preventDefault()
+    setAuthLoading(true); setAuthError('')
+    const { data, error } = await supabase.auth.signUp({
+      email: authEmail.trim(), password: authPassword,
+    })
+    if (error) { setAuthError(error.message); setAuthLoading(false); return }
+    if (data.user && authNombre.trim()) {
+      try { await supabase.from('perfiles').update({ nombre: authNombre.trim() }).eq('id', data.user.id) } catch {}
+    }
+    setAuthLoading(false)
     router.push('/onboarding')
+  }
+
+  const handleLogin = async (e) => {
+    e.preventDefault()
+    setAuthLoading(true); setAuthError('')
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: authEmail.trim(), password: authPassword,
+    })
+    if (error) { setAuthError(error.message); setAuthLoading(false); return }
+    const { data: perfil } = await supabase
+      .from('perfiles').select('onboarding_completado, current_vertical')
+      .eq('id', data.user.id).maybeSingle()
+    setAuthLoading(false)
+    if (perfil?.onboarding_completado) {
+      const tab = perfil.current_vertical === 'mujer' ? 'mujer'
+                : perfil.current_vertical === 'lideres' ? 'lideres'
+                : 'coach360'
+      router.push(`/dashboard?tab=${tab}`)
+    } else {
+      router.push('/onboarding')
+    }
   }
 
   if (loading) {
@@ -88,7 +146,10 @@ export default function HomePage() {
             <li><a href="#testimonials">Testimonios</a></li>
             <li><a href="#faq">Preguntas</a></li>
           </ul>
-          <button className="cz-nav-cta" onClick={handleCTA}>Comenzar</button>
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+            <button className="cz-nav-login" onClick={() => openAuth('login')}>Iniciar sesión</button>
+            <button className="cz-nav-cta" onClick={handleCTA}>Comenzar</button>
+          </div>
         </nav>
       </header>
 
@@ -252,6 +313,98 @@ export default function HomePage() {
           </div>
         </div>
       </footer>
+
+      {/* Auth modal */}
+      {authMode && (
+        <div className="cz-modal-overlay" onClick={closeAuth}>
+          <div className="cz-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="cz-modal-close" onClick={closeAuth} aria-label="Cerrar">✕</button>
+            <div className="cz-modal-tabs">
+              <button
+                className={`cz-modal-tab ${authMode === 'signup' ? 'active' : ''}`}
+                onClick={() => openAuth('signup')}
+              >
+                Crear cuenta
+              </button>
+              <button
+                className={`cz-modal-tab ${authMode === 'login' ? 'active' : ''}`}
+                onClick={() => openAuth('login')}
+              >
+                Iniciar sesión
+              </button>
+            </div>
+
+            <form onSubmit={authMode === 'signup' ? handleSignup : handleLogin} className="cz-modal-form">
+              {authMode === 'signup' && (
+                <input
+                  type="text"
+                  placeholder="Tu nombre"
+                  value={authNombre}
+                  onChange={(e) => setAuthNombre(e.target.value)}
+                  className="cz-modal-input"
+                  autoFocus
+                />
+              )}
+              <input
+                type="email"
+                placeholder="tu@email.com"
+                value={authEmail}
+                onChange={(e) => setAuthEmail(e.target.value)}
+                className="cz-modal-input"
+                required
+                autoFocus={authMode === 'login'}
+              />
+              <input
+                type="password"
+                placeholder="Contraseña (mín. 6 caracteres)"
+                value={authPassword}
+                onChange={(e) => setAuthPassword(e.target.value)}
+                className="cz-modal-input"
+                required
+                minLength={6}
+              />
+
+              {authError && (
+                <div className="cz-modal-error">{authError}</div>
+              )}
+
+              <button
+                type="submit"
+                className="cz-btn-primary cz-btn-full"
+                disabled={authLoading}
+              >
+                {authLoading
+                  ? '…'
+                  : authMode === 'signup' ? 'Crear cuenta' : 'Entrar'}
+              </button>
+
+              <div className="cz-modal-divider"><span>o</span></div>
+
+              <button
+                type="button"
+                onClick={handleGoogle}
+                className="cz-modal-google"
+              >
+                <svg width="16" height="16" viewBox="0 0 18 18" fill="none">
+                  <path d="M17.6 9.2c0-.6-.1-1.2-.2-1.8H9v3.4h4.8c-.2 1.1-.8 2-1.8 2.6v2.2h2.9c1.7-1.6 2.7-3.9 2.7-6.4z" fill="#4285F4"/>
+                  <path d="M9 18c2.4 0 4.5-.8 6-2.2l-2.9-2.2c-.8.5-1.8.9-3.1.9-2.4 0-4.4-1.6-5.2-3.8H.8v2.3C2.3 15.9 5.4 18 9 18z" fill="#34A853"/>
+                  <path d="M3.8 10.7c-.2-.6-.3-1.2-.3-1.7s.1-1.1.3-1.7V5H.8C.3 6.2 0 7.5 0 9s.3 2.8.8 4l3-2.3z" fill="#FBBC04"/>
+                  <path d="M9 3.6c1.3 0 2.5.5 3.5 1.4l2.6-2.6C13.5.9 11.4 0 9 0 5.4 0 2.3 2.1.8 5l3 2.3C4.6 5.2 6.6 3.6 9 3.6z" fill="#EA4335"/>
+                </svg>
+                Continuar con Google
+              </button>
+
+              <p className="cz-modal-foot">
+                {authMode === 'signup'
+                  ? <>¿Ya tenés cuenta? <a onClick={() => openAuth('login')}>Iniciar sesión</a></>
+                  : <>¿No tenés cuenta? <a onClick={() => openAuth('signup')}>Crear cuenta</a></>
+                }
+                {authMode === 'login' && <> · <a href="/forgot-password">Olvidé mi contraseña</a></>}
+              </p>
+            </form>
+          </div>
+        </div>
+      )}
 
       <style jsx global>{landingStyles}</style>
     </div>
@@ -624,6 +777,164 @@ const landingStyles = `
   font-size: 12px;
   color: var(--cz-muted);
 }
+
+/* Auth login button in nav */
+.cz-nav-login {
+  padding: 10px 16px;
+  background: transparent;
+  color: var(--cz-text);
+  border: none;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 500;
+  transition: color 200ms;
+}
+.cz-nav-login:hover { color: var(--cz-accent); }
+
+/* Auth modal */
+.cz-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10,10,10,0.85);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  backdrop-filter: blur(4px);
+}
+.cz-modal {
+  width: 100%;
+  max-width: 440px;
+  background: var(--cz-bg-2);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 32px 28px 28px;
+  position: relative;
+  max-height: 92vh;
+  overflow-y: auto;
+}
+.cz-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.08);
+  color: var(--cz-muted);
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+}
+.cz-modal-close:hover { color: var(--cz-text); border-color: rgba(255,255,255,0.2); }
+.cz-modal-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 22px;
+  background: rgba(255,255,255,0.04);
+  padding: 4px;
+  border-radius: 8px;
+}
+.cz-modal-tab {
+  flex: 1;
+  padding: 10px 16px;
+  border: none;
+  background: transparent;
+  color: var(--cz-muted);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 6px;
+  font-family: inherit;
+  transition: all 200ms;
+}
+.cz-modal-tab.active {
+  background: var(--cz-accent);
+  color: var(--cz-bg);
+  font-weight: 600;
+}
+.cz-modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.cz-modal-input {
+  width: 100%;
+  padding: 13px 14px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  color: var(--cz-text);
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 200ms;
+}
+.cz-modal-input:focus { border-color: var(--cz-accent); background: rgba(255,255,255,0.06); }
+.cz-modal-input::placeholder { color: rgba(168,168,168,0.5); }
+.cz-modal-error {
+  font-size: 12px;
+  color: #f87171;
+  padding: 8px 12px;
+  background: rgba(248,113,113,0.08);
+  border-radius: 6px;
+  line-height: 1.4;
+}
+.cz-modal-divider {
+  text-align: center;
+  margin: 4px 0;
+  position: relative;
+  font-size: 11px;
+  color: var(--cz-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.cz-modal-divider::before, .cz-modal-divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: calc(50% - 24px);
+  height: 1px;
+  background: rgba(255,255,255,0.08);
+}
+.cz-modal-divider::before { left: 0; }
+.cz-modal-divider::after { right: 0; }
+.cz-modal-google {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  color: var(--cz-text);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 200ms;
+}
+.cz-modal-google:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.16); }
+.cz-modal-foot {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--cz-muted);
+  text-align: center;
+  line-height: 1.6;
+}
+.cz-modal-foot a {
+  color: var(--cz-accent);
+  cursor: pointer;
+  text-decoration: none;
+}
+.cz-modal-foot a:hover { text-decoration: underline; }
 
 @media (max-width: 1024px) {
   .cz-coaches-grid, .cz-stats, .cz-testimonials-grid, .cz-footer-content { grid-template-columns: repeat(2, 1fr); }
