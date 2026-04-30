@@ -681,8 +681,180 @@ export default function CoachDashboard({ vertical = 'mujer' }) {
     </div>
   )
 
+  // Sidebar global persistente. Único lugar donde vive el contenido del sidebar.
+  // Usado por el shell layout — todas las views lo heredan.
+  const renderSidebar = () => (
+    <>
+      <button className="cd-shell-sidebar-close" onClick={() => setMenuAbierto(false)} aria-label="Cerrar">
+        <Icon.close s={14} />
+      </button>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '4px 10px', marginBottom: 20 }}>
+        <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round">
+          <circle cx="12" cy="12" r="10" />
+          <circle cx="12" cy="12" r="5.5" opacity=".55" />
+          <path d="M12 2v20M2 12h20" opacity=".22" />
+        </svg>
+        <span style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: 17, letterSpacing: '-0.02em' }}>Coach 360</span>
+      </div>
+
+      <div style={{ padding: '10px 12px', background: 'var(--ink-3)', borderRadius: 12, border: '1px solid var(--line)', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{ width: 32, height: 32, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, background: 'var(--ink-3)' }}>
+          <img src={coachImg} alt={coachName} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+        </div>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: 13, fontWeight: 600 }}>{coachName}</div>
+          <div className="font-mono" style={{ fontSize: 10, color: 'var(--text-muted)' }}>tu coach</div>
+        </div>
+      </div>
+
+      {[
+        { label: 'Hoy',          I: Icon.sparkle, active: view === 'ritual' || view === 'inicio',    action: () => navigate('ritual') },
+        { label: 'Conversación', I: Icon.dots,    active: view === 'clara',                          action: () => navigate('clara') },
+        { label: 'Módulos',      I: Icon.book,    active: view === 'modulos' || view === 'modulo',   action: () => navigate('modulos') },
+        { label: 'Tests',        I: Icon.chart,   active: view === 'tests',                          action: () => navigate('tests') },
+        { label: 'Mi equilibrio',I: Icon.compass, active: view === 'equilibrio',                     action: () => navigate('equilibrio') },
+        { label: 'Progreso',     I: Icon.chart,   active: view === 'perfil' || view === 'badges',    action: () => navigate('perfil') },
+      ].map((item, i) => {
+        const ItemIcon = item.I
+        return (
+          <button key={i} onClick={() => { item.action(); setMenuAbierto(false) }} style={{
+            display: 'flex', alignItems: 'center', gap: 12, padding: '9px 12px', border: 'none', borderRadius: 10,
+            background: item.active ? 'var(--v-tint)' : 'transparent',
+            color: item.active ? 'var(--text)' : 'var(--text-muted)',
+            fontSize: 13, cursor: 'pointer', textAlign: 'left', fontFamily: 'var(--font-body)',
+          }}>
+            <ItemIcon />
+            <span>{item.label}</span>
+            {item.active && <span style={{ marginLeft: 'auto', width: 4, height: 4, borderRadius: 2, background: 'var(--v-primary)' }} />}
+          </button>
+        )
+      })}
+
+      {(() => {
+        const verticalesDisponibles = [
+          { id: 'general', label: 'Coach 360', desc: 'Coaching general',     img: '/leo.jpg',   path: '/dashboard?tab=coach360', visible: canAccessCoach360 },
+          { id: 'mujer',   label: 'Mujer',     desc: 'Contexto de mujer',     img: '/clara.jpg', path: '/dashboard?tab=mujer',    visible: canAccessMujer },
+          { id: 'lideres', label: 'Líderes',   desc: 'Liderazgo ejecutivo',   img: '/marco.jpg', path: '/dashboard?tab=lideres',  visible: canAccessLideres },
+        ].filter(v => v.visible && v.id !== vertical)
+        if (verticalesDisponibles.length === 0) return null
+        return (
+          <div style={{ marginTop: 16, paddingTop: 14, borderTop: '1px solid var(--line)' }}>
+            <div className="eyebrow" style={{ marginBottom: 8, padding: '0 4px' }}>Otras experiencias</div>
+            {verticalesDisponibles.map(v => (
+              <button key={v.id} onClick={() => { setMenuAbierto(false); router.push(v.path) }} style={{
+                display: 'flex', alignItems: 'center', gap: 10, width: '100%',
+                padding: '8px 12px', border: 'none', borderRadius: 10,
+                background: 'transparent', color: 'var(--text-muted)',
+                cursor: 'pointer', textAlign: 'left',
+                fontFamily: 'var(--font-body)', marginBottom: 2,
+              }}>
+                <img src={v.img} alt="" style={{ width: 24, height: 24, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                <div style={{ flex: 1, minWidth: 0, fontSize: 12, color: 'var(--text)', fontWeight: 500 }}>{v.label}</div>
+                <Icon.arrow s={10} />
+              </button>
+            ))}
+          </div>
+        )
+      })()}
+
+      {view === 'clara' && (
+        <div style={{ marginTop: 16, paddingTop: 14, borderTop: '1px solid var(--line)' }}>
+          <div className="eyebrow" style={{ marginBottom: 8, padding: '0 4px' }}>Conversaciones</div>
+          <button onClick={nuevaConversacion} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', border: '1px solid var(--line-strong)', borderRadius: 10, background: 'transparent', color: 'var(--text)', fontSize: 13, cursor: 'pointer', marginBottom: 10, justifyContent: 'flex-start', fontFamily: 'var(--font-body)', width: '100%' }}>
+            <span style={{ color: 'var(--v-primary)' }}>✦</span> Nueva conversación
+          </button>
+          {(() => {
+            const g = agruparConvs(conversaciones)
+            const seccion = (titulo, items) => items.length > 0 && (
+              <>
+                <div className="eyebrow" style={{ marginBottom: 6, padding: '0 10px', marginTop: titulo === 'Hoy' ? 0 : 10 }}>{titulo}</div>
+                {items.map(conv => {
+                  const isActive = conv.id === conversacionActiva
+                  const when = new Date(conv.ultimo_mensaje).toLocaleString('es-CL', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
+                  return (
+                    <button key={conv.id} onClick={() => abrirConversacion(conv.id)} style={{
+                      display: 'block', padding: '8px 10px', border: 'none',
+                      background: isActive ? 'var(--v-tint)' : 'transparent',
+                      borderRadius: 8, textAlign: 'left', cursor: 'pointer', color: 'var(--text)', fontSize: 12, lineHeight: 1.3, marginBottom: 2, width: '100%', fontFamily: 'var(--font-body)',
+                    }}>
+                      <div style={{ fontWeight: isActive ? 500 : 400, marginBottom: 2, color: isActive ? 'var(--text)' : 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{conv.titulo || 'Sin título'}</div>
+                      <div style={{ fontSize: 9, color: 'var(--text-dim)', fontFamily: 'var(--font-mono)' }}>{when}</div>
+                    </button>
+                  )
+                })}
+              </>
+            )
+            return (
+              <>
+                {seccion('Hoy', g.hoy)}
+                {seccion('Esta semana', g.semana)}
+                {seccion('Anterior', g.anterior)}
+                {conversaciones.length === 0 && (
+                  <div style={{ padding: '8px 10px', fontSize: 11, color: 'var(--text-dim)', fontStyle: 'italic' }}>Aún no tienes conversaciones.</div>
+                )}
+              </>
+            )
+          })()}
+        </div>
+      )}
+
+      <div style={{ marginTop: 16, padding: 12, background: 'var(--ink-3)', border: '1px solid var(--line)', borderRadius: 12, fontSize: 12 }}>
+        <div className="eyebrow" style={{ marginBottom: 6, color: 'var(--v-primary)' }}>
+          ✦ {perfil?.plan_actual === 'free' ? 'Plan Gratis' : perfil?.plan_actual === 'esencial' ? 'Plan Esencial' : 'Plan Premium'}
+        </div>
+        <div style={{ color: 'var(--text-muted)', marginBottom: 8, lineHeight: 1.5 }}>
+          {perfil?.plan_actual === 'free' ? (
+            <>Te quedan <b style={{ color: 'var(--text)' }}>{Math.max(0, 5 - (perfil?.mensajes_chat_hoy || 0))} mensajes</b> hoy.</>
+          ) : ('Chat sin límite diario')}
+        </div>
+        <div style={{ height: 3, background: 'var(--ink-5)', borderRadius: 999, overflow: 'hidden' }}>
+          <div style={{ height: '100%', width: `${perfil?.plan_actual === 'free' ? Math.min(100, Math.round(((perfil?.mensajes_chat_hoy || 0) / 5) * 100)) : 0}%`, background: 'var(--v-primary)', transition: 'width .4s var(--ease-out)' }} />
+        </div>
+        {perfil?.plan_actual === 'free' && (
+          <button onClick={() => { navigate('planes'); setMenuAbierto(false) }} style={{ marginTop: 12, width: '100%', padding: '8px 10px', borderRadius: 999, border: 'none', background: 'var(--v-primary)', color: '#0a0c0e', fontSize: 12, cursor: 'pointer', fontWeight: 600, fontFamily: 'var(--font-body)' }}>
+            Ir a Esencial
+          </button>
+        )}
+      </div>
+
+      <button onClick={() => { setMenuAbierto(false); router.push('/configuracion') }} style={{ marginTop: 10, padding: '9px 12px', background: 'transparent', border: 'none', color: 'var(--text-muted)', fontSize: 13, cursor: 'pointer', fontFamily: 'var(--font-body)', textAlign: 'left', borderRadius: 10 }}>
+        Configuración
+      </button>
+      <button onClick={handleLogout} style={{ padding: '9px 12px', background: 'transparent', border: 'none', color: 'var(--text-dim)', fontSize: 12, cursor: 'pointer', fontFamily: 'var(--font-body)', textAlign: 'left', borderRadius: 10 }}>
+        Cerrar sesión
+      </button>
+    </>
+  )
+
   return (
-    <div style={{ minHeight: '100vh', background: '#0f0d0b', paddingBottom: 80, position: 'relative' }}>
+    <div className="cd-shell dir-ritual" data-v={config.dataV} style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--text)', position: 'relative' }}>
+      <style>{`
+        .cd-shell { display: flex; flex-direction: column; min-height: 100vh; }
+        .cd-shell-sidebar { display: none; }
+        .cd-shell-sidebar.open { display: flex; flex-direction: column; gap: 2px; position: fixed; top: 0; left: 0; bottom: 0; width: 280px; max-width: 85vw; z-index: 60; padding: 28px 20px; background: var(--ink-2); overflow-y: auto; box-shadow: 0 0 40px rgba(0,0,0,0.6); }
+        .cd-shell-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 55; }
+        .cd-shell-hamburger { position: fixed; top: 16px; left: 16px; z-index: 50; width: 40px; height: 40px; border-radius: 999px; background: var(--ink-3); border: 1px solid var(--line); color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .cd-shell-sidebar-close { position: absolute; top: 18px; right: 18px; width: 32px; height: 32px; border-radius: 999px; background: transparent; border: 1px solid var(--line); color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .cd-shell-main { flex: 1; min-width: 0; min-height: 100vh; }
+        @media (min-width: 768px) {
+          .cd-shell { display: grid; grid-template-columns: 240px 1fr; }
+          .cd-shell-sidebar, .cd-shell-sidebar.open { display: flex; flex-direction: column; gap: 2px; position: static; padding: 28px 20px; border-right: 1px solid var(--line); background: var(--ink-2); box-shadow: none; max-width: none; width: auto; z-index: auto; top: auto; left: auto; bottom: auto; overflow-y: auto; height: 100vh; }
+          .cd-shell-backdrop, .cd-shell-hamburger, .cd-shell-sidebar-close { display: none; }
+          .cd-shell-main { height: 100vh; overflow-y: auto; }
+        }
+      `}</style>
+
+      <button className="cd-shell-hamburger" onClick={() => setMenuAbierto(true)} aria-label="Menú">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+      {menuAbierto && <div className="cd-shell-backdrop" onClick={() => setMenuAbierto(false)} />}
+
+      <aside className={`cd-shell-sidebar ${menuAbierto ? 'open' : ''}`}>
+        {renderSidebar()}
+      </aside>
+
+      <main className="cd-shell-main">
 
       {view === 'inicio' && (
         <div className="dir-ritual" data-v={config.dataV} style={{ background: 'var(--bg)', color: 'var(--text)', minHeight: '100vh' }}>
@@ -720,132 +892,9 @@ export default function CoachDashboard({ vertical = 'mujer' }) {
             }
           `}</style>
 
-          {/* Mobile hamburger (visible <768px) */}
-          <button className="cd-hamburger" onClick={() => setMenuAbierto(true)} aria-label="Menú">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
-          </button>
-
-          {/* Mobile backdrop */}
-          {menuAbierto && <div className="cd-backdrop" onClick={() => setMenuAbierto(false)} />}
-
+          {/* Sidebar movido al shell global. Esta vista solo renderiza su main. */}
           <div className="cd-wrap">
-            {/* sidebar — port literal de RitualDashboard (Fase 5 L1582-1623) */}
-            <aside className={`cd-sidebar ${menuAbierto ? 'open' : ''}`}>
-              {/* Mobile-only close button */}
-              <button className="cd-sidebar-close" onClick={() => setMenuAbierto(false)} aria-label="Cerrar">
-                <Icon.close s={14} />
-              </button>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '4px 10px', marginBottom: 24 }}>
-                <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round">
-                  <circle cx="12" cy="12" r="10" />
-                  <circle cx="12" cy="12" r="5.5" opacity=".55" />
-                  <path d="M12 2v20M2 12h20" opacity=".22" />
-                </svg>
-                <span style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: 17, letterSpacing: '-0.02em' }}>Coach 360</span>
-              </div>
-
-              {/* Coach chooser pill */}
-              <div style={{ padding: '10px 12px', background: 'var(--ink-3)', borderRadius: 12, border: '1px solid var(--line)', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 10 }}>
-                <div style={{ width: 36, height: 36, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, background: 'var(--ink-3)' }}>
-                  <img src={coachImg} alt={coachName} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 13, fontWeight: 600 }}>{coachName}</div>
-                  <div className="font-mono" style={{ fontSize: 11, color: 'var(--text-muted)' }}>tu coach</div>
-                </div>
-                <Icon.arrow s={12} dir="down" />
-              </div>
-
-              {/* Menú nav (6 items con dot indicator en activo) */}
-              {[
-                { label: 'Hoy', I: Icon.sparkle, active: view === 'ritual' || view === 'inicio', action: () => navigate('ritual') },
-                { label: 'Conversación', I: Icon.dots, active: false, action: () => navigate('clara') },
-                { label: 'Módulos', I: Icon.book, active: view === 'modulos' || view === 'modulo', action: () => navigate('modulos') },
-                { label: 'Tests', I: Icon.chart, active: false, action: () => navigate('tests') },
-                { label: 'Mi equilibrio', I: Icon.compass, active: false, action: () => navigate('equilibrio') },
-                { label: 'Progreso', I: Icon.chart, active: false, action: () => navigate('perfil') },
-              ].map((item, i) => {
-                const ItemIcon = item.I
-                return (
-                  <button key={i} onClick={() => { item.action(); setMenuAbierto(false) }} style={{
-                    display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', border: 'none', borderRadius: 10,
-                    background: item.active ? 'var(--v-tint)' : 'transparent',
-                    color: item.active ? 'var(--text)' : 'var(--text-muted)',
-                    fontSize: 14, cursor: 'pointer', textAlign: 'left', fontFamily: 'var(--font-body)',
-                  }}>
-                    <ItemIcon />
-                    <span>{item.label}</span>
-                    {item.active && <span style={{ marginLeft: 'auto', width: 4, height: 4, borderRadius: 2, background: 'var(--v-primary)' }} />}
-                  </button>
-                )
-              })}
-
-              {/* Otras experiencias — switcher cross-vertical filtrado por género */}
-              {(() => {
-                const verticalesDisponibles = [
-                  { id: 'general', label: 'Coach 360', desc: 'Coaching general', img: '/leo.jpg', path: '/general/dashboard', visible: canAccessCoach360 },
-                  { id: 'mujer',   label: 'Mujer',     desc: 'Contexto de mujer',   img: '/clara.jpg', path: '/mujer/dashboard',   visible: canAccessMujer },
-                  { id: 'lideres', label: 'Líderes',   desc: 'Liderazgo ejecutivo', img: '/marco.jpg', path: '/lideres/dashboard', visible: canAccessLideres },
-                ].filter(v => v.visible && v.id !== vertical)
-                if (verticalesDisponibles.length === 0) return null
-                return (
-                  <div style={{ marginTop: 24, paddingTop: 16, borderTop: '1px solid var(--line)' }}>
-                    <div className="eyebrow" style={{ marginBottom: 10, padding: '0 4px' }}>Otras experiencias</div>
-                    {verticalesDisponibles.map(v => (
-                      <button
-                        key={v.id}
-                        onClick={() => { setMenuAbierto(false); router.push(v.path) }}
-                        style={{
-                          display: 'flex', alignItems: 'center', gap: 10, width: '100%',
-                          padding: '10px 12px', border: 'none', borderRadius: 10,
-                          background: 'transparent', color: 'var(--text-muted)',
-                          cursor: 'pointer', textAlign: 'left',
-                          fontFamily: 'var(--font-body)', marginBottom: 4,
-                        }}
-                      >
-                        <img src={v.img} alt="" style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontSize: 13, color: 'var(--text)', fontWeight: 500 }}>{v.label}</div>
-                          <div className="font-mono" style={{ fontSize: 10, color: 'var(--text-dim)', letterSpacing: '.05em' }}>{v.desc}</div>
-                        </div>
-                        <Icon.arrow s={11} />
-                      </button>
-                    ))}
-                  </div>
-                )
-              })()}
-
-              {/* Plan card — datos reales del perfil */}
-              <div style={{ marginTop: 16, padding: 14, borderRadius: 14, background: 'var(--ink-3)', border: '1px solid var(--line)', fontSize: 12 }}>
-                <div className="eyebrow" style={{ marginBottom: 6, color: 'var(--v-primary)' }}>
-                  ✦ {perfil?.plan_actual === 'free' ? 'Plan Gratis' : perfil?.plan_actual === 'esencial' ? 'Plan Esencial' : 'Plan Premium'}
-                </div>
-                <div style={{ color: 'var(--text-muted)', marginBottom: 8, lineHeight: 1.5 }}>
-                  {perfil?.plan_actual === 'free' ? (
-                    <>Te quedan <b style={{ color: 'var(--text)' }}>{Math.max(0, 5 - (perfil?.mensajes_chat_hoy || 0))} mensajes</b> hoy.</>
-                  ) : (
-                    'Chat sin límite diario'
-                  )}
-                </div>
-                <div style={{ height: 3, background: 'var(--ink-5)', borderRadius: 999, overflow: 'hidden' }}>
-                  <div style={{ height: '100%', width: `${perfil?.plan_actual === 'free' ? Math.min(100, Math.round(((perfil?.mensajes_chat_hoy || 0) / 5) * 100)) : 0}%`, background: 'var(--v-primary)', transition: 'width .4s var(--ease-out)' }} />
-                </div>
-                {perfil?.plan_actual === 'free' && (
-                  <button onClick={() => { navigate('planes'); setMenuAbierto(false) }} style={{ marginTop: 12, width: '100%', padding: '8px 10px', borderRadius: 999, border: 'none', background: 'var(--v-primary)', color: '#0a0c0e', fontSize: 12, cursor: 'pointer', fontWeight: 600, fontFamily: 'var(--font-body)' }}>
-                    Ir a Esencial
-                  </button>
-                )}
-              </div>
-
-              {/* Configuración + cerrar sesión */}
-              <button onClick={() => { setMenuAbierto(false); router.push('/configuracion') }} style={{ marginTop: 12, padding: '10px 12px', background: 'transparent', border: 'none', color: 'var(--text-muted)', fontSize: 13, cursor: 'pointer', fontFamily: 'var(--font-body)', textAlign: 'left', borderRadius: 10 }}>
-                Configuración
-              </button>
-              <button onClick={handleLogout} style={{ padding: '10px 12px', background: 'transparent', border: 'none', color: 'var(--text-dim)', fontSize: 12, cursor: 'pointer', fontFamily: 'var(--font-body)', textAlign: 'left', borderRadius: 10 }}>
-                Cerrar sesión
-              </button>
-            </aside>
 
             {/* main */}
             <main className="cd-main">
@@ -2196,7 +2245,7 @@ export default function CoachDashboard({ vertical = 'mujer' }) {
             .ch-messages { flex: 1; padding: 20px 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 18px; }
             .ch-input-wrap { padding: 12px 16px 20px; border-top: 1px solid var(--line); }
             @media (min-width: 768px) {
-              .ch-wrap { display: grid; grid-template-columns: 260px 1fr 300px; height: 100vh; }
+              .ch-wrap { display: grid; grid-template-columns: 1fr 300px; height: 100vh; }
               .ch-sidebar, .ch-sidebar.open { display: flex; flex-direction: column; gap: 4px; position: static; padding: 24px 18px; border-right: 1px solid var(--line); background: var(--ink-2); box-shadow: none; max-width: none; width: auto; z-index: auto; top: auto; left: auto; bottom: auto; overflow-y: auto; }
               .ch-context, .ch-context.open { display: flex; flex-direction: column; gap: 20px; position: static; padding: 28px 22px; border-left: 1px solid var(--line); background: var(--ink-2); box-shadow: none; max-width: none; width: auto; z-index: auto; top: auto; right: auto; bottom: auto; overflow-y: auto; }
               .ch-backdrop, .ch-hamburger, .ch-sidebar-close, .ch-context-close { display: none; }
@@ -2209,160 +2258,13 @@ export default function CoachDashboard({ vertical = 'mujer' }) {
             }
           `}</style>
 
-          <button className="ch-hamburger" onClick={() => setChatSidebarAbierto(true)} aria-label="Historial">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
-          </button>
-          {(chatSidebarAbierto || contextoAbierto) && (
-            <div className="ch-backdrop" onClick={() => { setChatSidebarAbierto(false); setContextoAbierto(false); }} />
+          {/* Sidebar movido al shell global; esta vista solo renderiza chat + context. */}
+          {contextoAbierto && (
+            <div className="ch-backdrop" onClick={() => setContextoAbierto(false)} />
           )}
 
           <div className="ch-wrap">
-            {/* Columna 1: Sidebar — historial real desde tabla unificada `conversaciones` */}
-            <aside className={`ch-sidebar ${chatSidebarAbierto ? 'open' : ''}`}>
-              <button className="ch-sidebar-close" onClick={() => setChatSidebarAbierto(false)} aria-label="Cerrar">
-                <Icon.close s={14} />
-              </button>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '4px 8px', marginBottom: 16 }}>
-                <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round">
-                  <circle cx="12" cy="12" r="10" />
-                  <circle cx="12" cy="12" r="5.5" opacity=".55" />
-                  <path d="M12 2v20M2 12h20" opacity=".22" />
-                </svg>
-                <span style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: 16 }}>Coach 360</span>
-              </div>
-
-              {/* Coach chooser pill */}
-              <div style={{ padding: '10px 12px', background: 'var(--ink-3)', borderRadius: 12, border: '1px solid var(--line)', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 10 }}>
-                <div style={{ width: 32, height: 32, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, background: 'var(--ink-3)' }}>
-                  <img src={coachImg} alt={coachName} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 13, fontWeight: 600 }}>{coachName}</div>
-                  <div className="font-mono" style={{ fontSize: 10, color: 'var(--text-muted)' }}>tu coach</div>
-                </div>
-              </div>
-
-              {/* Menú nav (6 items) */}
-              {[
-                { label: 'Hoy', I: Icon.sparkle, active: false, action: () => navigate('ritual') },
-                { label: 'Conversación', I: Icon.dots, active: true, action: () => navigate('clara') },
-                { label: 'Módulos', I: Icon.book, active: false, action: () => navigate('modulos') },
-                { label: 'Tests', I: Icon.chart, active: false, action: () => navigate('tests') },
-                { label: 'Mi equilibrio', I: Icon.compass, active: false, action: () => navigate('equilibrio') },
-                { label: 'Progreso', I: Icon.chart, active: false, action: () => navigate('perfil') },
-              ].map((item, i) => {
-                const ItemIcon = item.I
-                return (
-                  <button key={i} onClick={() => { item.action(); setChatSidebarAbierto(false) }} style={{
-                    display: 'flex', alignItems: 'center', gap: 12, padding: '9px 12px', border: 'none', borderRadius: 10,
-                    background: item.active ? 'var(--v-tint)' : 'transparent',
-                    color: item.active ? 'var(--text)' : 'var(--text-muted)',
-                    fontSize: 13, cursor: 'pointer', textAlign: 'left', fontFamily: 'var(--font-body)',
-                  }}>
-                    <ItemIcon />
-                    <span>{item.label}</span>
-                    {item.active && <span style={{ marginLeft: 'auto', width: 4, height: 4, borderRadius: 2, background: 'var(--v-primary)' }} />}
-                  </button>
-                )
-              })}
-
-              {/* Otras experiencias — switcher cross-vertical filtrado por género */}
-              {(() => {
-                const verticalesDisponibles = [
-                  { id: 'general', label: 'Coach 360', desc: 'Coaching general',     img: '/leo.jpg',   path: '/dashboard?tab=coach360', visible: canAccessCoach360 },
-                  { id: 'mujer',   label: 'Mujer',     desc: 'Contexto de mujer',     img: '/clara.jpg', path: '/dashboard?tab=mujer',    visible: canAccessMujer },
-                  { id: 'lideres', label: 'Líderes',   desc: 'Liderazgo ejecutivo',   img: '/marco.jpg', path: '/dashboard?tab=lideres',  visible: canAccessLideres },
-                ].filter(v => v.visible && v.id !== vertical)
-                if (verticalesDisponibles.length === 0) return null
-                return (
-                  <div style={{ marginTop: 16, paddingTop: 14, borderTop: '1px solid var(--line)' }}>
-                    <div className="eyebrow" style={{ marginBottom: 8, padding: '0 4px' }}>Otras experiencias</div>
-                    {verticalesDisponibles.map(v => (
-                      <button key={v.id} onClick={() => { setChatSidebarAbierto(false); router.push(v.path) }} style={{
-                        display: 'flex', alignItems: 'center', gap: 10, width: '100%',
-                        padding: '8px 12px', border: 'none', borderRadius: 10,
-                        background: 'transparent', color: 'var(--text-muted)',
-                        cursor: 'pointer', textAlign: 'left',
-                        fontFamily: 'var(--font-body)', marginBottom: 2,
-                      }}>
-                        <img src={v.img} alt="" style={{ width: 24, height: 24, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontSize: 12, color: 'var(--text)', fontWeight: 500 }}>{v.label}</div>
-                        </div>
-                        <Icon.arrow s={10} />
-                      </button>
-                    ))}
-                  </div>
-                )
-              })()}
-
-              <div style={{ marginTop: 16, paddingTop: 14, borderTop: '1px solid var(--line)' }}>
-                <div className="eyebrow" style={{ marginBottom: 8, padding: '0 4px' }}>Conversaciones</div>
-                <button onClick={nuevaConversacion} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', border: '1px solid var(--line-strong)', borderRadius: 10, background: 'transparent', color: 'var(--text)', fontSize: 13, cursor: 'pointer', marginBottom: 12, justifyContent: 'flex-start', fontFamily: 'var(--font-body)', width: '100%' }}>
-                  <span style={{ color: 'var(--v-primary)' }}>✦</span> Nueva conversación
-                </button>
-              </div>
-
-              {(() => {
-                const g = agruparConvs(conversaciones)
-                const seccion = (titulo, items) => items.length > 0 && (
-                  <>
-                    <div className="eyebrow" style={{ marginBottom: 8, padding: '0 10px', marginTop: titulo === 'Hoy' ? 0 : 14 }}>{titulo}</div>
-                    {items.map(conv => {
-                      const isActive = conv.id === conversacionActiva
-                      const when = new Date(conv.ultimo_mensaje).toLocaleString('es-CL', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
-                      return (
-                        <button key={conv.id} onClick={() => abrirConversacion(conv.id)} style={{
-                          display: 'block', padding: '10px 12px', border: 'none',
-                          background: isActive ? 'var(--v-tint)' : 'transparent',
-                          borderRadius: 8, textAlign: 'left', cursor: 'pointer', color: 'var(--text)', fontSize: 13, lineHeight: 1.3, marginBottom: 2, width: '100%', fontFamily: 'var(--font-body)',
-                        }}>
-                          <div style={{ fontWeight: isActive ? 500 : 400, marginBottom: 2, color: isActive ? 'var(--text)' : 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{conv.titulo || 'Sin título'}</div>
-                          <div style={{ fontSize: 10, color: 'var(--text-dim)', fontFamily: 'var(--font-mono)' }}>{when}</div>
-                        </button>
-                      )
-                    })}
-                  </>
-                )
-                return (
-                  <>
-                    {seccion('Hoy', g.hoy)}
-                    {seccion('Esta semana', g.semana)}
-                    {seccion('Anterior', g.anterior)}
-                    {conversaciones.length === 0 && (
-                      <div style={{ padding: '10px 12px', fontSize: 12, color: 'var(--text-dim)', fontStyle: 'italic' }}>
-                        Aún no tienes conversaciones.
-                      </div>
-                    )}
-                  </>
-                )
-              })()}
-
-              {/* Plan card (mismo mapeo que el dashboard sidebar) */}
-              <div style={{ marginTop: 'auto', padding: 12, background: 'var(--ink-3)', border: '1px solid var(--line)', borderRadius: 12 }}>
-                <div className="eyebrow" style={{ marginBottom: 6 }}>
-                  {perfil?.plan_actual === 'free' ? 'Plan Gratis' : perfil?.plan_actual === 'esencial' ? 'Plan Esencial' : 'Plan Premium'}
-                </div>
-                <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                  {perfil?.plan_actual === 'free' ? 'Mensajes hoy' : 'Mensajes este mes'}
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 }}>
-                  <span style={{ fontFamily: 'var(--font-display)', fontSize: 24 }}>{perfil?.mensajes_chat_hoy || 0}</span>
-                  <span style={{ fontSize: 11, color: 'var(--text-dim)', fontFamily: 'var(--font-mono)' }}>/ {perfil?.plan_actual === 'free' ? 5 : 400}</span>
-                </div>
-                <div style={{ height: 3, background: 'var(--ink-5)', borderRadius: 999, overflow: 'hidden' }}>
-                  <div style={{ height: '100%', width: `${Math.min(100, Math.round(((perfil?.mensajes_chat_hoy || 0) / (perfil?.plan_actual === 'free' ? 5 : 400)) * 100))}%`, background: 'var(--v-primary)', transition: 'width .4s var(--ease-out)' }} />
-                </div>
-              </div>
-
-              <button onClick={() => { setChatSidebarAbierto(false); router.push('/configuracion') }} style={{ marginTop: 10, padding: '9px 12px', background: 'transparent', border: 'none', color: 'var(--text-muted)', fontSize: 13, cursor: 'pointer', fontFamily: 'var(--font-body)', textAlign: 'left', borderRadius: 10 }}>
-                Configuración
-              </button>
-              <button onClick={handleLogout} style={{ padding: '9px 12px', background: 'transparent', border: 'none', color: 'var(--text-dim)', fontSize: 12, cursor: 'pointer', fontFamily: 'var(--font-body)', textAlign: 'left', borderRadius: 10 }}>
-                Cerrar sesión
-              </button>
-            </aside>
+            {/* Sidebar eliminado — ahora vive en el shell global. */}
 
             {/* Columna 2: Chat central */}
             <section className="ch-main">
@@ -3087,6 +2989,8 @@ export default function CoachDashboard({ vertical = 'mujer' }) {
           </div>
         </div>
       )}
+
+      </main>
 
       <TestShareModal
         open={shareTestOpen}
