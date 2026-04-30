@@ -49,23 +49,33 @@ export default function HomePage() {
   useEffect(() => { checkUser() }, [])
 
   async function checkUser() {
+    console.log('[landing] checkUser inicio')
     const { data: { session } } = await supabase.auth.getSession()
+    console.log('[landing] getSession:', { hasSession: !!session, userId: session?.user?.id })
     if (session?.user) {
       const { data: perfil } = await supabase
         .from('perfiles').select('onboarding_completado, current_vertical')
         .eq('id', session.user.id).maybeSingle()
+      console.log('[landing] perfil:', { tieneProfile: !!perfil, completado: perfil?.onboarding_completado })
       if (perfil) {
         if (perfil.onboarding_completado) {
           const tab = perfil.current_vertical === 'mujer' ? 'mujer'
                     : perfil.current_vertical === 'lideres' ? 'lideres'
                     : 'coach360'
+          console.log('[landing] redirige a dashboard tab:', tab)
           router.push(`/dashboard?tab=${tab}`)
         } else {
+          console.log('[landing] redirige a /onboarding')
           router.push('/onboarding')
         }
         return
       }
+      // Sesión pero sin perfil — mostrar landing igual (modal de signup ya hizo lo suyo)
+      console.log('[landing] sesión pero sin perfil — usuario nuevo, redirige a onboarding')
+      router.push('/onboarding')
+      return
     }
+    console.log('[landing] sin sesión, mostrando landing')
     setLoading(false)
   }
 
@@ -91,21 +101,36 @@ export default function HomePage() {
   const handleSignup = async (e) => {
     e.preventDefault()
     setAuthLoading(true); setAuthError('')
+    console.log('[signup] iniciando con email:', authEmail.trim())
     const { data, error } = await supabase.auth.signUp({
       email: authEmail.trim(), password: authPassword,
+    })
+    console.log('[signup] respuesta supabase:', {
+      hasUser: !!data?.user,
+      hasSession: !!data?.session,
+      userId: data?.user?.id,
+      emailConfirmed: data?.user?.email_confirmed_at,
+      error: error?.message,
     })
     if (error) { setAuthError(error.message); setAuthLoading(false); return }
 
     // Si Supabase tiene "Confirm email" ON, data.session es null → usuario debe verificar email primero.
     if (!data.session) {
+      console.log('[signup] sin sesión inmediata — Supabase requiere confirmar email')
       setAuthLoading(false)
-      setAuthError('Te enviamos un email a ' + authEmail.trim() + '. Confirmá tu cuenta y volvé a iniciar sesión.')
+      setAuthError('CONFIRMÁ TU EMAIL: Te enviamos un mail a ' + authEmail.trim() + '. Hacé click en el link y volvé a iniciar sesión.')
       return
     }
 
+    console.log('[signup] sesión creada, navegando a /onboarding')
     if (data.user && authNombre.trim()) {
-      try { await supabase.from('perfiles').update({ nombre: authNombre.trim() }).eq('id', data.user.id) } catch {}
+      try { await supabase.from('perfiles').update({ nombre: authNombre.trim() }).eq('id', data.user.id) } catch (e) { console.error('[signup] error update perfiles:', e) }
     }
+
+    // Verificar que la sesión está propagada al storage antes de navegar
+    const { data: { session: sessionVerificacion } } = await supabase.auth.getSession()
+    console.log('[signup] verificación getSession antes de navegar:', !!sessionVerificacion)
+
     setAuthLoading(false)
     router.push('/onboarding')
   }

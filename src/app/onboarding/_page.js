@@ -86,24 +86,34 @@ export default function Onboarding() {
   useEffect(() => { checkUser() }, [])
 
   async function checkUser() {
-    // getSession() lee localStorage (síncrono) — más confiable que getUser() (network call)
-    // justo después de signup. Reintenta una vez si falla por race condition.
+    console.log('[onboarding] checkUser inicio')
     let { data: { session } } = await supabase.auth.getSession()
+    console.log('[onboarding] primer getSession:', { hasSession: !!session, userId: session?.user?.id })
+
     if (!session?.user) {
-      // Esperar 200ms y reintentar antes de redirigir — la sesión recién creada
-      // puede no estar propagada aún
+      console.log('[onboarding] no hay sesión, esperando 200ms y reintentando...')
       await new Promise(r => setTimeout(r, 200))
       const retry = await supabase.auth.getSession()
       session = retry.data.session
+      console.log('[onboarding] retry getSession:', { hasSession: !!session, userId: session?.user?.id })
     }
-    if (!session?.user) { router.push('/'); return }
+    if (!session?.user) {
+      console.log('[onboarding] sigue sin sesión, redirigiendo a /')
+      router.push('/'); return
+    }
     const user = session.user
     setUser(user)
     const { data: profile } = await supabase
       .from('perfiles').select('onboarding_completado, nombre').eq('id', user.id).maybeSingle()
-    if (profile?.onboarding_completado) { router.push('/dashboard?tab=coach360'); return }
+    console.log('[onboarding] perfil:', { tieneProfile: !!profile, completado: profile?.onboarding_completado })
+
+    if (profile?.onboarding_completado) {
+      console.log('[onboarding] ya completado, redirigiendo a dashboard')
+      router.push('/dashboard?tab=coach360'); return
+    }
     if (profile?.nombre) setNombre(profile.nombre)
     else if (user.user_metadata?.full_name) setNombre(user.user_metadata.full_name.split(' ')[0])
+    console.log('[onboarding] mostrando paso 1')
   }
 
   const toggleArea = (id) =>
