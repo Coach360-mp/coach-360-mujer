@@ -3,40 +3,57 @@
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
-import { Icon, Sigil, RealPortrait } from '@/components/design/icons'
 
-const UNSPLASH_IMG = {
-  t1: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=80&auto=format&fit=crop',
-  t2: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&q=80&auto=format&fit=crop',
-  t3: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&q=80&auto=format&fit=crop',
-  t4: 'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=400&q=80&auto=format&fit=crop',
-  moment1: 'https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=1200&q=80&auto=format&fit=crop',
-}
+const COACHES_INFO = [
+  { id: 'leo',   nombre: 'Leo',   role: 'Coach Estratégico · Ejecución', frase: '"Del saber al hacer."',          color: '#4db8a8', img: '/leo.jpg' },
+  { id: 'clara', nombre: 'Clara', role: 'Coach Empática · Bienestar',    frase: '"Más claridad, más vos."',       color: '#d4a574', img: '/clara.jpg' },
+  { id: 'marco', nombre: 'Marco', role: 'Coach Ejecutivo · Liderazgo',   frase: '"Liderar es decidir bien."',     color: '#7b68a8', img: '/marco.jpg' },
+]
 
 const PASOS = [
-  ['01', 'Conoces a tu coach', 'Eliges entre Clara, Leo o Marco según tu momento.'],
-  ['02', 'Un test breve', '20 preguntas que dibujan tu mapa actual.'],
-  ['03', 'Conversas cuando quieras', 'Sin horarios. Sin lista de espera.'],
-  ['04', 'Haces módulos cortos', '5-15 min. Para mover algo, no solo leer.'],
-  ['05', 'Ves tu progreso', 'Tu equilibrio en mente, cuerpo, corazón, espíritu.'],
+  ['1', 'Registrate en segundos',     'Crea tu cuenta con email. No requiere tarjeta para empezar gratis.'],
+  ['2', 'Elegí tu coach',              'Leo, Clara o Marco — según lo que querés mover.'],
+  ['3', 'Onboarding guiado',           'Respondes algunas preguntas y armamos tu mapa de inicio.'],
+  ['4', 'Conversa cuando quieras',     'Chat sin horarios. Tu coach está cuando lo necesitás.'],
+  ['5', 'Mira tu progreso',            'Métricas, hitos y reconocimientos en tiempo real.'],
+]
+
+const TESTIMONIOS = [
+  { quote: 'Coach 360 cambió cómo veo mis desafíos. Leo me ayudó a entender por qué procrastinaba. Ahora soy mucho más productivo.',  name: 'Andrés Martínez', role: 'Emprendedor, México',   img: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&q=80' },
+  { quote: 'Llevo 3 meses con Clara y mi estrés bajó dramáticamente. Finalmente entiendo cómo cuidarme sin culpa.',                    name: 'Sofía García',    role: 'Ejecutiva, Argentina',  img: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=80' },
+  { quote: 'Marco me ayudó a sacar lo mejor de mi equipo. Antes éramos caóticos, ahora tenemos dirección.',                            name: 'Carlos López',    role: 'Director, Colombia',    img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80' },
+]
+
+const FAQS = [
+  ['¿Cuánto cuesta Coach 360?',           'Plan free con acceso limitado y planes pagos desde $9.990 CLP/mes. Cada plan incluye acceso a coaches y herramientas según tu nivel.'],
+  ['¿Qué pasa si no me gusta mi coach?',  'Podés cambiar de coach cuando quieras desde Configuración. Sin penalidades.'],
+  ['¿Es seguro compartir mi información?','Sí. Cumplimos con la Ley 19.628 de Chile. Tus datos no se venden.'],
+  ['¿Los coaches son humanos o IA?',      'Los coaches son agentes de IA entrenados con metodologías profesionales. Las sesiones 1:1 con humanos son add-on premium.'],
+  ['¿Hay garantía?',                       'Plan Esencial y Premium con cancelación cuando quieras, sin compromisos largos.'],
+  ['¿Puedo usarlo desde el celu?',         'Sí. La app es 100% responsive — funciona desde cualquier dispositivo.'],
 ]
 
 export default function HomePage() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
+  const [openFaq, setOpenFaq] = useState(null)
 
   useEffect(() => { checkUser() }, [])
 
   async function checkUser() {
     const { data: { session } } = await supabase.auth.getSession()
     if (session?.user) {
-      const { data: perfil } = await supabase.from('perfiles').select('current_vertical, onboarding_completado').eq('id', session.user.id).single()
+      const { data: perfil } = await supabase
+        .from('perfiles').select('onboarding_completado, current_vertical')
+        .eq('id', session.user.id).maybeSingle()
       if (perfil) {
-        const vertical = perfil.current_vertical || 'mujer'
-        if (vertical === 'mujer') {
-          router.push(perfil.onboarding_completado ? '/dashboard' : '/onboarding')
+        if (perfil.onboarding_completado) {
+          const tab = perfil.current_vertical === 'mujer' ? 'mujer'
+                    : perfil.current_vertical === 'lideres' ? 'lideres'
+                    : 'coach360'
+          router.push(`/dashboard?tab=${tab}`)
         } else {
-          router.push(perfil.onboarding_completado ? `/${vertical}/dashboard` : `/${vertical}/onboarding`)
+          router.push('/onboarding')
         }
         return
       }
@@ -44,178 +61,578 @@ export default function HomePage() {
     setLoading(false)
   }
 
+  const handleCTA = () => {
+    router.push('/onboarding')
+  }
+
   if (loading) {
     return (
-      <div className="dir-ritual" style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--text)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: '.12em', color: 'var(--text-muted)' }}>CARGANDO ✦</div>
+      <div className="cz-page" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ fontFamily: 'var(--font-mono, monospace)', fontSize: 12, letterSpacing: '.12em', color: 'var(--text-muted)' }}>CARGANDO ✦</div>
+        <style jsx global>{landingStyles}</style>
       </div>
     )
   }
 
   return (
-    <div className="dir-ritual" style={{ background: 'var(--bg)', color: 'var(--text)', minHeight: '100vh' }}>
-      <style>{`
-        .hl-nav { padding: 20px 20px; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
-        .hl-nav-links { display: none; }
-        .hl-hero { padding: 48px 20px 40px; display: flex; flex-direction: column; gap: 40px; }
-        .hl-h1 { font-size: clamp(44px, 10vw, 88px); line-height: 0.98; letter-spacing: -0.045em; font-weight: 400; margin: 0; }
-        .hl-coach-grid { display: grid; grid-template-columns: 1fr; gap: 12px; height: auto; }
-        .hl-coach-big { aspect-ratio: 1 / 1; }
-        .hl-coach-sm { aspect-ratio: 16 / 9; }
-        .hl-how-wrap { padding: 72px 20px; border-top: 1px solid var(--line); background: var(--ink-2); }
-        .hl-how-h2 { font-size: clamp(32px, 7vw, 56px); line-height: 1; letter-spacing: -0.035em; font-weight: 400; margin: 0; }
-        .hl-how-grid { display: grid; grid-template-columns: 1fr; gap: 14px; max-width: 1200px; margin: 0 auto; }
-        .hl-testi-wrap { padding: 72px 20px; border-top: 1px solid var(--line); }
-        .hl-testi-grid { display: flex; flex-direction: column; gap: 32px; max-width: 1200px; margin: 0 auto; align-items: center; }
-        .hl-testi-img { width: 100%; max-width: 400px; height: 300px; border-radius: 20px; overflow: hidden; }
-        .hl-testi-quote { font-size: clamp(26px, 5vw, 44px); line-height: 1.15; letter-spacing: -0.025em; font-weight: 400; margin-bottom: 28px; font-family: var(--font-display); }
-        .hl-cta-wrap { padding: 96px 20px; text-align: center; border-top: 1px solid var(--line); background: var(--ink-2); }
-        .hl-cta-h2 { font-size: clamp(42px, 9vw, 72px); line-height: 1; letter-spacing: -0.04em; font-weight: 400; margin: 0 0 24px; }
-        @media (min-width: 768px) {
-          .hl-nav { padding: 24px 64px; flex-wrap: nowrap; }
-          .hl-nav-links { display: flex; gap: 32px; font-size: 14px; color: var(--text-muted); }
-          .hl-hero { padding: 96px 64px 80px; display: grid; grid-template-columns: 1.1fr 1fr; gap: 72px; align-items: center; }
-          .hl-coach-grid { grid-template-columns: 1fr 1fr; gap: 12px; height: 540px; }
-          .hl-coach-big { grid-row: span 2; aspect-ratio: auto; }
-          .hl-coach-sm { aspect-ratio: auto; }
-          .hl-how-wrap { padding: 96px 64px; }
-          .hl-how-grid { grid-template-columns: repeat(5, 1fr); gap: 14px; }
-          .hl-testi-wrap { padding: 120px 64px; }
-          .hl-testi-grid { display: grid; grid-template-columns: 400px 1fr; gap: 64px; align-items: center; }
-          .hl-testi-img { width: 400px; max-width: none; height: 500px; }
-          .hl-cta-wrap { padding: 120px 64px; }
-        }
-      `}</style>
+    <div className="cz-page">
+      <header className="cz-header">
+        <nav className="cz-nav">
+          <div className="cz-logo">
+            <div className="cz-logo-sigil" />
+            <span>Coach 360</span>
+          </div>
+          <ul className="cz-nav-links">
+            <li><a href="#coaches">Coaches</a></li>
+            <li><a href="#how">Cómo funciona</a></li>
+            <li><a href="#testimonials">Testimonios</a></li>
+            <li><a href="#faq">Preguntas</a></li>
+          </ul>
+          <button className="cz-nav-cta" onClick={handleCTA}>Comenzar</button>
+        </nav>
+      </header>
 
-      {/* NAV */}
-      <div className="hl-nav">
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <Sigil s={20} />
-          <span style={{ fontFamily: 'var(--font-display)', fontSize: 20, letterSpacing: '-0.02em', fontWeight: 500 }}>Coach 360</span>
+      <section className="cz-hero">
+        <div className="cz-eyebrow cz-eyebrow-hero">Transformación Personal Guiada</div>
+        <h1 className="cz-hero-title">Alcanzá tus objetivos con coaching personalizado</h1>
+        <p className="cz-hero-subtitle">Coaches expertos diseñados para tu crecimiento personal, profesional y emocional.</p>
+        <div className="cz-cta-group">
+          <button className="cz-btn-primary" onClick={handleCTA}>Comenzar hoy</button>
+          <a href="#coaches" className="cz-btn-secondary">Conocer a los coaches</a>
         </div>
-        <div className="hl-nav-links">
-          <a href="#coaches" style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>Coaches</a>
-          <a href="#metodo" style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>Método</a>
-          <a onClick={() => router.push('/planes')} style={{ color: 'var(--text-muted)', cursor: 'pointer' }}>Planes</a>
-          <a href="#historias" style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>Historias</a>
+        <div className="cz-hero-image">
+          <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=1200&q=80" alt="Coach 360" />
         </div>
-        <div style={{ display: 'flex', gap: 10 }}>
-          <button onClick={() => router.push('/mujer')} style={{ padding: '9px 18px', borderRadius: 999, border: '1px solid var(--line)', background: 'transparent', color: 'var(--text)', fontSize: 13, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Ingresar</button>
-          <button onClick={() => router.push('/mujer')} style={{ padding: '9px 18px', borderRadius: 999, border: 'none', background: 'var(--text)', color: 'var(--bg)', fontWeight: 600, fontSize: 13, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Empezar gratis</button>
-        </div>
-      </div>
+      </section>
 
-      {/* HERO */}
-      <div id="coaches" className="hl-hero">
-        <div>
-          <div className="eyebrow" style={{ marginBottom: 20 }}>✦ Coaching ontológico con IA · LATAM</div>
-          <h1 className="hl-h1" style={{ fontFamily: 'var(--font-display)' }}>
-            Alguien <em style={{ fontStyle: 'italic', color: 'var(--v-primary)' }}>a tu lado</em>,<br />cuando lo necesitas.
-          </h1>
-          <p style={{ fontSize: 18, color: 'var(--text-muted)', lineHeight: 1.55, marginTop: 26, maxWidth: 480 }}>
-            Clara, Leo y Marco son coaches de IA que te acompañan todos los días. Te escuchan, te recuerdan lo que importa, y te ayudan a mover lo que estaba quieto.
-          </p>
-          <div style={{ display: 'flex', gap: 12, marginTop: 32, flexWrap: 'wrap' }}>
-            <button onClick={() => router.push('/mujer')} style={{ padding: '14px 24px', borderRadius: 999, border: 'none', background: 'var(--text)', color: 'var(--bg)', fontWeight: 600, fontSize: 15, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Empezar gratis</button>
-            <a href="#metodo" style={{ padding: '14px 24px', borderRadius: 999, border: '1px solid var(--line-strong)', background: 'transparent', color: 'var(--text)', fontSize: 15, cursor: 'pointer', fontFamily: 'var(--font-body)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>Ver cómo funciona</a>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginTop: 32 }}>
-            <div style={{ display: 'flex' }}>
-              {[UNSPLASH_IMG.t1, UNSPLASH_IMG.t2, UNSPLASH_IMG.t3, UNSPLASH_IMG.t4].map((s, i) => (
-                <div key={i} style={{ marginLeft: i === 0 ? 0 : -10 }}>
-                  <RealPortrait src={s} size={36} ring />
-                </div>
-              ))}
-            </div>
-            <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>
-              <b style={{ color: 'var(--text)' }}>+3.000 personas</b> en Chile, Argentina y Colombia
-            </div>
-          </div>
+      <section className="cz-section" id="coaches">
+        <div className="cz-section-header">
+          <div className="cz-eyebrow cz-eyebrow-section">Nuestros Coaches</div>
+          <h2 className="cz-section-title">Expertos en crecimiento personal</h2>
+          <p className="cz-section-subtitle">Cada coach aporta su especialidad para guiarte hacia tu mejor versión.</p>
         </div>
-
-        {/* coach grid */}
-        <div className="hl-coach-grid">
-          <div data-v="clara" className="hl-coach-big" onClick={() => router.push('/mujer')} style={{ position: 'relative', borderRadius: 18, overflow: 'hidden', cursor: 'pointer' }}>
-            <img src="/clara.jpg" alt="Clara" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, transparent 40%, rgba(10,12,14,.85))' }} />
-            <div style={{ position: 'absolute', bottom: 18, left: 18, right: 18, color: '#fff' }}>
-              <div style={{ fontSize: 10, fontFamily: 'var(--font-mono)', opacity: .7, letterSpacing: '.1em', marginBottom: 4 }}>PARA TI, MUJER</div>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: 26, letterSpacing: '-0.02em' }}>Clara</div>
-              <div style={{ fontSize: 13, fontStyle: 'italic', opacity: .85 }}>Más claridad, más poder.</div>
-            </div>
-          </div>
-          <div data-v="leo" className="hl-coach-sm" onClick={() => router.push('/general')} style={{ position: 'relative', borderRadius: 18, overflow: 'hidden', cursor: 'pointer' }}>
-            <img src="/leo.jpg" alt="Leo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, transparent 30%, rgba(10,12,14,.85))' }} />
-            <div style={{ position: 'absolute', bottom: 14, left: 14, right: 14, color: '#fff' }}>
-              <div style={{ fontSize: 9, fontFamily: 'var(--font-mono)', opacity: .7, letterSpacing: '.1em' }}>DÍA A DÍA</div>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: 22 }}>Leo</div>
-            </div>
-          </div>
-          <div data-v="marco" className="hl-coach-sm" onClick={() => router.push('/lideres')} style={{ position: 'relative', borderRadius: 18, overflow: 'hidden', cursor: 'pointer' }}>
-            <img src="/marco.jpg" alt="Marco" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, transparent 30%, rgba(10,12,14,.85))' }} />
-            <div style={{ position: 'absolute', bottom: 14, left: 14, right: 14, color: '#fff' }}>
-              <div style={{ fontSize: 9, fontFamily: 'var(--font-mono)', opacity: .7, letterSpacing: '.1em' }}>LÍDERES</div>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: 22 }}>Marco</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* CÓMO FUNCIONA */}
-      <div id="metodo" className="hl-how-wrap">
-        <div style={{ textAlign: 'center', marginBottom: 48 }}>
-          <div className="eyebrow" style={{ marginBottom: 12 }}>✦ Cómo funciona</div>
-          <h2 className="hl-how-h2" style={{ fontFamily: 'var(--font-display)' }}>
-            Cinco minutos al día. <em style={{ fontStyle: 'italic', color: 'var(--v-primary)' }}>Cambios reales</em> en un mes.
-          </h2>
-        </div>
-        <div className="hl-how-grid">
-          {PASOS.map(([n, t, d], i) => (
-            <div key={i} style={{ padding: 24, background: 'var(--ink-1)', border: '1px solid var(--line)', borderRadius: 14 }}>
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--v-primary)', marginBottom: 16 }}>{n}</div>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, letterSpacing: '-0.015em', marginBottom: 8, lineHeight: 1.2 }}>{t}</div>
-              <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.5 }}>{d}</div>
+        <div className="cz-coaches-grid">
+          {COACHES_INFO.map((c) => (
+            <div key={c.id} className="cz-coach-card">
+              <div className="cz-coach-avatar" style={{ borderColor: c.color }}>
+                <img src={c.img} alt={c.nombre} />
+              </div>
+              <div>
+                <div className="cz-coach-name">{c.nombre}</div>
+                <div className="cz-coach-role">{c.role}</div>
+              </div>
+              <div className="cz-coach-quote" style={{ borderTopColor: 'rgba(255,255,255,0.08)' }}>{c.frase}</div>
             </div>
           ))}
         </div>
-      </div>
+      </section>
 
-      {/* TESTIMONIO */}
-      <div id="historias" className="hl-testi-wrap">
-        <div className="hl-testi-grid">
-          <div className="hl-testi-img">
-            <img src={UNSPLASH_IMG.moment1} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          </div>
-          <div>
-            <div style={{ display: 'flex', gap: 3, color: 'var(--v-primary)', marginBottom: 24 }}>
-              {[1,2,3,4,5].map(i => <Icon.star key={i} s={16} />)}
-            </div>
-            <div className="hl-testi-quote">
-              "Después de tres meses con Clara, tomé la decisión que llevaba <em style={{ fontStyle: 'italic', color: 'var(--v-primary)' }}>dos años</em> postergando. No era magia — era alguien que me hacía las preguntas que yo no quería hacerme."
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-              <RealPortrait src={UNSPLASH_IMG.t3} size={52} />
-              <div>
-                <div style={{ fontFamily: 'var(--font-display)', fontSize: 18 }}>Sofía Valderrama</div>
-                <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>Médica · 38 · Viña del Mar</div>
+      <section className="cz-section" id="how">
+        <div className="cz-section-header">
+          <div className="cz-eyebrow cz-eyebrow-section">Proceso simple</div>
+          <h2 className="cz-section-title">Cómo funciona Coach 360</h2>
+          <p className="cz-section-subtitle">Empezá tu transformación en 5 pasos.</p>
+        </div>
+        <div className="cz-how-grid">
+          <div className="cz-how-steps">
+            {PASOS.map(([n, t, d]) => (
+              <div key={n} className="cz-how-step">
+                <div className="cz-step-number">{n}</div>
+                <div>
+                  <div className="cz-step-title">{t}</div>
+                  <div className="cz-step-desc">{d}</div>
+                </div>
               </div>
-            </div>
+            ))}
+          </div>
+          <div className="cz-how-image">
+            <img src="https://images.unsplash.com/photo-1573164713988-8665fc963095?w=800&q=80" alt="Cómo funciona" />
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* CTA FINAL */}
-      <div className="hl-cta-wrap">
-        <h2 className="hl-cta-h2" style={{ fontFamily: 'var(--font-display)' }}>
-          Empieza <em style={{ fontStyle: 'italic', color: 'var(--v-primary)' }}>hoy</em>.
-        </h2>
-        <p style={{ fontSize: 18, color: 'var(--text-muted)', lineHeight: 1.5, maxWidth: 560, margin: '0 auto 36px' }}>
-          Es gratis. Sin tarjeta. Cuando tengas ganas de más, ahí estaremos.
-        </p>
-        <button onClick={() => router.push('/mujer')} style={{ padding: '16px 36px', borderRadius: 999, border: 'none', background: 'var(--v-primary)', color: '#0a0c0e', fontWeight: 600, fontSize: 16, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>Conocer a mi coach →</button>
-      </div>
+      <section className="cz-section" id="testimonials">
+        <div className="cz-section-header">
+          <div className="cz-eyebrow cz-eyebrow-section">Historias reales</div>
+          <h2 className="cz-section-title">Transformaciones que inspiran</h2>
+        </div>
+
+        <div className="cz-stats">
+          <div className="cz-stat-card"><div className="cz-stat-num">92%</div><div className="cz-stat-label">reportan transformación en 90 días</div></div>
+          <div className="cz-stat-card"><div className="cz-stat-num">50k+</div><div className="cz-stat-label">usuarios activos</div></div>
+          <div className="cz-stat-card"><div className="cz-stat-num">4.9★</div><div className="cz-stat-label">calificación promedio</div></div>
+        </div>
+
+        <div className="cz-testimonials-grid">
+          {TESTIMONIOS.map((t, i) => (
+            <div key={i} className="cz-testimonial-card">
+              <p className="cz-testimonial-quote">"{t.quote}"</p>
+              <div className="cz-testimonial-author">
+                <div className="cz-testimonial-avatar">
+                  <img src={t.img} alt={t.name} />
+                </div>
+                <div>
+                  <div className="cz-testimonial-name">{t.name}</div>
+                  <div className="cz-testimonial-role">{t.role}</div>
+                </div>
+              </div>
+              <div className="cz-testimonial-stars">⭐⭐⭐⭐⭐ 5.0</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="cz-cta-section">
+        <div className="cz-cta-grid">
+          <div className="cz-cta-image">
+            <img src="https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=800&q=80" alt="Empezá tu viaje" />
+          </div>
+          <div>
+            <h2 className="cz-cta-title">Comenzá tu transformación hoy</h2>
+            <p className="cz-cta-subtitle">No necesitás perfección, solo honestidad contigo. Miles ya dieron el primer paso.</p>
+            <ul className="cz-cta-list">
+              <li><span>✓</span> Plan Free disponible para siempre</li>
+              <li><span>✓</span> Sin tarjeta de crédito requerida</li>
+              <li><span>✓</span> Cambiar coach cuando quieras</li>
+              <li><span>✓</span> Cumplimiento Ley 19.628 (Chile)</li>
+            </ul>
+            <button className="cz-btn-primary cz-btn-full" onClick={handleCTA}>Comenzar mi viaje ahora</button>
+          </div>
+        </div>
+      </section>
+
+      <section className="cz-section" id="faq">
+        <div className="cz-section-header">
+          <div className="cz-eyebrow cz-eyebrow-section">Preguntas frecuentes</div>
+          <h2 className="cz-section-title">¿Qué necesitás saber?</h2>
+        </div>
+        <div className="cz-faq-grid">
+          {FAQS.map(([q, a], i) => (
+            <div key={i} className={`cz-faq-item ${openFaq === i ? 'open' : ''}`} onClick={() => setOpenFaq(openFaq === i ? null : i)}>
+              <div className="cz-faq-question">
+                <span>{q}</span>
+                <span className="cz-faq-icon">▼</span>
+              </div>
+              {openFaq === i && <div className="cz-faq-answer">{a}</div>}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <footer className="cz-footer">
+        <div className="cz-footer-content">
+          <div>
+            <h3>Producto</h3>
+            <a href="/planes">Planes</a>
+            <a href="#coaches">Coaches</a>
+            <a href="#faq">FAQ</a>
+          </div>
+          <div>
+            <h3>Empresa</h3>
+            <a href="#">Sobre nosotros</a>
+            <a href="#">Contacto</a>
+          </div>
+          <div>
+            <h3>Legal</h3>
+            <a href="/privacidad">Privacidad</a>
+            <a href="#">Términos</a>
+          </div>
+          <div>
+            <h3>Cuenta</h3>
+            <a href="/onboarding">Empezar</a>
+            <a href="/forgot-password">Recuperar contraseña</a>
+          </div>
+        </div>
+        <div className="cz-footer-bottom">
+          <span>© 2026 Coach 360. Todos los derechos reservados.</span>
+          <div style={{ display: 'flex', gap: 16 }}>
+            <a href="#">Twitter</a>
+            <a href="#">LinkedIn</a>
+            <a href="#">Instagram</a>
+          </div>
+        </div>
+      </footer>
+
+      <style jsx global>{landingStyles}</style>
     </div>
   )
 }
+
+const landingStyles = `
+.cz-page {
+  --cz-accent: #4db8a8;
+  --cz-bg: #0a0a0a;
+  --cz-bg-2: #111111;
+  --cz-text: #ffffff;
+  --cz-muted: #a8a8a8;
+  background: var(--cz-bg);
+  color: var(--cz-text);
+  font-family: var(--font-body), Inter, system-ui, sans-serif;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+.cz-header {
+  background: var(--cz-bg-2);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  padding: 16px 32px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.cz-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+.cz-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-display), Fraunces, Georgia, serif;
+  font-size: 16px;
+  font-weight: 500;
+}
+.cz-logo-sigil {
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--cz-accent);
+  border-radius: 50%;
+}
+.cz-nav-links {
+  display: flex;
+  gap: 32px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.cz-nav-links a {
+  color: var(--cz-muted);
+  text-decoration: none;
+  font-size: 13px;
+  transition: color 300ms;
+}
+.cz-nav-links a:hover { color: var(--cz-text); }
+.cz-nav-cta {
+  padding: 10px 20px;
+  background: var(--cz-accent);
+  color: var(--cz-bg);
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  font-weight: 600;
+  font-family: inherit;
+  transition: all 300ms;
+}
+.cz-nav-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(77,184,168,0.24);
+}
+
+.cz-hero {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 80px 32px;
+  text-align: center;
+}
+.cz-eyebrow {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 600;
+}
+.cz-eyebrow-hero, .cz-eyebrow-section {
+  color: var(--cz-accent);
+  margin-bottom: 16px;
+}
+.cz-hero-title {
+  font-family: var(--font-display), Fraunces, Georgia, serif;
+  font-size: clamp(32px, 6vw, 56px);
+  font-weight: 500;
+  line-height: 1.2;
+  margin: 0 auto 20px;
+  max-width: 800px;
+}
+.cz-hero-subtitle {
+  font-size: 18px;
+  color: var(--cz-muted);
+  max-width: 700px;
+  margin: 0 auto 40px;
+}
+.cz-cta-group {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-bottom: 60px;
+  flex-wrap: wrap;
+}
+.cz-btn-primary {
+  padding: 14px 32px;
+  background: var(--cz-accent);
+  color: var(--cz-bg);
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  font-weight: 600;
+  font-family: inherit;
+  transition: all 300ms;
+}
+.cz-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(77,184,168,0.32);
+}
+.cz-btn-full { width: 100%; padding: 16px; }
+.cz-btn-secondary {
+  padding: 14px 32px;
+  background: transparent;
+  color: var(--cz-text);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  font-weight: 600;
+  font-family: inherit;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  transition: all 300ms;
+}
+.cz-btn-secondary:hover {
+  border-color: var(--cz-accent);
+  background: rgba(77,184,168,0.05);
+}
+.cz-hero-image {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(77,184,168,0.2);
+  aspect-ratio: 16/9;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+.cz-hero-image img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.cz-section {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 80px 32px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+.cz-section-header { text-align: center; margin-bottom: 60px; }
+.cz-section-title {
+  font-family: var(--font-display), Fraunces, Georgia, serif;
+  font-size: clamp(28px, 5vw, 40px);
+  font-weight: 500;
+  margin: 12px 0 16px;
+}
+.cz-section-subtitle {
+  font-size: 16px;
+  color: var(--cz-muted);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.cz-coaches-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+.cz-coach-card {
+  background: var(--cz-bg-2);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 32px 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  transition: all 300ms;
+}
+.cz-coach-card:hover {
+  border-color: rgba(77,184,168,0.3);
+  background: rgba(77,184,168,0.05);
+  transform: translateY(-4px);
+}
+.cz-coach-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  margin: 0 auto;
+  overflow: hidden;
+  border: 2px solid;
+  background: rgba(255,255,255,0.05);
+}
+.cz-coach-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cz-coach-name {
+  font-size: 18px;
+  font-weight: 600;
+  font-family: var(--font-display), Fraunces, Georgia, serif;
+}
+.cz-coach-role { font-size: 13px; color: var(--cz-muted); margin-top: 4px; }
+.cz-coach-quote {
+  font-size: 12px;
+  color: var(--cz-muted);
+  border-top: 1px solid;
+  padding-top: 16px;
+  font-style: italic;
+}
+
+.cz-how-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
+}
+.cz-how-steps { display: flex; flex-direction: column; gap: 32px; }
+.cz-how-step { display: flex; gap: 20px; align-items: flex-start; }
+.cz-step-number {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(77,184,168,0.1);
+  border: 1px solid rgba(77,184,168,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  color: var(--cz-accent);
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.cz-step-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+.cz-step-desc { font-size: 12px; color: var(--cz-muted); line-height: 1.6; }
+.cz-how-image {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(77,184,168,0.2);
+  aspect-ratio: 4/5;
+}
+.cz-how-image img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.cz-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+  margin-bottom: 60px;
+}
+.cz-stat-card {
+  text-align: center;
+  padding: 24px;
+  background: rgba(77,184,168,0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(77,184,168,0.1);
+}
+.cz-stat-num { font-size: 36px; font-weight: 600; color: var(--cz-accent); margin-bottom: 8px; }
+.cz-stat-label { font-size: 12px; color: var(--cz-muted); }
+
+.cz-testimonials-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+.cz-testimonial-card {
+  background: var(--cz-bg-2);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 28px 24px;
+}
+.cz-testimonial-quote { font-size: 14px; line-height: 1.7; margin-bottom: 16px; font-style: italic; }
+.cz-testimonial-author { display: flex; align-items: center; gap: 12px; }
+.cz-testimonial-avatar { width: 40px; height: 40px; border-radius: 50%; overflow: hidden; flex-shrink: 0; }
+.cz-testimonial-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cz-testimonial-name { font-size: 13px; font-weight: 600; }
+.cz-testimonial-role { font-size: 11px; color: var(--cz-muted); }
+.cz-testimonial-stars { margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.08); font-size: 11px; color: var(--cz-accent); }
+
+.cz-cta-section {
+  max-width: 1400px;
+  margin: 80px auto 0;
+  padding: 80px 32px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+.cz-cta-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
+}
+.cz-cta-image {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(77,184,168,0.2);
+  aspect-ratio: 4/5;
+}
+.cz-cta-image img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cz-cta-title {
+  font-family: var(--font-display), Fraunces, Georgia, serif;
+  font-size: clamp(28px, 5vw, 40px);
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+.cz-cta-subtitle { font-size: 15px; color: var(--cz-muted); margin-bottom: 32px; line-height: 1.8; }
+.cz-cta-list { list-style: none; padding: 0; margin: 0 0 32px; display: flex; flex-direction: column; gap: 12px; }
+.cz-cta-list li { display: flex; align-items: center; gap: 12px; font-size: 13px; }
+.cz-cta-list li span { color: var(--cz-accent); }
+
+.cz-faq-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-top: 40px;
+}
+.cz-faq-item {
+  background: var(--cz-bg-2);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 24px;
+  cursor: pointer;
+  transition: all 300ms;
+}
+.cz-faq-item:hover { border-color: rgba(77,184,168,0.3); background: rgba(77,184,168,0.05); }
+.cz-faq-question { display: flex; justify-content: space-between; align-items: center; gap: 16px; font-weight: 600; font-size: 14px; }
+.cz-faq-icon { font-size: 12px; transition: transform 300ms; flex-shrink: 0; color: var(--cz-accent); }
+.cz-faq-item.open .cz-faq-icon { transform: rotate(180deg); }
+.cz-faq-answer { margin-top: 16px; font-size: 13px; color: var(--cz-muted); line-height: 1.6; }
+
+.cz-footer {
+  background: var(--cz-bg-2);
+  border-top: 1px solid rgba(255,255,255,0.08);
+  padding: 60px 32px;
+  margin-top: 80px;
+}
+.cz-footer-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 40px;
+}
+.cz-footer h3 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 16px; font-weight: 600; }
+.cz-footer a { display: block; font-size: 13px; color: var(--cz-muted); text-decoration: none; margin-bottom: 10px; transition: color 300ms; }
+.cz-footer a:hover { color: var(--cz-text); }
+.cz-footer-bottom {
+  max-width: 1400px;
+  margin: 40px auto 0;
+  padding-top: 40px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--cz-muted);
+}
+
+@media (max-width: 1024px) {
+  .cz-coaches-grid, .cz-stats, .cz-testimonials-grid, .cz-footer-content { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 768px) {
+  .cz-nav-links { display: none; }
+  .cz-hero, .cz-section, .cz-cta-section { padding: 60px 16px; }
+  .cz-coaches-grid, .cz-stats, .cz-testimonials-grid, .cz-faq-grid, .cz-footer-content { grid-template-columns: 1fr; }
+  .cz-how-grid, .cz-cta-grid { grid-template-columns: 1fr; gap: 32px; }
+  .cz-footer-bottom { flex-direction: column; gap: 16px; text-align: center; }
+}
+`
