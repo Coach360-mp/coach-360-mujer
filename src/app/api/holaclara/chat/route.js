@@ -44,7 +44,7 @@ export async function POST(req) {
     const perfilCtx = perfil ? `\nPerfil de la usuaria: ${perfil}` : ''
 
     const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      model: 'claude-sonnet-4-5',
       max_tokens: 300,
       system: SYSTEM_PROMPT + perfilCtx,
       messages: [
