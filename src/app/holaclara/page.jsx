@@ -43,8 +43,14 @@ export default function HolaClaraLanding() {
         <div style={{ fontFamily: "'Inter Tight', sans-serif", fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1.5px', fontWeight: 700, opacity: 0.6, marginBottom: '40px' }}>
           Sin agendar, sin culpa, en español.
         </div>
-        <div style={{ width: '100%', maxWidth: '280px', margin: '0 auto 32px', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 12px 48px rgba(245,201,168,0.3)', background: '#F5EFE6', height: '320px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontSize: '18px', color: '#C9A96E', opacity: 0.6 }}>Clara</div>
+
+        {/* IMAGEN HERO */}
+        <div style={{ width: '100%', maxWidth: '280px', margin: '0 auto 24px', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 12px 48px rgba(245,201,168,0.3)' }}>
+          <img
+            src="/images/15_mujer_pecosa.jpg"
+            alt="Clara"
+            style={{ width: '100%', height: '340px', objectFit: 'cover', objectPosition: 'center top', display: 'block' }}
+          />
         </div>
         <p style={{ fontFamily: "'Caveat', cursive", fontSize: '18px', color: '#C9A96E' }}>conoce a Clara, tu coach IA</p>
       </div>
@@ -67,6 +73,15 @@ export default function HolaClaraLanding() {
         </div>
       </div>
 
+      {/* IMAGEN GRADIENTE entre secciones */}
+      <div style={{ width: '100%', maxWidth: '420px', margin: '0 auto', height: '200px', overflow: 'hidden' }}>
+        <img
+          src="/images/13_gradiente_turrell_naranja.jpg"
+          alt=""
+          style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', display: 'block' }}
+        />
+      </div>
+
       {/* DIVIDER */}
       <div style={{ width: '1px', height: '60px', background: 'rgba(42,37,32,0.12)', margin: '0 auto' }} />
 
@@ -75,6 +90,16 @@ export default function HolaClaraLanding() {
         <div style={{ fontFamily: "'Inter Tight', sans-serif", fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1.5px', fontWeight: 700, marginBottom: '32px', textAlign: 'center', opacity: 0.5 }}>
           Cómo funciona
         </div>
+
+        {/* IMAGEN CÓMO FUNCIONA */}
+        <div style={{ borderRadius: '16px', overflow: 'hidden', marginBottom: '32px', boxShadow: '0 8px 32px rgba(42,37,32,0.08)' }}>
+          <img
+            src="/images/12_desayuno_sol.jpg"
+            alt=""
+            style={{ width: '100%', height: '180px', objectFit: 'cover', objectPosition: 'center', display: 'block' }}
+          />
+        </div>
+
         <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
           {[
             { num: '01', titulo: 'Clara te conoce', desc: 'Conversaciones sin horario fijo. Clara recuerda lo que importa.' },
@@ -100,9 +125,19 @@ export default function HolaClaraLanding() {
         <div style={{ fontFamily: "'Inter Tight', sans-serif", fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1.5px', fontWeight: 700, marginBottom: '8px', textAlign: 'center', opacity: 0.5 }}>
           En 30 días
         </div>
-        <div style={{ fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontSize: '32px', lineHeight: 1.2, marginBottom: '32px', textAlign: 'center' }}>
+        <div style={{ fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontSize: '32px', lineHeight: 1.2, marginBottom: '24px', textAlign: 'center' }}>
           Tres cosas van a cambiar
         </div>
+
+        {/* IMAGEN 30 DÍAS */}
+        <div style={{ borderRadius: '16px', overflow: 'hidden', marginBottom: '32px', boxShadow: '0 8px 32px rgba(42,37,32,0.08)' }}>
+          <img
+            src="/images/11_mujer_leyendo_jardin.jpg"
+            alt=""
+            style={{ width: '100%', height: '200px', objectFit: 'cover', objectPosition: 'center top', display: 'block' }}
+          />
+        </div>
+
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {[
             { num: '01', texto: 'Vas a saber qué te agota de verdad', gold: true },
@@ -136,7 +171,7 @@ export default function HolaClaraLanding() {
               <div style={{ fontSize: '11px', opacity: 0.5, marginBottom: '14px' }}>{msgs}</div>
               {features.map(f => (
                 <div key={f} style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '6px', fontSize: '13px', opacity: 0.85 }}>
-                  <span style={{ color: '#C9A96E' }}>✓</span> {f}
+                  <span style={{ color: destacado ? '#C9A96E' : '#C9A96E' }}>✓</span> {f}
                 </div>
               ))}
             </div>
@@ -144,13 +179,28 @@ export default function HolaClaraLanding() {
         </div>
       </div>
 
-      {/* CTA FINAL */}
-      <div style={{ ...styles.container, paddingBottom: '80px', textAlign: 'center' }}>
-        <button onClick={() => router.push('/holaclara/test')} style={{ width: '100%', padding: '16px', borderRadius: '12px', background: '#2A2520', color: '#FAFAF7', fontSize: '15px', fontFamily: "'Inter Tight', sans-serif", fontWeight: 700, border: 'none', cursor: 'pointer', marginBottom: '12px', letterSpacing: '0.5px' }}>
-          Empezar mi test gratuito
-        </button>
-        <p style={{ fontSize: '13px', opacity: 0.5 }}>3 minutos · sin tarjeta</p>
+      {/* CTA FINAL con imagen de fondo */}
+      <div style={{ position: 'relative', overflow: 'hidden', marginBottom: '0' }}>
+        <img
+          src="/images/09_espigas_mar.jpg"
+          alt=""
+          style={{ width: '100%', height: '300px', objectFit: 'cover', objectPosition: 'center', display: 'block' }}
+        />
+        <div style={{ position: 'absolute', inset: 0, background: 'rgba(42,37,32,0.55)' }} />
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 20px', textAlign: 'center' }}>
+          <div style={{ fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontSize: '28px', color: '#FAFAF7', marginBottom: '8px', lineHeight: 1.2 }}>
+            Ya es hora.
+          </div>
+          <p style={{ fontSize: '14px', color: 'rgba(250,250,247,0.75)', marginBottom: '32px' }}>3 minutos · sin tarjeta</p>
+          <button
+            onClick={() => router.push('/holaclara/test')}
+            style={{ padding: '16px 40px', borderRadius: '12px', background: '#FAFAF7', color: '#2A2520', fontSize: '15px', fontFamily: "'Inter Tight', sans-serif", fontWeight: 700, border: 'none', cursor: 'pointer', letterSpacing: '0.5px' }}
+          >
+            Empezar mi test gratuito
+          </button>
+        </div>
       </div>
+
     </div>
   )
 }
