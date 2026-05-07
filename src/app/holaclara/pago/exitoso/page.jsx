@@ -1,8 +1,8 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 
-export default function PagoExitoso() {
+function PagoExitosoContent() {
   const router = useRouter()
   const params = useSearchParams()
   const plan = params.get('plan') || 'esencial'
@@ -22,20 +22,32 @@ export default function PagoExitoso() {
   }
 
   return (
+    <div style={s.root}>
+      <div style={s.card}>
+        <div style={s.circulo}>
+          <svg width="28" height="24" viewBox="0 0 28 24" fill="none">
+            <polyline points="2,12 10,20 26,4" stroke="#C9A96E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </div>
+        <div style={s.titulo}>Ya eres parte, {plan === 'profundo' ? 'Profundo' : 'Esencial'}.</div>
+        <div style={s.sub}>Tu plan está activo. Clara te espera adentro.<br />Redirigiendo en unos segundos...</div>
+        <button style={s.btn} onClick={() => router.push('/holaclara/chat')}>Ir al chat →</button>
+      </div>
+    </div>
+  )
+}
+
+export default function PagoExitoso() {
+  return (
     <>
       <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@1,400&family=Inter+Tight:wght@400;700&display=swap" rel="stylesheet" />
-      <div style={s.root}>
-        <div style={s.card}>
-          <div style={s.circulo}>
-            <svg width="28" height="24" viewBox="0 0 28 24" fill="none">
-              <polyline points="2,12 10,20 26,4" stroke="#C9A96E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </div>
-          <div style={s.titulo}>Ya eres parte, {plan === 'profundo' ? 'Profundo' : 'Esencial'}.</div>
-          <div style={s.sub}>Tu plan está activo. Clara te espera adentro.<br />Redirigiendo en unos segundos...</div>
-          <button style={s.btn} onClick={() => router.push('/holaclara/chat')}>Ir al chat →</button>
+      <Suspense fallback={
+        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FAFAF7', fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontSize: '18px', color: '#C9A96E' }}>
+          cargando...
         </div>
-      </div>
+      }>
+        <PagoExitosoContent />
+      </Suspense>
     </>
   )
 }
