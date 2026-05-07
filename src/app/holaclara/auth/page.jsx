@@ -42,7 +42,16 @@ export default function Auth() {
       options: { data: { nombre } }
     })
     if (error) { setError(error.message); setCargando(false); return }
-    if (data.user) await guardarPerfil(data.user.id)
+    if (data.user) {
+      await guardarPerfil(data.user.id)
+      const testData = localStorage.getItem('hc_resultado_test_leido') || localStorage.getItem('hc_resultado_test')
+      const perfilTest = testData ? JSON.parse(testData).perfil : null
+      fetch('/api/holaclara/email-bienvenida', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, nombre, perfil: perfilTest })
+      }).catch(() => {})
+    }
     setExito(true)
     setCargando(false)
   }
