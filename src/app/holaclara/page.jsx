@@ -30,7 +30,7 @@ export default function HolaClaraLanding() {
           <div style={{ height: '1px', background: '#C9A96E', margin: '2px 0' }} />
           <div style={{ fontSize: '7px', letterSpacing: '0.1em', color: '#9A8F84', textTransform: 'uppercase' }}>Para la que quiere más y necesita parar.</div>
         </div>
-        <button onClick={() => router.push('/holaclara/auth')} style={{ padding: '8px 18px', borderRadius: '20px', border: '1px solid #2A2520', background: 'transparent', fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit' }}>
+        <button onClick={() => router.push('/holaclara/auth')} style={{ padding: '8px 18px', borderRadius: '20px', border: '1px solid #2A2520', background: 'transparent', fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit', color: '#2A2520', WebkitAppearance: 'none' }}>
           Entrar
         </button>
       </nav>
@@ -49,10 +49,10 @@ export default function HolaClaraLanding() {
           <img
             src="/images/hero_landing.png"
             alt="Clara"
-            style={{ width: '100%', height: '340px', objectFit: 'cover', objectPosition: 'center top', display: 'block' }}
+            style={{ width: '100%', height: '340px', objectFit: 'cover', objectPosition: '60% 20%', display: 'block' }}
           />
         </div>
-        <p style={{ fontFamily: "'Caveat', cursive", fontSize: '18px', color: '#C9A96E' }}>conoce a Clara, tu coach IA</p>
+
       </div>
 
       {/* RECONOCIMIENTO */}
