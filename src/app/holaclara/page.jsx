@@ -48,7 +48,7 @@ export default function HolaClaraLanding() {
       {/* IMAGEN HERO FULL WIDTH */}
       <div style={{ width: '100vw', position: 'relative', left: '50%', right: '50%', marginLeft: '-50vw', marginRight: '-50vw', marginBottom: '60px', marginTop: '-1px', overflow: 'hidden' }}>
         <img
-          src="/images/hero_landing.png"
+          src="/images/13_gradiente_turrell_naranja.jpg"
           alt="Clara"
           style={{ width: '100%', height: '100vw', maxHeight: '500px', objectFit: 'cover', objectPosition: '60% 15%', display: 'block' }}
         />
