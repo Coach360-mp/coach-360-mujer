@@ -20,10 +20,8 @@ const TABS = [
     path: '/holaclara/conocerme',
     icon: (active) => (
       <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-        <circle cx="11" cy="11" r="8" stroke={active ? '#C9A96E' : '#9A8F84'} strokeWidth="1.5" fill={active ? 'rgba(201,169,110,0.12)' : 'none'} />
-        <path d="M8 9 C8 7.34 9.34 6 11 6 C12.66 6 14 7.34 14 9 C14 10.66 12.66 12 11 12"
+        <path d="M11 11 C11 11 11 8 14 8 C17 8 17 12 14 13 C11 14 8 13 7 10 C6 7 8 4 11 4 C15 4 18 7 18 11 C18 15.97 14.42 18 11 18 C6.58 18 4 14.97 4 11"
           stroke={active ? '#C9A96E' : '#9A8F84'} strokeWidth="1.5" strokeLinecap="round" fill="none" />
-        <circle cx="11" cy="15" r="1" fill={active ? '#C9A96E' : '#9A8F84'} />
       </svg>
     ),
   },
