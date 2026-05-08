@@ -79,6 +79,8 @@ export default function CicloPage() {
   const [cicloIrregular, setCicloIrregular] = useState(false)
   const [guardando, setGuardando] = useState(false)
   const [guardado, setGuardado] = useState(false)
+  const [showFechaInput, setShowFechaInput] = useState(false)
+  const [fechaInput, setFechaInput] = useState('')
 
   useEffect(() => { inicializar() }, [])
 
@@ -121,6 +123,13 @@ export default function CicloPage() {
     }, { onConflict: 'usuario_id,created_at::date' })
 
     await supabase.from('perfiles').update({ fase_ciclo_actual: faseSel }).eq('id', usuario.id)
+
+    if (fechaInput) {
+      await supabase.from('perfiles').update({ fecha_ultimo_periodo: fechaInput }).eq('id', usuario.id)
+      const { fase, dia } = calcularFase(fechaInput)
+      setFaseSel(fase)
+      setDiaActual(dia)
+    }
 
     setGuardando(false)
     setGuardado(true)
@@ -246,6 +255,23 @@ export default function CicloPage() {
               <div style={s.claraText}>{fase.clara}</div>
             </div>
 
+            {!cicloIrregular && (
+              <div style={{ marginBottom: '16px' }}>
+                {!showFechaInput ? (
+                  <button onClick={() => setShowFechaInput(true)} style={{ background: 'transparent', border: 'none', fontSize: '12px', color: '#C9A96E', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', textDecoration: 'underline', display: 'block', marginBottom: '8px' }}>
+                    ¿Cuándo fue tu último período?
+                  </button>
+                ) : (
+                  <div style={{ background: '#F5EFE6', borderRadius: '12px', padding: '14px 16px', borderLeft: '3px solid #C9A96E' }}>
+                    <div style={{ fontSize: '10px', letterSpacing: '1.5px', textTransform: 'uppercase', color: '#9A8F84', fontWeight: 700, marginBottom: '8px' }}>Primer día de tu último período</div>
+                    <input type="date" value={fechaInput} onChange={e => setFechaInput(e.target.value)}
+                      max={new Date().toISOString().split('T')[0]}
+                      style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1px solid rgba(42,37,32,0.2)', background: '#fff', fontFamily: "'Inter Tight', sans-serif", fontSize: '14px', color: '#2A2520', outline: 'none', boxSizing: 'border-box' }} />
+                    <div style={{ fontSize: '11px', color: '#9A8F84', marginTop: '6px' }}>Clara usará esto para calcular tu fase actual.</div>
+                  </div>
+                )}
+              </div>
+            )}
             <button style={s.guardarBtn} onClick={guardarRegistro}>
               {guardado ? '✓ Guardado' : guardando ? 'Guardando...' : 'Guardar registro de hoy'}
             </button>
