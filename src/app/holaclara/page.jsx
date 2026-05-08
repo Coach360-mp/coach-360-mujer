@@ -47,7 +47,7 @@ export default function HolaClaraLanding() {
         {/* IMAGEN HERO */}
         <div style={{ width: '100%', maxWidth: '280px', margin: '0 auto 24px', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 12px 48px rgba(245,201,168,0.3)' }}>
           <img
-            src="/images/15_mujer_pecosa.jpg"
+            src="/images/hero_landing.png"
             alt="Clara"
             style={{ width: '100%', height: '340px', objectFit: 'cover', objectPosition: 'center top', display: 'block' }}
           />
