@@ -45,11 +45,11 @@ export default function HolaClaraLanding() {
         </div>
 
         {/* IMAGEN HERO */}
-        <div style={{ width: '100%', maxWidth: '280px', margin: '0 auto 24px', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 12px 48px rgba(245,201,168,0.3)' }}>
+        <div style={{ width: '100%', margin: '0 auto 24px', overflow: 'hidden' }}>
           <img
             src="/images/hero_landing.png"
             alt="Clara"
-            style={{ width: '100%', height: '340px', objectFit: 'cover', objectPosition: '60% 20%', display: 'block' }}
+            style={{ width: '100%', height: '100vw', maxHeight: '420px', objectFit: 'cover', objectPosition: '60% 20%', display: 'block' }}
           />
         </div>
 
