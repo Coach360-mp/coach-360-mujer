@@ -211,18 +211,22 @@ export default function JournalingPage() {
   }, [])
 
   const guardar = async (datos) => {
-    if (usuario && plantillaActiva) {
-      await supabase.from('journaling_entradas').insert({
-        user_id: usuario.id,
-        plantilla_id: plantillaActiva.id,
-        datos,
-        fecha: new Date().toISOString().split('T')[0],
-      }).catch(() => {})
-      fetch('/api/holaclara/sumar-puntos', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: usuario.id, tipo: 'journaling' }),
-      }).catch(() => {})
+    try {
+      if (usuario && plantillaActiva) {
+        await supabase.from('journaling_entradas').insert({
+          user_id: usuario.id,
+          plantilla_id: plantillaActiva.id,
+          datos,
+          fecha: new Date().toISOString().split('T')[0],
+        })
+        fetch('/api/holaclara/sumar-puntos', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: usuario.id, tipo: 'journaling' }),
+        }).catch(() => {})
+      }
+    } catch (e) {
+      console.error('Error guardando journaling:', e)
     }
     setCompletado(true)
   }
