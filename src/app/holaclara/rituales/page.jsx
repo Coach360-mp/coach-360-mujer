@@ -349,7 +349,10 @@ function CheckinRitual({ ritual, onComplete }) {
           </button>
         ))}
       </div>
-      <button style={{ width: '100%', padding: '13px', borderRadius: '12px', background: sel !== null ? '#2A2520' : 'rgba(42,37,32,0.3)', color: '#FAFAF7', fontFamily: "'Inter Tight', sans-serif", fontSize: '13px', fontWeight: 700, border: 'none', cursor: sel !== null ? 'pointer' : 'default' }} onClick={() => sel !== null && onComplete({ respuesta: ritual.opciones[sel] })} disabled={sel === null}>
+      <button style={{ width: '100%', padding: '13px', borderRadius: '12px', background: sel !== null ? '#2A2520' : 'rgba(42,37,32,0.3)', color: '#FAFAF7', fontFamily: "'Inter Tight', sans-serif", fontSize: '13px', fontWeight: 700, border: 'none', cursor: 'pointer' }} onClick={() => {
+        if (sel === null) { alert('Elige una opción para continuar'); return }
+        onComplete({ respuesta: ritual.opciones[sel] })
+      }}>
         Continuar →
       </button>
     </div>
