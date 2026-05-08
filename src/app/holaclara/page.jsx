@@ -36,7 +36,7 @@ export default function HolaClaraLanding() {
       </nav>
 
       {/* HERO */}
-      <div style={{ ...styles.container, paddingTop: '48px', paddingBottom: '32px', textAlign: 'center' }}>
+      <div style={{ ...styles.container, paddingTop: '48px', paddingBottom: '0', textAlign: 'center' }}>
         <div style={{ fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontSize: '52px', lineHeight: 1.1, marginBottom: '16px' }}>
           Vuelve a ti.
         </div>
@@ -46,7 +46,7 @@ export default function HolaClaraLanding() {
       </div>
 
       {/* IMAGEN HERO FULL WIDTH */}
-      <div style={{ width: '100vw', position: 'relative', left: '50%', right: '50%', marginLeft: '-50vw', marginRight: '-50vw', marginBottom: '60px', overflow: 'hidden' }}>
+      <div style={{ width: '100vw', position: 'relative', left: '50%', right: '50%', marginLeft: '-50vw', marginRight: '-50vw', marginBottom: '60px', marginTop: '-1px', overflow: 'hidden' }}>
         <img
           src="/images/hero_landing.png"
           alt="Clara"
