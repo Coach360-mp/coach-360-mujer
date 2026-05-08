@@ -113,7 +113,7 @@ export default function CicloPage() {
     setGuardando(true)
     const hoy = new Date().toISOString().split('T')[0]
 
-    await supabase.from('registro_ciclo').upsert({
+    try { await supabase.from('registro_ciclo').upsert({
       usuario_id: usuario.id,
       fase: faseSel,
       sintomas: sintomasSel,
@@ -122,7 +122,7 @@ export default function CicloPage() {
       created_at: new Date().toISOString(),
     }, { onConflict: 'usuario_id,created_at::date' })
 
-    await supabase.from('perfiles').update({ fase_ciclo_actual: faseSel }).eq('id', usuario.id)
+    try { await supabase.from('perfiles').update({ fase_ciclo_actual: faseSel }).eq('id', usuario.id) } catch(e) { console.error('ciclo error:', e) }
 
     if (fechaInput) {
       await supabase.from('perfiles').update({ fecha_ultimo_periodo: fechaInput }).eq('id', usuario.id)

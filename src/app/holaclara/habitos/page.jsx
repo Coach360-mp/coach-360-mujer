@@ -93,11 +93,10 @@ export default function HabitosPage() {
     const yaCompletado = completadosHoy.includes(habitoId)
 
     if (yaCompletado) {
-      await supabase.from('habitos_completados').delete()
-        .eq('user_id', usuario.id).eq('habito_id', habitoId).eq('fecha', hoy)
+      try { await supabase.from('habitos_completados').delete().eq('user_id', usuario.id).eq('habito_id', habitoId).eq('fecha', hoy) } catch(e) { console.error('habito delete error:', e) }
       setCompletadosHoy(prev => prev.filter(id => id !== habitoId))
     } else {
-      await supabase.from('habitos_completados').insert({ user_id: usuario.id, habito_id: habitoId, fecha: hoy })
+      try { await supabase.from('habitos_completados').insert({ user_id: usuario.id, habito_id: habitoId, fecha: hoy }) } catch(e) { console.error('habito insert error:', e) }
       setCompletadosHoy(prev => [...prev, habitoId])
       fetch('/api/holaclara/sumar-puntos', {
         method: 'POST',

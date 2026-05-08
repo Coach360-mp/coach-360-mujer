@@ -18,7 +18,7 @@ export default function Auth() {
     const data = localStorage.getItem('hc_resultado_test')
     if (!data) return
     const { perfil, puntajes } = JSON.parse(data)
-    await supabase.from('perfiles').upsert({
+    try { await supabase.from('perfiles').upsert({
       id: userId,
       perfil_test_entrada: perfil,
       puntaje_t: puntajes.T || 0,
