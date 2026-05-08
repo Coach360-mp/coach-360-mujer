@@ -429,6 +429,7 @@ export default function RitualesPage() {
   const [completado, setCompletado] = useState(false)
   const [showCierre, setShowCierre] = useState(false)
   const [datosRitual, setDatosRitual] = useState({})
+  const ritualRef = useRef(null)
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -438,6 +439,7 @@ export default function RitualesPage() {
   }, [])
 
   const completarRitual = async (datos = {}) => {
+    if (ritualActivo) ritualRef.current = ritualActivo
     if (usuario && ritualActivo) {
       await supabase.from('rituales_completados').insert({
         user_id: usuario.id,
@@ -457,7 +459,7 @@ export default function RitualesPage() {
   }
 
   const irAChat = () => {
-    const cierre = CIERRES[ritualActivo?.id] || {}
+    const cierre = CIERRES[ritualRef.current?.id] || {}
     const msg = encodeURIComponent(cierre.chat || 'Clara, acabo de completar un ritual.')
     router.push(`/holaclara/chat?msg=${msg}`)
   }
@@ -497,8 +499,8 @@ export default function RitualesPage() {
     </>
   )
 
-  if (showCierre && ritualActivo) {
-    const cierre = CIERRES[ritualActivo.id] || {
+  if (showCierre && ritualRef.current) {
+    const cierre = CIERRES[ritualRef.current.id] || {
       mensaje: 'Lo hiciste.',
       invitacion: 'Sigue desde aquí.',
       pregunta: '¿Cómo estás ahora?',
@@ -512,7 +514,7 @@ export default function RitualesPage() {
             <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: '#F5EFE6', border: '2px solid #C9A96E', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px' }}>
               <svg width="22" height="18" viewBox="0 0 28 24" fill="none"><polyline points="2,12 10,20 26,4" stroke="#C9A96E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
             </div>
-            <div style={{ fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontSize: '13px', color: '#C9A96E', marginBottom: '12px', letterSpacing: '0.5px' }}>{ritualActivo.nombre}</div>
+            <div style={{ fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontSize: '13px', color: '#C9A96E', marginBottom: '12px', letterSpacing: '0.5px' }}>{ritualRef.current.nombre}</div>
             <div style={{ fontSize: '17px', lineHeight: 1.7, color: '#2A2520', marginBottom: '16px' }}>{cierre.mensaje}</div>
             <div style={{ fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontSize: '16px', color: '#C9A96E', marginBottom: '8px', lineHeight: 1.5 }}>{cierre.invitacion}</div>
             <div style={{ fontSize: '15px', color: '#2A2520', opacity: 0.6, marginBottom: '40px', lineHeight: 1.6, borderLeft: '2px solid #C9A96E', paddingLeft: '12px' }}>{cierre.pregunta}</div>
@@ -552,7 +554,7 @@ export default function RitualesPage() {
                 <div style={{ fontFamily: "'Caveat', cursive", fontSize: '16px', color: '#C9A96E', marginBottom: '24px' }}>elige un ritual corto</div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   {RITUALES.map(ritual => (
-                    <div key={ritual.id} onClick={() => setRitualActivo(ritual)} style={{ background: '#fff', border: '0.5px solid rgba(42,37,32,0.15)', borderRadius: '16px', padding: '14px 16px', display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}>
+                    <div key={ritual.id} onClick={() => { setRitualActivo(ritual); ritualRef.current = ritual }} style={{ background: '#fff', border: '0.5px solid rgba(42,37,32,0.15)', borderRadius: '16px', padding: '14px 16px', display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}>
                       <RitualIcon ritual={ritual} />
                       <div style={{ flex: 1 }}>
                         <div style={{ fontSize: '13px', fontWeight: 700, color: '#2A2520', marginBottom: '2px' }}>{ritual.nombre}</div>
