@@ -377,6 +377,11 @@ export default function RitualesPage() {
         datos,
         fecha: new Date().toISOString().split('T')[0],
       }).catch(() => {})
+      fetch('/api/holaclara/sumar-puntos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: usuario.id, tipo: 'ritual' }),
+      }).catch(() => {})
     }
     setCompletado(true)
   }
