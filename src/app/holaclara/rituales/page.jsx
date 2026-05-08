@@ -9,6 +9,69 @@ const supabase = createBrowserClient(
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsbGVreXJiZWhrYXlybm5uanB3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyNTg4MzAsImV4cCI6MjA5MDgzNDgzMH0.CyDyp3ztZf6Tr9QVJWFV3Qo2o0PsNiejIAp-t_Va1pE'
 )
 
+const CIERRES = {
+  respiraciones: {
+    mensaje: "Tres respiraciones. Parece poco, pero tu cuerpo ya lo registró. Hay una diferencia entre entrar a algo corriendo y entrar habiendo parado un segundo.",
+    invitacion: "Eso que tienes adelante — hazlo desde aquí.",
+    pregunta: "¿Cómo estás ahora comparado a hace tres minutos?",
+    chat: "Clara, acabo de hacer las 3 respiraciones. Quiero contarte cómo estoy ahora."
+  },
+  checkin: {
+    mensaje: "Te preguntaste cómo estabas. La mayoría no lo hace en todo el día. Ya tienes más información que antes para moverte.",
+    invitacion: "¿Qué necesitas ahora que ya sabes cómo llegas?",
+    pregunta: "¿Qué vas a hacer diferente en la próxima hora?",
+    chat: "Clara, acabo de hacer mi check-in. Quiero contarte cómo estoy."
+  },
+  pausa_mediodia: {
+    mensaje: "Tres minutos sin producir nada. Eso cuesta más de lo que parece. Y rinde más de lo que crees.",
+    invitacion: "La tarde empieza ahora, desde un lugar distinto.",
+    pregunta: "¿Qué es lo primero que quieres hacer con esta claridad?",
+    chat: "Clara, acabo de hacer mi pausa de mediodía. ¿Cómo aprovecho mejor la tarde?"
+  },
+  gratitud: {
+    mensaje: "No es positivismo forzado — es que tu cerebro tiende a buscar lo que falta. Acabas de entrenarlo para ver lo que hay.",
+    invitacion: "Eso se queda contigo el resto del día, aunque no lo notes.",
+    pregunta: "¿Cuál de las tres te sorprendió más?",
+    chat: "Clara, acabo de escribir mis 3 cosas de gratitud. Quiero contarte qué descubrí."
+  },
+  soltar: {
+    mensaje: "Lo pusiste en palabras. Lo que está adentro pesa más que lo que está escrito.",
+    invitacion: "Ya no tienes que cargarlo solo en la cabeza.",
+    pregunta: "¿Qué sientes ahora que lo soltaste?",
+    chat: "Clara, acabo de hacer el ejercicio de soltar. Quiero hablar de lo que escribí."
+  },
+  grounding: {
+    mensaje: "Estabas en otro lado y volviste. Eso no es fácil. La mayoría se queda dando vueltas.",
+    invitacion: "Desde aquí puedes responder en vez de reaccionar.",
+    pregunta: "¿Qué fue lo más difícil de traerte de vuelta al presente?",
+    chat: "Clara, acabo de hacer el 5-4-3-2-1. Quiero contarte cómo estoy."
+  },
+  manana: {
+    mensaje: "Te preguntaste cómo estabas antes de actuar. Esa pausa de dos segundos es más poderosa de lo que parece.",
+    invitacion: "Come presente. Es más nutritivo que cualquier dieta.",
+    pregunta: "¿Qué necesita tu cuerpo ahora mismo?",
+    chat: "Clara, me hice el check-in antes de comer. Quiero contarte qué noté."
+  },
+  cierre: {
+    mensaje: "Cerraste el día con intención. La mayoría lo deja abierto y se lo lleva a la cama.",
+    invitacion: "Ahora puedes soltar el día de verdad.",
+    pregunta: "¿Qué te llevas de hoy que vale la pena recordar mañana?",
+    chat: "Clara, acabo de cerrar el día. Quiero contarte cómo me fue."
+  },
+  termostato: {
+    mensaje: "Sabes dónde estás. Eso cambia cómo vas a actuar en la próxima hora.",
+    invitacion: "No tienes que reaccionar desde donde estabas — puedes elegir desde donde quieres estar.",
+    pregunta: "¿Qué haría alguien en calma en tu lugar ahora mismo?",
+    chat: "Clara, acabo de medir mi temperatura emocional. Quiero hablarlo contigo."
+  },
+  recordar: {
+    mensaje: "Te acordaste de algo que ya sabías pero habías dejado de ver. Eso no se aprende — se recuerda.",
+    invitacion: "Lleva eso contigo hoy.",
+    pregunta: "¿Por qué crees que lo habías olvidado?",
+    chat: "Clara, acabo de recordar quién soy. Quiero contarte qué apareció."
+  },
+}
+
 const RITUALES = [
   {
     id: 'respiraciones',
@@ -361,6 +424,8 @@ export default function RitualesPage() {
   const [usuario, setUsuario] = useState(null)
   const [ritualActivo, setRitualActivo] = useState(null)
   const [completado, setCompletado] = useState(false)
+  const [showCierre, setShowCierre] = useState(false)
+  const [datosRitual, setDatosRitual] = useState({})
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -384,6 +449,19 @@ export default function RitualesPage() {
         body: JSON.stringify({ userId: usuario.id, tipo: 'ritual' }),
       }).catch(() => {})
     }
+    setDatosRitual(datos)
+    setShowCierre(true)
+  }
+
+  const irAChat = () => {
+    const cierre = CIERRES[ritualActivo?.id] || {}
+    const msg = encodeURIComponent(cierre.chat || 'Clara, acabo de completar un ritual.')
+    router.push(`/holaclara/chat?msg=${msg}`)
+  }
+
+  const guardarYSeguir = () => {
+    setShowCierre(false)
+    setRitualActivo(null)
     setCompletado(true)
   }
 
@@ -415,6 +493,37 @@ export default function RitualesPage() {
       </div>
     </>
   )
+
+  if (showCierre && ritualActivo) {
+    const cierre = CIERRES[ritualActivo.id] || {
+      mensaje: 'Lo hiciste.',
+      invitacion: 'Sigue desde aquí.',
+      pregunta: '¿Cómo estás ahora?',
+      chat: 'Clara, acabo de completar un ritual.'
+    }
+    return (
+      <>
+        <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;1,400;1,600&family=Inter+Tight:wght@400;700&family=Caveat:wght@500&display=swap" rel="stylesheet" />
+        <div style={{ minHeight: '100vh', background: '#FAFAF7', fontFamily: "'Inter Tight', sans-serif", color: '#2A2520', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '32px 24px' }}>
+          <div style={{ maxWidth: '380px', margin: '0 auto', width: '100%' }}>
+            <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: '#F5EFE6', border: '2px solid #C9A96E', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px' }}>
+              <svg width="22" height="18" viewBox="0 0 28 24" fill="none"><polyline points="2,12 10,20 26,4" stroke="#C9A96E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            </div>
+            <div style={{ fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontSize: '13px', color: '#C9A96E', marginBottom: '12px', letterSpacing: '0.5px' }}>{ritualActivo.nombre}</div>
+            <div style={{ fontSize: '17px', lineHeight: 1.7, color: '#2A2520', marginBottom: '16px' }}>{cierre.mensaje}</div>
+            <div style={{ fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontSize: '16px', color: '#C9A96E', marginBottom: '8px', lineHeight: 1.5 }}>{cierre.invitacion}</div>
+            <div style={{ fontSize: '15px', color: '#2A2520', opacity: 0.6, marginBottom: '40px', lineHeight: 1.6, borderLeft: '2px solid #C9A96E', paddingLeft: '12px' }}>{cierre.pregunta}</div>
+            <button onClick={irAChat} style={{ width: '100%', padding: '14px', borderRadius: '12px', background: '#2A2520', color: '#FAFAF7', fontFamily: "'Inter Tight', sans-serif", fontSize: '14px', fontWeight: 700, border: 'none', cursor: 'pointer', marginBottom: '10px' }}>
+              Contarle a Clara →
+            </button>
+            <button onClick={guardarYSeguir} style={{ width: '100%', padding: '14px', borderRadius: '12px', background: 'transparent', color: '#2A2520', fontFamily: "'Inter Tight', sans-serif", fontSize: '14px', fontWeight: 700, border: '1px solid rgba(42,37,32,0.2)', cursor: 'pointer' }}>
+              Guardar y seguir
+            </button>
+          </div>
+        </div>
+      </>
+    )
+  }
 
   return (
     <>
