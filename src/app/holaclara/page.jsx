@@ -36,23 +36,22 @@ export default function HolaClaraLanding() {
       </nav>
 
       {/* HERO */}
-      <div style={{ ...styles.container, paddingTop: '48px', paddingBottom: '60px', textAlign: 'center' }}>
+      <div style={{ ...styles.container, paddingTop: '48px', paddingBottom: '32px', textAlign: 'center' }}>
         <div style={{ fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontSize: '52px', lineHeight: 1.1, marginBottom: '16px' }}>
           Vuelve a ti.
         </div>
-        <div style={{ fontFamily: "'Inter Tight', sans-serif", fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1.5px', fontWeight: 700, opacity: 0.6, marginBottom: '40px' }}>
+        <div style={{ fontFamily: "'Inter Tight', sans-serif", fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1.5px', fontWeight: 700, opacity: 0.6, marginBottom: '32px' }}>
           Sin agendar, sin culpa, en español.
         </div>
+      </div>
 
-        {/* IMAGEN HERO */}
-        <div style={{ width: '100%', margin: '0 auto 24px', overflow: 'hidden' }}>
-          <img
-            src="/images/hero_landing.png"
-            alt="Clara"
-            style={{ width: '100%', height: '100vw', maxHeight: '420px', objectFit: 'cover', objectPosition: '60% 20%', display: 'block' }}
-          />
-        </div>
-
+      {/* IMAGEN HERO FULL WIDTH */}
+      <div style={{ width: '100vw', position: 'relative', left: '50%', right: '50%', marginLeft: '-50vw', marginRight: '-50vw', marginBottom: '60px', overflow: 'hidden' }}>
+        <img
+          src="/images/hero_landing.png"
+          alt="Clara"
+          style={{ width: '100%', height: '100vw', maxHeight: '500px', objectFit: 'cover', objectPosition: '60% 15%', display: 'block' }}
+        />
       </div>
 
       {/* RECONOCIMIENTO */}
