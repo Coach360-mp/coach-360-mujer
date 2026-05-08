@@ -28,6 +28,8 @@ export default function Chat() {
   const [input, setInput] = useState('')
   const [cargando, setCargando] = useState(false)
   const [limitAlcanzado, setLimitAlcanzado] = useState(false)
+  const [grabando, setGrabando] = useState(false)
+  const recognitionRef = useRef(null)
   const bottomRef = useRef(null)
 
   useEffect(() => {
@@ -93,6 +95,30 @@ export default function Chat() {
       setMensajes(prev => [...prev, { rol: 'clara', texto: 'Algo salió mal. ¿Lo intentamos de nuevo?' }])
     }
     setCargando(false)
+  }
+
+  function toggleMic() {
+    if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+      alert('Usa Chrome o Safari para dictar por voz.')
+      return
+    }
+    if (grabando) {
+      recognitionRef.current?.stop()
+      return
+    }
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition
+    recognitionRef.current = new SR()
+    recognitionRef.current.lang = 'es-CL'
+    recognitionRef.current.continuous = true
+    recognitionRef.current.interimResults = true
+    recognitionRef.current.onresult = (e) => {
+      let t = ''
+      for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript
+      setInput(t)
+    }
+    recognitionRef.current.onend = () => setGrabando(false)
+    recognitionRef.current.start()
+    setGrabando(true)
   }
 
   return (
@@ -184,6 +210,19 @@ export default function Chat() {
               lineHeight: 1.5, maxHeight: '120px', overflowY: 'auto'
             }}
           />
+          <button onClick={toggleMic} disabled={limitAlcanzado} style={{
+            width: '40px', height: '40px', borderRadius: '50%',
+            background: grabando ? '#C9A96E' : '#EDE8DF',
+            border: 'none', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            flexShrink: 0, transition: 'background 0.2s'
+          }}>
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <rect x="4" y="1" width="6" height="8" rx="3" fill={grabando ? '#fff' : '#888'} />
+              <path d="M2 7c0 2.76 2.24 5 5 5s5-2.24 5-5" stroke={grabando ? '#fff' : '#888'} strokeWidth="1.2" strokeLinecap="round" fill="none"/>
+              <line x1="7" y1="12" x2="7" y2="14" stroke={grabando ? '#fff' : '#888'} strokeWidth="1.2" strokeLinecap="round"/>
+            </svg>
+          </button>
           <button onClick={enviar} disabled={!input.trim() || cargando || limitAlcanzado} style={{
             width: '40px', height: '40px', borderRadius: '50%',
             background: input.trim() && !cargando ? '#2A2520' : '#EDE8DF',
