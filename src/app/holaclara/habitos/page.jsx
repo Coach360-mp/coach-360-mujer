@@ -39,7 +39,8 @@ const CAT_COLORS = { mente: '#378ADD', cuerpo: '#D85A30', corazon: '#7F77DD', es
 const CAT_LABELS = { mente: 'Mente', cuerpo: 'Cuerpo', corazon: 'Corazón', espiritu: 'Espíritu' }
 const ILLUS_BG = { mente: '#E6F1FB', cuerpo: '#FAECE7', corazon: '#EEEDFE', espiritu: '#E1F5EE' }
 const DIAS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
-const FRECUENCIAS = ['Todos los días', 'Días de semana', 'Fines de semana']
+const FRECUENCIAS = ['Todos los días', 'Días de semana', 'Fines de semana', 'Personalizado']
+const DIAS_SEMANA = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
 
 export default function HabitosPage() {
   const router = useRouter()
@@ -52,6 +53,7 @@ export default function HabitosPage() {
   const [selHabit, setSelHabit] = useState(null)
   const [selImg, setSelImg] = useState(null)
   const [selFreq, setSelFreq] = useState('Todos los días')
+  const [diasPersonalizados, setDiasPersonalizados] = useState([])
   const [customInput, setCustomInput] = useState('')
   const diaHoy = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1
 
@@ -108,14 +110,19 @@ export default function HabitosPage() {
       'Todos los días': [1, 2, 3, 4, 5, 6, 7],
       'Días de semana': [1, 2, 3, 4, 5],
       'Fines de semana': [6, 7],
+      'Personalizado': diasPersonalizados.length > 0 ? diasPersonalizados : [1, 2, 3, 4, 5, 6, 7],
     }
+
+    const frecuenciaLabel = selFreq === 'Personalizado'
+      ? diasPersonalizados.map(d => DIAS_SEMANA[d-1]).join(', ')
+      : selFreq
 
     const { data } = await supabase.from('habitos_usuario').insert({
       user_id: usuario.id,
       dimension: selCat,
       nombre,
       imagen: customInput.trim() ? null : selImg,
-      frecuencia: selFreq,
+      frecuencia: frecuenciaLabel,
       dias_semana: diasMap[selFreq] || [1, 2, 3, 4, 5, 6, 7],
       activo: true,
     }).select().single()
@@ -123,7 +130,7 @@ export default function HabitosPage() {
     if (data) setHabitos(prev => [...prev, data])
     setShowModal(false)
     setSelCat(null); setSelHabit(null); setSelImg(null)
-    setCustomInput(''); setSelFreq('Todos los días')
+    setCustomInput(''); setSelFreq('Todos los días'); setDiasPersonalizados([])
   }
 
   const completadosCount = completadosHoy.length
@@ -318,6 +325,20 @@ export default function HabitosPage() {
                     <button key={f} style={s.freqBtn(selFreq === f)} onClick={() => setSelFreq(f)}>{f}</button>
                   ))}
                 </div>
+                {selFreq === 'Personalizado' && (
+                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '12px' }}>
+                    {DIAS_SEMANA.map((dia, i) => {
+                      const num = i + 1
+                      const sel = diasPersonalizados.includes(num)
+                      return (
+                        <button key={dia} onClick={() => setDiasPersonalizados(prev => sel ? prev.filter(d => d !== num) : [...prev, num])}
+                          style={{ padding: '6px 10px', borderRadius: '8px', border: '1px solid', borderColor: sel ? '#C9A96E' : 'rgba(42,37,32,0.15)', background: sel ? '#FBF5EC' : '#fff', fontFamily: "'Inter Tight', sans-serif", fontSize: '11px', fontWeight: 700, color: sel ? '#C9A96E' : '#2A2520', cursor: 'pointer' }}>
+                          {dia}
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
                 <button style={s.confirmBtn} onClick={agregarHabito}>Agregar hábito</button>
               </>
             )}
