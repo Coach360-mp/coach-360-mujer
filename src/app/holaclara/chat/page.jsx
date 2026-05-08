@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
+import TabBar from '../components/TabBar'
 import { useRouter } from 'next/navigation'
 import { createBrowserClient } from '@supabase/ssr'
 
@@ -203,6 +204,7 @@ export default function Chat() {
           30% { transform: translateY(-6px) }
         }
       `}</style>
+      <TabBar />
     </div>
   )
 }
