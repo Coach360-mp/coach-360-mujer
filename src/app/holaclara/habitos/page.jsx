@@ -99,6 +99,11 @@ export default function HabitosPage() {
     } else {
       await supabase.from('habitos_completados').insert({ user_id: usuario.id, habito_id: habitoId, fecha: hoy })
       setCompletadosHoy(prev => [...prev, habitoId])
+      fetch('/api/holaclara/sumar-puntos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: usuario.id, tipo: 'habito' }),
+      }).catch(() => {})
     }
   }
 
