@@ -440,19 +440,23 @@ export default function RitualesPage() {
 
   const completarRitual = async (datos = {}) => {
     if (ritualActivo) ritualRef.current = ritualActivo
-    if (usuario && ritualActivo) {
-      await supabase.from('rituales_completados').insert({
-        user_id: usuario.id,
-        ritual_id: ritualActivo.id,
-        tipo: ritualActivo.tipo,
-        datos,
-        fecha: new Date().toISOString().split('T')[0],
-      }).catch(() => {})
-      fetch('/api/holaclara/sumar-puntos', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: usuario.id, tipo: 'ritual' }),
-      }).catch(() => {})
+    try {
+      if (usuario && ritualActivo) {
+        await supabase.from('rituales_completados').insert({
+          user_id: usuario.id,
+          ritual_id: ritualActivo.id,
+          tipo: ritualActivo.tipo,
+          datos,
+          fecha: new Date().toISOString().split('T')[0],
+        })
+        fetch('/api/holaclara/sumar-puntos', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: usuario.id, tipo: 'ritual' }),
+        }).catch(() => {})
+      }
+    } catch (e) {
+      console.error('Error guardando ritual:', e)
     }
     setDatosRitual(datos)
     setShowCierre(true)
