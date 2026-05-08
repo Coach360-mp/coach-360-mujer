@@ -1,4 +1,5 @@
 'use client'
+import TabBar from '../components/TabBar'
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createBrowserClient } from '@supabase/ssr'
@@ -465,6 +466,7 @@ export default function RitualesPage() {
           </div>
         </div>
       </div>
+      <TabBar />
     </>
   )
 }
