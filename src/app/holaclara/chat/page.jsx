@@ -22,6 +22,7 @@ const PRIMER_MENSAJE = {
 
 export default function Chat() {
   const router = useRouter()
+  const { mostrarTour, completarTour } = useTour()
   const [usuario, setUsuario] = useState(null)
   const [perfil, setPerfil] = useState(null)
   const [mensajes, setMensajes] = useState([])
