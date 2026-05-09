@@ -10,20 +10,14 @@ const supabase = createBrowserClient(
 )
 
 const PREGUNTAS = [
-  { id: 'P1', tipo: 'FIS', texto: 'Cuando despierto, mi cuerpo se siente cansado aunque haya dormido bien.' },
-  { id: 'P2', tipo: 'MEN', texto: 'Mi mente no para, ni siquiera cuando intento descansar.' },
-  { id: 'P3', tipo: 'EMO', texto: 'Termino el día sintiéndome emocionalmente vacía o sobrecargada.' },
-  { id: 'P4', tipo: 'SEN', texto: 'Las luces, los ruidos, las pantallas me sobreestimulan más de lo que reconozco.' },
-  { id: 'P5', tipo: 'SOC', texto: 'Después de estar con gente, necesito recuperarme aunque haya disfrutado.' },
-  { id: 'P6', tipo: 'CRE', texto: 'Hace tiempo que no hago algo solo por placer, sin un propósito útil.' },
-  { id: 'P7', tipo: 'ESP', texto: 'Siento que mi vida tiene movimiento pero no dirección clara.' },
-  { id: 'P8', tipo: 'FIS', texto: 'Mi cuerpo tiene tensiones acumuladas (cuello, mandíbula, espalda) que no se van.' },
-  { id: 'P9', tipo: 'MEN', texto: 'Tomo decisiones todo el día y al final no puedo decidir ni qué cenar.' },
-  { id: 'P10', tipo: 'EMO', texto: 'Me cuesta diferenciar mis emociones de las de las personas a mi alrededor.' },
-  { id: 'P11', tipo: 'SEN', texto: 'Cuando estoy sola en silencio, me siento mejor de lo que esperaba.' },
-  { id: 'P12', tipo: 'SOC', texto: 'Tengo relaciones que me drenan más de lo que me llenan.' },
-  { id: 'P13', tipo: 'CRE', texto: 'Resuelvo problemas todo el día pero rara vez creo algo desde mí.' },
-  { id: 'P14', tipo: 'ESP', texto: 'Hago muchas cosas pero ninguna me conecta con algo más grande que yo.' },
+  { id: 'P1', tipo: 'ANS', texto: 'Me preocupa que las personas que quiero se alejen de mí.' },
+  { id: 'P2', tipo: 'EVI', texto: 'Me cuesta pedir ayuda aunque la necesite.' },
+  { id: 'P3', tipo: 'SEG', texto: 'En los conflictos, busco resolución aunque sea incómoda.' },
+  { id: 'P4', tipo: 'ANS', texto: 'A veces siento que amo más de lo que me aman.' },
+  { id: 'P5', tipo: 'EVI', texto: 'Prefiero no depender emocionalmente de nadie.' },
+  { id: 'P6', tipo: 'SEG', texto: 'Puedo expresar lo que necesito sin sentir que es demasiado.' },
+  { id: 'P7', tipo: 'ANS', texto: 'Los silencios o la distancia de alguien me generan ansiedad.' },
+  { id: 'P8', tipo: 'EVI', texto: 'Las relaciones íntimas me generan incomodidad aunque las desee.' },
 ]
 
 const OPCIONES = [
@@ -35,96 +29,91 @@ const OPCIONES = [
 ]
 
 const PERFILES = {
-  FIS: {
-    slug: 'descanso-fisico',
-    titulo: 'Tu cuerpo lleva tiempo pidiendo descansar de verdad',
-    tipo: 'Descanso Físico',
-    color: '#F5EFE6',
-    acento: '#C9A96E',
-    frase: 'Mi descanso pendiente es físico. No es flojera, es información.',
-    interpretacion: 'Tu cuerpo está agotado a un nivel que el sueño solo no resuelve. Llevas semanas o meses funcionando con la batería en rojo, y has aprendido a operar así.\n\nEl descanso físico tiene dos formas. Pasivo: dormir, recostarte, soltar el cuerpo. Activo: estiramientos, yoga restaurativa, masaje, caminar lento sin destino.\n\nProbablemente has intentado dormir más y no fue suficiente. Eso es porque tu cuerpo necesita también el descanso activo: liberar tensiones acumuladas, mover lo que está estancado.\n\nEsta semana, te invito a una cosa concreta: 20 minutos al día solo para tu cuerpo. No para entrenar. Para escucharlo.',
-    invitacion: '¿Cuándo fue la última vez que hiciste algo solo para tu cuerpo, sin que sirviera para nada más?',
-  },
-  MEN: {
-    slug: 'descanso-mental',
-    titulo: 'Tu mente no se apaga. Y eso te está costando.',
-    tipo: 'Descanso Mental',
-    color: '#EEEDFE',
-    acento: '#534AB7',
-    frase: 'Mi descanso pendiente es mental. Mi cabeza piensa más rápido de lo que vivo.',
-    interpretacion: 'Tu mente está en modo análisis 24/7. Resuelves problemas mientras te bañas, planificas mientras manejas, repasas conversaciones cuando intentas dormir.\n\nEsto se llama fatiga cognitiva, y es invisible hasta que se vuelve insoportable. La gente cree que descansa la mente con Netflix o redes sociales, pero esos son estimulantes, no descansos.\n\nEl descanso mental real es: silencio, naturaleza, hacer algo manual sin pensar mucho, escribir lo que tienes en la cabeza para sacarlo.\n\nEsta semana, te invito a hacer 3 micro-pausas de 2 minutos al día sin pantalla. Solo eso.',
-    invitacion: '¿Cuándo fue la última vez que tu mente estuvo realmente en silencio?',
-  },
-  EMO: {
-    slug: 'descanso-emocional',
-    titulo: 'Llevas demasiado tiempo procesando emociones que no son tuyas.',
-    tipo: 'Descanso Emocional',
+  ansioso: {
+    nombre: 'Apego Ansioso',
+    frase: 'Amas con intensidad. Y el miedo a perder a veces dirige más que el amor en sí.',
     color: '#FAECE7',
     acento: '#993C1D',
-    frase: 'Mi descanso pendiente es emocional. Cuido tanto a otros que olvido cuidarme yo.',
-    interpretacion: 'Eres alguien que siente mucho, escucha mucho, contiene mucho. A los demás y a ti misma. Y eso pesa.\n\nEl descanso emocional es la capacidad de no estar disponible para las emociones de los demás. De decir "ahora no puedo con esto" sin culpa.\n\nProbablemente cargas conversaciones que no son tuyas, problemas de gente que no son tu responsabilidad. Tu sistema emocional está saturado.\n\nEsta semana, te invito a algo difícil pero clave: identificar UNA relación que estás cargando que no es tuya, y poner un límite suave.',
-    invitacion: '¿Qué emociones llevas hoy que no son tuyas?',
+    revelacion: 'La ansiedad de apego no significa que amas mal. Significa que aprendiste a amar en condiciones donde la presencia de los demás no era predecible. Tu sistema nervioso aprendió a estar alerta. Eso se puede cambiar.',
+    partida: 'Tu punto de partida es notar cuándo el miedo a perder empieza a conducir tus decisiones en las relaciones. No para ignorarlo — para elegir diferente.',
+    ejes: [
+      { titulo: 'Regular la ansiedad relacional', desc: 'Aprender a calmarte cuando el miedo a la pérdida se activa' },
+      { titulo: 'Comunicar necesidades sin urgencia', desc: 'Pedir lo que necesitas sin que parezca una emergencia' },
+      { titulo: 'Desarrollar base segura interna', desc: 'Que tu estabilidad no dependa completamente de la presencia de otros' },
+    ],
+    dias: [
+      'Identificar un momento donde el miedo a perder dirigió tu comportamiento',
+      'Una conversación donde pides algo que necesitas sin urgencia',
+      'Una práctica de regulación cuando sientes que alguien se aleja',
+    ],
+    clara: '¿Qué necesitarías sentir en una relación para no tener miedo de perderla?',
+    fortaleza: 'Alta capacidad de amor y conexión',
+    debilidad: 'Ansiedad cuando hay distancia o silencio',
   },
-  SEN: {
-    slug: 'descanso-sensorial',
-    titulo: 'El mundo te grita sin que lo notes.',
-    tipo: 'Descanso Sensorial',
-    color: '#EAF5EE',
-    acento: '#1D9E75',
-    frase: 'Mi descanso pendiente es sensorial. El silencio me hace bien y no lo sabía.',
-    interpretacion: 'Vives sobreestimulada y ya ni te das cuenta. Pantallas, notificaciones, luces, ruido de fondo. Tu sistema nervioso recibe miles de inputs al día y casi nunca tiene silencio real.\n\nDescanso sensorial es: cerrar los ojos sin pantalla, estar en un lugar silencioso, bajar la luz al final del día, alejarse del celular por horas.\n\nEsta semana, te invito a una cosa concreta: 30 minutos al día sin estímulos digitales. Puede ser cocinando en silencio, caminando sin auriculares, o sentada mirando por la ventana.',
-    invitacion: '¿Cuándo fue la última vez que estuviste en silencio real — sin pantallas, sin música, sin ruido?',
-  },
-  SOC: {
-    slug: 'descanso-social',
-    titulo: 'No todas las personas en tu vida te están sumando.',
-    tipo: 'Descanso Social',
-    color: '#F5EFE6',
-    acento: '#C9A96E',
-    frase: 'Mi descanso pendiente es social. Hay personas que me cansan y necesito nombrarlo.',
-    interpretacion: 'Tu energía social está agotada porque cargas relaciones que no te llenan. Probablemente tienes vínculos con personas que demandan más de lo que dan.\n\nEl descanso social tiene dos caras: pasar más tiempo sola para recuperarte, y rodearte de personas que te energizan en lugar de drenarte.\n\nNo es egoísmo identificar quién te da y quién te quita. Es supervivencia emocional.\n\nEsta semana, te invito a hacer una lista mental: ¿con quién te sientes más viva después de verla? ¿Con quién te sientes más vacía?',
-    invitacion: '¿Hay alguien en tu vida con quien salgas y termines más cansada de lo que llegaste?',
-  },
-  CRE: {
-    slug: 'descanso-creativo',
-    titulo: 'Resuelves problemas todo el día pero no creas nada desde ti.',
-    tipo: 'Descanso Creativo',
+  evitativo: {
+    nombre: 'Apego Evitativo',
+    frase: 'Valoras tu independencia. Y también te cuesta recibir lo que más quieres.',
     color: '#EEEDFE',
     acento: '#534AB7',
-    frase: 'Mi descanso pendiente es creativo. Hace tiempo que no hago algo solo por placer.',
-    interpretacion: 'Tu cabeza está ocupada todo el día resolviendo. Tareas, problemas, decisiones. Pero ¿cuándo fue la última vez que hiciste algo creativo solo por gusto, sin que sirviera para nada?\n\nEl descanso creativo no es hacer manualidades obligadas. Es contacto con belleza, con asombro, con producción que no tiene propósito útil.\n\nEsta semana, te invito a hacer UNA cosa creativa sin propósito útil. 15 minutos. Lo que sea.',
-    invitacion: '¿Qué hacías de niña solo porque te gustaba, sin que nadie te lo pidiera?',
+    revelacion: 'El apego evitativo no es falta de amor — es un mecanismo aprendido para protegerte de la decepción. El problema es que también te protege de la intimidad que deseas. La independencia se volvió un escudo.',
+    partida: 'Tu punto de partida es reconocer cuándo la incomodidad con la intimidad es protección aprendida — no una preferencia real. Hay una diferencia entre elegir la independencia y huir de la dependencia.',
+    ejes: [
+      { titulo: 'Tolerar la intimidad', desc: 'Aprender a estar cerca sin que se sienta una amenaza' },
+      { titulo: 'Pedir y recibir', desc: 'Desarrollar la capacidad de recibir cuidado sin desactivarte' },
+      { titulo: 'Vulnerabilidad selectiva', desc: 'Elegir con quién y cuándo abrirte — en vez de nunca' },
+    ],
+    dias: [
+      'Identificar un momento donde la distancia fue protección, no elección',
+      'Pedir algo pequeño a alguien de confianza y dejar que te lo den',
+      'Una conversación con Clara sobre qué te da miedo de depender de alguien',
+    ],
+    clara: '¿Cuándo fue la última vez que dejaste que alguien te cuidara de verdad — sin salir corriendo?',
+    fortaleza: 'Autonomía y autosuficiencia',
+    debilidad: 'Dificultad para recibir e intimar',
   },
-  ESP: {
-    slug: 'descanso-espiritual',
-    titulo: 'Tu vida tiene movimiento, pero te falta dirección.',
-    tipo: 'Descanso Espiritual',
-    color: '#F5EFE6',
-    acento: '#C9A96E',
-    frase: 'Mi descanso pendiente es espiritual. Hago mucho y conecto con poco.',
-    interpretacion: 'Estás cansada de un cansancio que nadie nombra: el de no saber para qué haces lo que haces. Tu vida funciona, hay logros, hay actividad, pero falta sentido.\n\nEl descanso espiritual no es religión. Es conectarte con algo más grande que tú: la naturaleza, una causa, tu propósito.\n\nNo es depresión. Es el llamado a profundizar.\n\nEsta semana, te invito a quedarte con UNA pregunta: ¿qué quiero que importe en mi vida los próximos 5 años?',
-    invitacion: '¿Hay algo que haces en tu vida que se siente significativo de verdad — no solo importante?',
+  seguro: {
+    nombre: 'Apego Seguro',
+    frase: 'Puedes amar sin perderte. Pedir sin miedo. Alejarte sin huir.',
+    color: '#EAF5EE',
+    acento: '#1D9E75',
+    revelacion: 'El apego seguro no es suerte — es el resultado de experiencias relacionales que te enseñaron que la intimidad es segura. Eso te da una base muy sólida para todas tus relaciones. Y también una responsabilidad.',
+    partida: 'Tu punto de partida es profundizar. ¿Hay relaciones específicas donde el apego seguro cuesta más? ¿Hay momentos donde aparece la ansiedad o el alejamiento? Esos son los bordes del trabajo.',
+    ejes: [
+      { titulo: 'Profundizar la intimidad', desc: 'Llevar la seguridad a los lugares donde todavía te proteges' },
+      { titulo: 'Ser base segura para otros', desc: 'Tu estilo de apego impacta las relaciones de quienes te rodean' },
+      { titulo: 'Sostener en los momentos difíciles', desc: 'Mantener el apego seguro cuando hay conflicto o crisis' },
+    ],
+    dias: [
+      'Identificar una relación donde el apego seguro te cuesta más',
+      'Una conversación honesta sobre lo que necesitas en esa relación',
+      'Una reflexión con Clara sobre qué construyó tu base segura',
+    ],
+    clara: '¿Qué te enseñaron tus relaciones más seguras sobre cómo mereces ser amada?',
+    fortaleza: 'Intimidad sin pérdida de identidad',
+    debilidad: 'Posibles zonas de apego inseguro no identificadas',
   },
 }
 
-const PRIORIDAD = ['MEN', 'EMO', 'ESP', 'FIS', 'SEN', 'SOC', 'CRE']
-
-function calcularResultado(respuestas) {
-  const scores = { FIS: 0, MEN: 0, EMO: 0, SEN: 0, SOC: 0, CRE: 0, ESP: 0 }
-  PREGUNTAS.forEach(p => { scores[p.tipo] += respuestas[p.id] || 0 })
-  const ordenado = Object.entries(scores).sort((a, b) => b[1] - a[1] || PRIORIDAD.indexOf(a[0]) - PRIORIDAD.indexOf(b[0]))
-  const top3 = ordenado.slice(0, 3).map(([tipo]) => tipo)
-  const fortaleza = ordenado[ordenado.length - 1][0]
-  return { scores, top3, fortaleza, principal: top3[0] }
+function calcularPerfil(respuestas) {
+  let ans = 0, evi = 0, seg = 0
+  PREGUNTAS.forEach((p, i) => {
+    const val = respuestas[i] || 3
+    if (p.tipo === 'ANS') ans += val
+    if (p.tipo === 'EVI') evi += val
+    if (p.tipo === 'SEG') seg += val
+  })
+  if (seg >= ans && seg >= evi) return PERFILES.seguro
+  if (ans >= evi) return PERFILES.ansioso
+  return PERFILES.evitativo
 }
 
-export default function TestDescansoPage() {
+export default function TestApego() {
   const router = useRouter()
   const [usuario, setUsuario] = useState(null)
-  const [fase, setFase] = useState('intro') // intro | test | calculando | resultado
-  const [preguntaIdx, setPreguntaIdx] = useState(0)
-  const [respuestas, setRespuestas] = useState({})
-  const [resultado, setResultado] = useState(null)
+  const [fase, setFase] = useState('intro')
+  const [idx, setIdx] = useState(0)
+  const [respuestas, setRespuestas] = useState([])
+  const [perfil, setPerfil] = useState(null)
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -133,25 +122,22 @@ export default function TestDescansoPage() {
     })
   }, [])
 
-  const responder = (valor) => {
-    const pregunta = PREGUNTAS[preguntaIdx]
-    const nuevasRespuestas = { ...respuestas, [pregunta.id]: valor }
-    setRespuestas(nuevasRespuestas)
-    if (preguntaIdx < PREGUNTAS.length - 1) {
-      setPreguntaIdx(i => i + 1)
+  const responder = async (valor) => {
+    const nuevas = [...respuestas, valor]
+    setRespuestas(nuevas)
+    if (idx < PREGUNTAS.length - 1) {
+      setIdx(i => i + 1)
     } else {
       setFase('calculando')
       setTimeout(async () => {
-        const res = calcularResultado(nuevasRespuestas)
-        setResultado(res)
+        const p = calcularPerfil(nuevas)
+        setPerfil(p)
         if (usuario) {
           try {
             await supabase.from('tests_resultados_usuaria').upsert({
-              user_id: usuario.id,
-              test_slug: 'tipo-de-descanso',
-              respuestas: nuevasRespuestas,
-              resultado_slug: res.principal,
-              scores: res.scores,
+              user_id: usuario.id, test_slug: 'apego',
+              respuestas: nuevas, resultado_slug: p.nombre,
+              scores: { ans, evi, seg: 0 },
             })
             await supabase.rpc('sumar_puntos', { p_user_id: usuario.id, p_puntos: 20, p_tipo: 'test' })
           } catch(e) { console.error(e) }
@@ -166,67 +152,53 @@ export default function TestDescansoPage() {
     container: { maxWidth: '420px', margin: '0 auto', padding: '24px 20px 80px' },
   }
 
-  // INTRO
   if (fase === 'intro') return (
     <>
       <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;1,400;1,600&family=Inter+Tight:wght@400;700&family=Caveat:wght@500&display=swap" rel="stylesheet" />
       <div style={s.root}>
-        {/* IMAGEN HERO */}
         <div style={{ width: '100%', height: '240px', overflow: 'hidden', position: 'relative' }}>
-          <img src="/images/test_descanso_portada.png" alt="Test de descanso" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 40%' }} />
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(250,250,247,1) 0%, rgba(250,250,247,0.2) 60%, rgba(250,250,247,0) 100%)' }} />
+          <img src="/images/test_apego_portada.png" alt="Test apego" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 30%' }} />
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(250,250,247,1) 0%, rgba(250,250,247,0) 60%)' }} />
           <button onClick={() => router.back()} style={{ position: 'absolute', top: '16px', left: '16px', background: 'rgba(255,255,255,0.8)', border: 'none', borderRadius: '20px', padding: '6px 14px', fontSize: '12px', fontWeight: 700, color: '#2A2520', cursor: 'pointer', fontFamily: 'inherit' }}>← volver</button>
         </div>
         <div style={s.container}>
-          <div style={{ fontSize: '9px', letterSpacing: '2px', textTransform: 'uppercase', color: '#9A8F84', fontWeight: 700, marginBottom: '8px' }}>Test · 6 minutos · Gratis</div>
-          <div style={{ fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontSize: '30px', color: '#2A2520', marginBottom: '16px', lineHeight: 1.2 }}>¿Qué tipo de descanso necesitas?</div>
-          <div style={{ fontSize: '14px', color: '#6B6057', lineHeight: 1.7, marginBottom: '24px' }}>
-            Llevas tiempo cansada. Has dormido más, has tomado vacaciones, y aún así no descansas de verdad.
-            <br /><br />
-            Hay una razón. El descanso físico es solo uno de siete tipos posibles. Este test te muestra tus tres descansos pendientes y cuál es tu fortaleza.
+          <div style={{ fontSize: '9px', letterSpacing: '2px', textTransform: 'uppercase', color: '#9A8F84', fontWeight: 700, marginBottom: '8px' }}>Test · 6 min · Esencial</div>
+          <div style={{ fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontSize: '28px', color: '#2A2520', marginBottom: '16px', lineHeight: 1.2 }}>¿Cómo amas y cómo necesitas ser amada?</div>
+          <div style={{ fontSize: '14px', color: '#6B6057', lineHeight: 1.7, marginBottom: '20px' }}>Tu estilo de apego explica más de tus relaciones que cualquier otra cosa. Y la buena noticia es que se puede cambiar.</div>
+          <div style={{ background: '#F5EFE6', borderRadius: '12px', padding: '12px 14px', marginBottom: '32px', borderLeft: '3px solid #C9A96E' }}>
+            <div style={{ fontSize: '9px', letterSpacing: '1px', textTransform: 'uppercase', color: '#9A8F84', fontWeight: 700, marginBottom: '4px' }}>Metodología</div>
+            <div style={{ fontSize: '13px', color: '#2A2520', lineHeight: 1.5 }}>Basado en la teoría del apego de Bowlby y Ainsworth, actualizada por investigación contemporánea sobre vínculos adultos.</div>
           </div>
-          <div style={{ background: '#F5EFE6', borderRadius: '14px', padding: '14px 16px', marginBottom: '32px', borderLeft: '3px solid #C9A96E' }}>
-            <div style={{ fontSize: '12px', color: '#9A8F84', fontWeight: 700, marginBottom: '4px', letterSpacing: '1px', textTransform: 'uppercase' }}>Metodología</div>
-            <div style={{ fontSize: '13px', color: '#2A2520', lineHeight: 1.5 }}>Basado en el trabajo de Saundra Dalton-Smith sobre los 7 tipos de descanso — con más de 30M de visualizaciones en TED.</div>
-          </div>
-          <button onClick={() => setFase('test')} style={{ width: '100%', padding: '14px', borderRadius: '12px', background: '#2A2520', color: '#FAFAF7', fontFamily: "'Inter Tight', sans-serif", fontSize: '14px', fontWeight: 700, border: 'none', cursor: 'pointer', marginBottom: '10px' }}>
-            Empezar el test →
-          </button>
-          <button onClick={() => router.back()} style={{ width: '100%', padding: '12px', borderRadius: '12px', background: 'transparent', color: '#9A8F84', fontFamily: "'Inter Tight', sans-serif", fontSize: '13px', border: '0.5px solid rgba(42,37,32,0.15)', cursor: 'pointer' }}>
-            Volver
-          </button>
+          <button onClick={() => setFase('test')} style={{ width: '100%', padding: '14px', borderRadius: '12px', background: '#2A2520', color: '#FAFAF7', fontFamily: "'Inter Tight', sans-serif", fontSize: '14px', fontWeight: 700, border: 'none', cursor: 'pointer', marginBottom: '10px' }}>Empezar el test →</button>
+          <button onClick={() => router.back()} style={{ width: '100%', padding: '12px', borderRadius: '12px', background: 'transparent', color: '#9A8F84', fontFamily: "'Inter Tight', sans-serif", fontSize: '13px', border: '0.5px solid rgba(42,37,32,0.15)', cursor: 'pointer' }}>Volver</button>
         </div>
         <TabBar />
       </div>
     </>
   )
 
-  // TEST
   if (fase === 'test') {
-    const pregunta = PREGUNTAS[preguntaIdx]
-    const progreso = ((preguntaIdx) / PREGUNTAS.length) * 100
+    const pregunta = PREGUNTAS[idx]
+    const progreso = (idx / PREGUNTAS.length) * 100
     return (
       <>
-        <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;1,400;1,600&family=Inter+Tight:wght@400;700&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@1,400&family=Inter+Tight:wght@400;700&display=swap" rel="stylesheet" />
         <div style={s.root}>
           <div style={{ padding: '16px 20px 0', maxWidth: '420px', margin: '0 auto' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-              <span style={{ fontSize: '11px', color: '#9A8F84', fontWeight: 700 }}>{preguntaIdx + 1} de {PREGUNTAS.length}</span>
-              <span style={{ fontSize: '11px', color: '#9A8F84' }}>¿Qué tipo de descanso necesitas?</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
+              <span style={{ fontSize: '11px', color: '#9A8F84', fontWeight: 700 }}>{idx + 1} de {PREGUNTAS.length}</span>
+              <span style={{ fontSize: '11px', color: '#9A8F84' }}>Estilo de apego</span>
             </div>
             <div style={{ height: '3px', background: 'rgba(42,37,32,0.08)', borderRadius: '2px', overflow: 'hidden' }}>
               <div style={{ height: '100%', background: '#C9A96E', borderRadius: '2px', width: `${progreso}%`, transition: 'width 0.3s' }} />
             </div>
           </div>
           <div style={s.container}>
-            <div style={{ fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontSize: '22px', color: '#2A2520', marginBottom: '32px', lineHeight: 1.4, marginTop: '24px' }}>
-              {pregunta.texto}
-            </div>
+            <div style={{ fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontSize: '22px', color: '#2A2520', marginBottom: '32px', marginTop: '24px', lineHeight: 1.4 }}>{pregunta.texto}</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {OPCIONES.map(op => (
                 <button key={op.valor} onClick={() => responder(op.valor)} style={{ padding: '16px', borderRadius: '12px', border: '1px solid rgba(42,37,32,0.12)', background: '#fff', fontFamily: "'Inter Tight', sans-serif", fontSize: '14px', fontWeight: 600, color: '#2A2520', cursor: 'pointer', textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  {op.label}
-                  <span style={{ fontSize: '12px', color: '#C9A96E', fontWeight: 700 }}>{op.valor}</span>
+                  {op.label}<span style={{ fontSize: '12px', color: '#C9A96E', fontWeight: 700 }}>{op.valor}</span>
                 </button>
               ))}
             </div>
@@ -236,10 +208,9 @@ export default function TestDescansoPage() {
     )
   }
 
-  // CALCULANDO
   if (fase === 'calculando') return (
     <>
-      <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@1,400&family=Inter+Tight:wght@400;700&family=Caveat:wght@500&display=swap" rel="stylesheet" />
+      <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@1,400&family=Caveat:wght@500&display=swap" rel="stylesheet" />
       <div style={{ minHeight: '100vh', background: '#FAFAF7', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 20px' }}>
         <div style={{ width: '56px', height: '56px', borderRadius: '50%', border: '2px solid #EDE8DF', borderTopColor: '#C9A96E', animation: 'spin 1s linear infinite', marginBottom: '24px' }} />
         <div style={{ fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontSize: '20px', color: '#2A2520', marginBottom: '8px' }}>Clara está leyendo tus respuestas...</div>
@@ -249,67 +220,68 @@ export default function TestDescansoPage() {
     </>
   )
 
-  // RESULTADO
-  if (fase === 'resultado' && resultado) {
-    const perfilPrincipal = PERFILES[resultado.principal]
-    const top3Perfiles = resultado.top3.map(t => PERFILES[t])
-    const fortaleza = PERFILES[resultado.fortaleza]
-
-    return (
-      <>
-        <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;1,400;1,600&family=Inter+Tight:wght@400;700&family=Caveat:wght@500&display=swap" rel="stylesheet" />
-        <div style={s.root}>
-          <div style={s.container}>
-            <div style={{ fontSize: '9px', letterSpacing: '2px', textTransform: 'uppercase', color: '#9A8F84', fontWeight: 700, marginBottom: '8px' }}>Tu resultado</div>
-            <div style={{ fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontSize: '28px', color: '#2A2520', marginBottom: '20px', lineHeight: 1.2 }}>{perfilPrincipal.titulo}</div>
-
-            {/* TOP 3 DESCANSOS */}
-            <div style={{ marginBottom: '20px' }}>
-              <div style={{ fontSize: '10px', letterSpacing: '1.5px', textTransform: 'uppercase', color: '#9A8F84', fontWeight: 700, marginBottom: '10px' }}>Tus 3 descansos pendientes</div>
-              {top3Perfiles.map((p, i) => (
-                <div key={i} style={{ display: 'flex', gap: '10px', alignItems: 'center', padding: '12px 14px', background: i === 0 ? p.color : '#fff', borderRadius: '12px', marginBottom: '8px', border: i === 0 ? `2px solid ${p.acento}` : '0.5px solid rgba(42,37,32,0.1)' }}>
-                  <div style={{ fontSize: '13px', color: p.acento, fontWeight: 700, minWidth: '20px' }}>{i + 1}</div>
-                  <div style={{ fontSize: '14px', fontWeight: i === 0 ? 700 : 500, color: '#2A2520' }}>{p.tipo}</div>
-                  {i === 0 && <div style={{ marginLeft: 'auto', fontSize: '11px', color: p.acento, fontWeight: 700 }}>Principal</div>}
-                </div>
-              ))}
-            </div>
-
-            {/* FORTALEZA */}
-            <div style={{ background: '#2A2520', borderRadius: '14px', padding: '14px 16px', marginBottom: '20px' }}>
-              <div style={{ fontSize: '10px', letterSpacing: '1.5px', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', fontWeight: 700, marginBottom: '4px' }}>Tu fortaleza</div>
-              <div style={{ fontSize: '15px', color: '#C9A96E', fontWeight: 700 }}>{fortaleza.tipo}</div>
-            </div>
-
-            {/* INTERPRETACIÓN */}
-            <div style={{ background: perfilPrincipal.color, borderRadius: '16px', padding: '20px', marginBottom: '20px', borderLeft: `3px solid ${perfilPrincipal.acento}` }}>
-              <div style={{ fontSize: '10px', letterSpacing: '1.5px', textTransform: 'uppercase', color: perfilPrincipal.acento, fontWeight: 700, marginBottom: '10px' }}>Qué significa</div>
-              {perfilPrincipal.interpretacion.split('\n\n').map((p, i) => (
-                <div key={i} style={{ fontSize: '14px', color: '#2A2520', lineHeight: 1.7, marginBottom: i < 2 ? '12px' : 0 }}>{p}</div>
-              ))}
-            </div>
-
-            {/* PREGUNTA CLARA */}
-            <div style={{ background: '#fff', borderRadius: '14px', padding: '16px', marginBottom: '24px', border: '0.5px solid rgba(42,37,32,0.1)' }}>
-              <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
-                <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#C9A96E', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontSize: '12px', color: '#fff' }}>c</div>
-                <div style={{ fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontSize: '15px', color: '#2A2520', lineHeight: 1.6 }}>{perfilPrincipal.invitacion}</div>
-              </div>
-            </div>
-
-            {/* CTAs */}
-            <button onClick={() => router.push(`/holaclara/chat?msg=${encodeURIComponent(`Clara, acabo de hacer el test de descanso. Mi resultado principal es ${perfilPrincipal.tipo}. ${perfilPrincipal.invitacion}`)}`)} style={{ width: '100%', padding: '14px', borderRadius: '12px', background: '#2A2520', color: '#FAFAF7', fontFamily: "'Inter Tight', sans-serif", fontSize: '14px', fontWeight: 700, border: 'none', cursor: 'pointer', marginBottom: '10px' }}>
-              Hablar con Clara sobre esto →
-            </button>
-            <button onClick={() => router.push('/holaclara/conocerme')} style={{ width: '100%', padding: '12px', borderRadius: '12px', background: 'transparent', color: '#9A8F84', fontFamily: "'Inter Tight', sans-serif", fontSize: '13px', border: '0.5px solid rgba(42,37,32,0.15)', cursor: 'pointer' }}>
-              Volver a Conocerme
-            </button>
+  if (fase === 'resultado' && perfil) return (
+    <>
+      <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;1,400;1,600&family=Inter+Tight:wght@400;700&family=Caveat:wght@500&display=swap" rel="stylesheet" />
+      <div style={s.root}>
+        <div style={s.container}>
+          <div style={{ background: perfil.color, borderRadius: '20px', padding: '24px', marginBottom: '16px', borderLeft: `4px solid ${perfil.acento}` }}>
+            <div style={{ fontSize: '9px', letterSpacing: '2px', textTransform: 'uppercase', color: perfil.acento, fontWeight: 700, marginBottom: '8px' }}>Tu perfil</div>
+            <div style={{ fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontSize: '26px', color: '#2A2520', marginBottom: '10px', lineHeight: 1.2 }}>{perfil.nombre}</div>
+            <div style={{ fontSize: '15px', color: '#2A2520', lineHeight: 1.7 }}>{perfil.frase}</div>
           </div>
-          <TabBar />
+          <div style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
+            <div style={{ flex: 1, background: '#EAF5EE', borderRadius: '14px', padding: '14px' }}>
+              <div style={{ fontSize: '9px', letterSpacing: '1px', textTransform: 'uppercase', color: '#1D9E75', fontWeight: 700, marginBottom: '6px' }}>Fortaleza</div>
+              <div style={{ fontSize: '13px', color: '#2A2520', lineHeight: 1.4 }}>{perfil.fortaleza}</div>
+            </div>
+            <div style={{ flex: 1, background: '#FAECE7', borderRadius: '14px', padding: '14px' }}>
+              <div style={{ fontSize: '9px', letterSpacing: '1px', textTransform: 'uppercase', color: '#993C1D', fontWeight: 700, marginBottom: '6px' }}>A trabajar</div>
+              <div style={{ fontSize: '13px', color: '#2A2520', lineHeight: 1.4 }}>{perfil.debilidad}</div>
+            </div>
+          </div>
+          <div style={{ background: '#2A2520', borderRadius: '16px', padding: '20px', marginBottom: '16px' }}>
+            <div style={{ fontSize: '9px', letterSpacing: '2px', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', fontWeight: 700, marginBottom: '10px' }}>Lo que esto revela</div>
+            <div style={{ fontSize: '14px', color: 'rgba(255,255,255,0.8)', lineHeight: 1.7 }}>{perfil.revelacion}</div>
+          </div>
+          <div style={{ marginBottom: '16px' }}>
+            <div style={{ fontSize: '9px', letterSpacing: '2px', textTransform: 'uppercase', color: '#9A8F84', fontWeight: 700, marginBottom: '12px' }}>Lo que puedes desarrollar</div>
+            {perfil.ejes.map((eje, i) => (
+              <div key={i} style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', marginBottom: '10px' }}>
+                <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: perfil.acento, flexShrink: 0, marginTop: '6px' }} />
+                <div>
+                  <div style={{ fontSize: '13px', fontWeight: 700, color: '#2A2520', marginBottom: '2px' }}>{eje.titulo}</div>
+                  <div style={{ fontSize: '12px', color: '#6B6057', lineHeight: 1.5 }}>{eje.desc}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div style={{ background: '#fff', borderRadius: '16px', padding: '20px', marginBottom: '16px', border: '0.5px solid rgba(42,37,32,0.08)' }}>
+            <div style={{ fontSize: '9px', letterSpacing: '2px', textTransform: 'uppercase', color: '#9A8F84', fontWeight: 700, marginBottom: '12px' }}>En 7 días puedes tener</div>
+            {perfil.dias.map((dia, i) => (
+              <div key={i} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', marginBottom: i < perfil.dias.length - 1 ? '10px' : 0 }}>
+                <div style={{ fontSize: '12px', color: perfil.acento, fontWeight: 700, flexShrink: 0 }}>✓</div>
+                <div style={{ fontSize: '13px', color: '#2A2520', lineHeight: 1.5 }}>{dia}</div>
+              </div>
+            ))}
+          </div>
+          <div style={{ background: '#fff', borderRadius: '14px', padding: '16px', marginBottom: '24px', border: '0.5px solid rgba(42,37,32,0.08)' }}>
+            <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+              <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#C9A96E', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontSize: '12px', color: '#fff' }}>c</div>
+              <div style={{ fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontSize: '15px', color: '#2A2520', lineHeight: 1.6 }}>{perfil.clara}</div>
+            </div>
+          </div>
+          <button onClick={() => router.push(`/holaclara/chat?msg=${encodeURIComponent(`Clara, hice el test de estilo de apego. Mi resultado fue "${perfil.nombre}". ${perfil.clara}`)}`)} style={{ width: '100%', padding: '14px', borderRadius: '12px', background: '#2A2520', color: '#FAFAF7', fontFamily: "'Inter Tight', sans-serif", fontSize: '14px', fontWeight: 700, border: 'none', cursor: 'pointer', marginBottom: '10px' }}>
+            Hablar con Clara sobre esto →
+          </button>
+          <button onClick={() => router.push('/holaclara/tests')} style={{ width: '100%', padding: '12px', borderRadius: '12px', background: 'transparent', color: '#9A8F84', fontFamily: "'Inter Tight', sans-serif", fontSize: '13px', border: '0.5px solid rgba(42,37,32,0.15)', cursor: 'pointer' }}>
+            Ver otros tests
+          </button>
         </div>
-      </>
-    )
-  }
+        <TabBar />
+      </div>
+    </>
+  )
 
   return null
 }
