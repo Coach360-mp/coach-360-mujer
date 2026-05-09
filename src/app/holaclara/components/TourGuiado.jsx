@@ -187,8 +187,8 @@ export default function TourGuiado({ onComplete }) {
             Empezar con Clara →
           </button>
         ) : paso.tipo === 'instruccion' ? (
-          <div style={{ display: 'flex', gap: '8px', alignItems: 'center', padding: '10px 14px', background: '#F5EFE6', borderRadius: '10px', border: '1px solid #C9A96E' }}>
-            <div style={{ fontSize: '16px' }}>👆</div>
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center', padding: '10px 14px', background: '#F5EFE6', borderRadius: '10px', border: '1px solid #C9A96E' }}>
+            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#C9A96E', flexShrink: 0 }} />
             <div style={{ fontSize: '13px', color: '#2A2520', fontWeight: 600 }}>{paso.accion}</div>
           </div>
         ) : (

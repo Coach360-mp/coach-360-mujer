@@ -140,7 +140,7 @@ export default function OnboardingPage() {
           {/* PASO 1 — BIENVENIDA */}
           {paso === 1 && (
             <div>
-              <div style={{ fontFamily: "'Caveat', cursive", fontSize: '18px', color: '#C9A96E', marginBottom: '16px' }}>Hola, {nombrePerfil} 👋</div>
+              <div style={{ fontFamily: "'Caveat', cursive", fontSize: '18px', color: '#C9A96E', marginBottom: '16px' }}>Hola, {nombrePerfil}.</div>
               <div style={s.title}>Estás en el lugar correcto.</div>
               <div style={s.sub}>
                 Soy Clara. Voy a acompañarte a conocerte mejor, crecer en tus términos y volver a ti misma.

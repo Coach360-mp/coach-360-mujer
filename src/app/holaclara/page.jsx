@@ -85,13 +85,13 @@ export default function LandingHolaClara() {
           <div style={{ background: '#2A2520', borderRadius: '20px', padding: '24px', marginBottom: '48px' }}>
             <div style={{ fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', fontWeight: 700, marginBottom: '16px' }}>Por qué Clara es distinta</div>
             {[
-              { icono: '🌙', texto: 'Memoria hormonal — Clara conoce tu ciclo y adapta el acompañamiento' },
-              { icono: '💭', texto: 'Clara recuerda — cada conversación construye sobre la anterior' },
-              { icono: '🇨🇱', texto: 'En español, hecho para mujeres LATAM' },
-              { icono: '⚡', texto: 'Sin agendar, sin culpa, en tu bolsillo' },
+              { texto: 'Memoria hormonal — Clara conoce tu ciclo y adapta el acompañamiento' },
+              { texto: 'Clara recuerda — cada conversación construye sobre la anterior' },
+              { texto: 'En español, hecho para mujeres LATAM' },
+              { texto: 'Sin agendar, sin culpa, en tu bolsillo' },
             ].map((item, i) => (
               <div key={i} style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', marginBottom: i < 3 ? '12px' : 0 }}>
-                <div style={{ fontSize: '16px', flexShrink: 0 }}>{item.icono}</div>
+                <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#C9A96E', flexShrink: 0, marginTop: '6px' }} />
                 <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.7)', lineHeight: 1.5 }}>{item.texto}</div>
               </div>
             ))}
