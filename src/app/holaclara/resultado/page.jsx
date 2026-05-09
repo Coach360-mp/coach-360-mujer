@@ -2,53 +2,110 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
-const perfiles = {
+const PERFILES = {
   cumplidora_cansada: {
-    nombre: "La Cumplidora Cansada",
-    titulo: "Llevas mucho tiempo siendo la que resuelve.",
-    desc: "Tu energía se fue en cumplir — con el trabajo, con las expectativas, con la imagen de tenerlo todo bajo control. Por fuera todo funciona. Por dentro hay un agotamiento que no tiene razón de estar.",
-    clara: "Antes de hablar de productividad o de prioridades — ¿cuándo fue la última vez que paraste de verdad? No para descansar antes de volver. Para parar.",
-    tags: ["Trabajo y exigencia", "Límites", "Descanso sin culpa", "Presencia"]
+    nombre: 'Cumplidora Cansada',
+    frase: 'Eres de las que cumple. Y eso es una fortaleza — hasta que olvidas cumplir contigo.',
+    secreto: 'Hay una versión tuya que no corre, no carga, no resuelve todo. Que simplemente está. Y está más cerca de lo que crees.',
+    ejes: [
+      { titulo: 'Conocerte mejor', desc: 'Descubrir por qué cumplir se convirtió en tu forma de existir' },
+      { titulo: 'Crecer en tus términos', desc: 'Hábitos que no dependan de la voluntad — sino de lo que de verdad importa' },
+      { titulo: 'Volver a ti', desc: 'Aprender a estar sin estar haciendo algo' },
+    ],
+    dias: [
+      'Tu primera conversación honesta contigo misma',
+      'Tres hábitos que no te cuesten energía extra',
+      'Una pausa que no se sienta como perder el tiempo',
+    ],
+    clara: '¿Cuándo fue la última vez que paraste de verdad? No para descansar antes de volver. Para parar.',
+    color: '#F5EFE6',
+    acento: '#C9A96E',
   },
   cuida_a_todos: {
-    nombre: "La que Cuida a Todos",
-    titulo: "Sabes perfectamente lo que necesitan los demás.",
-    desc: "La pregunta es cuándo fue la última vez que alguien te preguntó qué necesitas tú — y lo dijiste de verdad. Tu energía ha estado en función de los vínculos.",
-    clara: "Antes de hablar de los demás — ¿qué quisiste tú esta semana? No lo que diste. Lo que quisiste.",
-    tags: ["Vínculos", "Límites relacionales", "Autocuidado", "Reciprocidad"]
+    nombre: 'La que Cuida a Todos',
+    frase: 'Das mucho. La pregunta es cuánto de lo que das también va hacia ti.',
+    secreto: 'No tienes que dejar de cuidar a los demás para cuidarte a ti. Puedes hacer las dos cosas — cuando sabes cómo.',
+    ejes: [
+      { titulo: 'Conocerte mejor', desc: 'Entender qué hay detrás de esa necesidad de que todos estén bien' },
+      { titulo: 'Crecer en tus términos', desc: 'Construir límites que no se sientan como abandono' },
+      { titulo: 'Volver a ti', desc: 'Reconectar con lo que tú quieres — más allá de lo que necesitan los demás' },
+    ],
+    dias: [
+      'Identificar una cosa que haces por los demás pero que en realidad es para ti',
+      'Una conversación donde digas lo que realmente necesitas',
+      'Un espacio en tu semana que sea solo tuyo',
+    ],
+    clara: '¿Qué quisiste tú esta semana? No lo que diste. Lo que quisiste.',
+    color: '#EAF5EE',
+    acento: '#1D9E75',
   },
   no_se_reconoce: {
-    nombre: "La que No se Reconoce",
-    titulo: "Algo en ti sabe que hay más.",
-    desc: "No estás rota ni perdida. Estás en el momento en que una mujer empieza a preguntarse quién es cuando nadie la está mirando.",
-    clara: "Esa sensación de extrañeza no es señal de que algo salió mal. Es señal de que algo quiere cambiar. ¿Cuándo empezaste a sentirla?",
-    tags: ["Identidad", "Autoconocimiento", "Propósito", "Presencia"]
+    nombre: 'La que No se Reconoce',
+    frase: 'Algo en ti sabe que hay más. No sabes exactamente qué — pero lo sientes.',
+    secreto: 'No estás perdida. Estás en el momento exacto en que algo en ti quiere cambiar. Ese momento tiene nombre: es el inicio.',
+    ejes: [
+      { titulo: 'Conocerte mejor', desc: 'Descubrir quién eres cuando nadie te está mirando' },
+      { titulo: 'Crecer en tus términos', desc: 'Construir desde lo que tú valoras — no desde lo que se espera de ti' },
+      { titulo: 'Volver a ti', desc: 'Reconocer tu voz entre todo el ruido' },
+    ],
+    dias: [
+      'Una pregunta que lleva tiempo sin respuesta — y empezar a responderla',
+      'Claridad sobre una cosa que sí sabes de ti misma',
+      'Una decisión pequeña tomada desde lo que tú quieres',
+    ],
+    clara: '¿Cuándo empezaste a sentir que algo no encajaba? ¿Qué estaba pasando en ese momento?',
+    color: '#EEEDFE',
+    acento: '#534AB7',
   },
   escucha_el_cuerpo: {
-    nombre: "La que Escucha el Cuerpo",
-    titulo: "Tu cuerpo lleva un tiempo diciéndote algo.",
-    desc: "No es ansiedad, no es exageración, no es que debas acostumbrarte. Es información. Cansancio que no se va, tensión que vuelve — el cuerpo siempre sabe antes que la mente.",
-    clara: "El cuerpo no miente. Antes de buscar qué está mal, te propongo una pregunta distinta: ¿qué está intentando decirte?",
-    tags: ["Cuerpo", "Ciclo hormonal", "Energía", "Escucha interna"]
+    nombre: 'La que Escucha el Cuerpo',
+    frase: 'Tu cuerpo lleva un tiempo diciéndote algo. Y tú llevas un tiempo ignorándolo.',
+    secreto: 'Lo que sientes no es ansiedad ni exageración. Es información. Y cuando aprendes a leerla, todo cambia.',
+    ejes: [
+      { titulo: 'Conocerte mejor', desc: 'Aprender a leer lo que tu cuerpo dice antes de que grite' },
+      { titulo: 'Crecer en tus términos', desc: 'Hábitos que respeten tu ciclo y tu energía real' },
+      { titulo: 'Volver a ti', desc: 'Recuperar la confianza en lo que sientes' },
+    ],
+    dias: [
+      'Identificar una señal corporal que has estado ignorando',
+      'Una práctica de 5 minutos que cambia cómo llega tu cuerpo al día',
+      'Una conversación con Clara sobre lo que tu cuerpo intenta decirte',
+    ],
+    clara: 'El cuerpo no miente. ¿Qué crees que está intentando decirte el tuyo?',
+    color: '#FAECE7',
+    acento: '#993C1D',
   },
   la_que_busca: {
-    nombre: "La que Busca",
-    titulo: "Ya sabes que quieres más. Ahora toca definir qué.",
-    desc: "No estás buscando arreglarte. Estás buscando crecer. Ya hiciste el trabajo superficial. Lo que buscas ahora es pasar de la pregunta abierta a la claridad concreta.",
-    clara: "Estás en un lugar interesante — no hay urgencia, pero sí una pregunta que no para. Esa pregunta es la más valiosa que existe. ¿Cuál es la tuya?",
-    tags: ["Crecimiento", "Claridad", "Propósito", "Construcción"]
-  }
+    nombre: 'La que Busca',
+    frase: 'Ya sabes que quieres más. Ahora falta definir exactamente qué.',
+    secreto: 'No estás buscando arreglarte — estás buscando crecer. Y hay una diferencia enorme entre las dos cosas.',
+    ejes: [
+      { titulo: 'Conocerte mejor', desc: 'Claridad sobre qué es lo que de verdad estás buscando' },
+      { titulo: 'Crecer en tus términos', desc: 'Pasar de la pregunta abierta a la acción concreta' },
+      { titulo: 'Volver a ti', desc: 'Construir desde lo que ya eres — no desde lo que te falta' },
+    ],
+    dias: [
+      'Nombrar la pregunta que más te mueve ahora mismo',
+      'Una claridad que llevas tiempo buscando',
+      'Un primer paso concreto hacia lo que quieres construir',
+    ],
+    clara: 'Estás en un lugar interesante. No hay urgencia, pero sí una pregunta que no para. ¿Cuál es la tuya?',
+    color: '#F5EFE6',
+    acento: '#C9A96E',
+  },
 }
 
 export default function Resultado() {
   const router = useRouter()
   const [perfil, setPerfil] = useState(null)
+  const [perfilKey, setPerfilKey] = useState(null)
 
   useEffect(() => {
     const data = localStorage.getItem('hc_resultado_test')
     if (!data) { router.push('/holaclara/test'); return }
-    const { perfil } = JSON.parse(data)
-    setPerfil(perfiles[perfil] || perfiles['la_que_busca'])
+    const { perfil: key } = JSON.parse(data)
+    setPerfilKey(key)
+    setPerfil(PERFILES[key] || PERFILES['la_que_busca'])
   }, [])
 
   if (!perfil) return (
@@ -59,56 +116,74 @@ export default function Resultado() {
   )
 
   return (
-    <div style={{ minHeight: '100vh', background: '#FAFAF7', fontFamily: 'Jost, sans-serif' }}>
-      <nav style={{ padding: '14px 28px', borderBottom: '0.5px solid #F0EBE3' }}>
-        <div>
-          <div style={{ fontSize: '9px', color: '#9A8F84', letterSpacing: '0.05em' }}>Hola</div>
-          <div style={{ fontFamily: 'Georgia, serif', fontSize: '18px', color: '#2A2520', lineHeight: 1 }}>Clara</div>
-          <div style={{ height: '1px', background: '#C9A96E', margin: '2px 0' }} />
-          <div style={{ fontSize: '6px', letterSpacing: '0.1em', color: '#9A8F84', textTransform: 'uppercase' }}>Para la que quiere más y necesita parar.</div>
-        </div>
-      </nav>
+    <>
+      <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;1,300;1,400&family=Inter+Tight:wght@300;400;600;700&family=Caveat:wght@500&display=swap" rel="stylesheet" />
+      <div style={{ minHeight: '100vh', background: '#FAFAF7', fontFamily: "'Inter Tight', sans-serif", color: '#2A2520' }}>
+        <div style={{ maxWidth: '420px', margin: '0 auto', padding: '0 20px 60px' }}>
 
-      <div style={{ padding: '32px 28px' }}>
-        <div style={{ fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9A8F84', marginBottom: '10px' }}>
-          Tu perfil · Hola Clara
-        </div>
-        <h1 style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic', fontSize: '28px', fontWeight: 300, color: '#2A2520', lineHeight: 1.2, marginBottom: '12px' }}>
-          {perfil.nombre}
-        </h1>
-        <p style={{ fontSize: '13px', color: '#6B6057', fontWeight: 300, lineHeight: 1.65, marginBottom: '24px' }}>
-          {perfil.titulo} {perfil.desc}
-        </p>
+          {/* HEADER */}
+          <div style={{ padding: '24px 0 32px', textAlign: 'center' }}>
+            <div style={{ fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontSize: '20px', color: '#2A2520', lineHeight: 1 }}>Clara</div>
+            <div style={{ height: '1px', background: '#C9A96E', margin: '4px auto', width: '40px' }} />
+            <div style={{ fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', color: '#9A8F84', fontWeight: 700, marginTop: '6px' }}>Tu resultado</div>
+          </div>
 
-        <div style={{ background: '#F5EFE6', borderRadius: '12px', padding: '16px 18px', display: 'flex', gap: '12px', marginBottom: '24px' }}>
-          <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#C9A96E', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Georgia, serif', fontStyle: 'italic', fontSize: '14px', color: '#fff' }}>c</div>
-          <p style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic', fontSize: '14px', fontWeight: 300, color: '#2A2520', lineHeight: 1.6, margin: 0 }}>
-            "{perfil.clara}"
-          </p>
-        </div>
+          {/* PERFIL */}
+          <div style={{ background: perfil.color, borderRadius: '20px', padding: '24px', marginBottom: '20px', borderLeft: `4px solid ${perfil.acento}` }}>
+            <div style={{ fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', color: perfil.acento, fontWeight: 700, marginBottom: '8px' }}>Tu perfil</div>
+            <div style={{ fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontSize: '28px', color: '#2A2520', marginBottom: '12px', lineHeight: 1.2 }}>{perfil.nombre}</div>
+            <div style={{ fontSize: '15px', color: '#2A2520', lineHeight: 1.7, fontWeight: 400 }}>{perfil.frase}</div>
+          </div>
 
-        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '32px' }}>
-          {perfil.tags.map(t => (
-            <span key={t} style={{ fontSize: '11px', padding: '4px 12px', borderRadius: '20px', border: '0.5px solid #E8D8BC', background: '#fff', color: '#6B6057' }}>{t}</span>
-          ))}
-        </div>
+          {/* CLARA HABLA */}
+          <div style={{ background: '#fff', borderRadius: '16px', padding: '20px', marginBottom: '20px', border: '0.5px solid rgba(42,37,32,0.1)' }}>
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+              <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#C9A96E', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontSize: '14px', color: '#fff' }}>c</div>
+              <div style={{ fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontSize: '15px', color: '#2A2520', lineHeight: 1.7 }}>"{perfil.clara}"</div>
+            </div>
+          </div>
 
-        <button onClick={() => router.push('/holaclara/auth')} style={{
-          width: '100%', padding: '14px', borderRadius: '10px',
-          background: '#2A2520', color: '#FAFAF7', fontSize: '13px',
-          fontFamily: 'inherit', fontWeight: 500, border: 'none', cursor: 'pointer',
-          marginBottom: '8px'
-        }}>
-          Empezar con Clara →
-        </button>
-        <button style={{
-          width: '100%', padding: '12px', borderRadius: '10px',
-          background: 'transparent', color: '#9A8F84', fontSize: '12px',
-          fontFamily: 'inherit', border: '0.5px solid #E8E4DC', cursor: 'pointer'
-        }}>
-          Ya tengo cuenta — iniciar sesión
-        </button>
+          {/* EL SECRETO */}
+          <div style={{ background: '#2A2520', borderRadius: '16px', padding: '20px', marginBottom: '20px' }}>
+            <div style={{ fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', fontWeight: 700, marginBottom: '10px' }}>Lo que pocos saben</div>
+            <div style={{ fontSize: '15px', color: '#FAFAF7', lineHeight: 1.7 }}>{perfil.secreto}</div>
+          </div>
+
+          {/* TU CAMINO */}
+          <div style={{ marginBottom: '20px' }}>
+            <div style={{ fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', color: '#9A8F84', fontWeight: 700, marginBottom: '14px' }}>Tu camino con Clara</div>
+            {perfil.ejes.map((eje, i) => (
+              <div key={i} style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', marginBottom: '12px' }}>
+                <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: perfil.acento, flexShrink: 0, marginTop: '7px' }} />
+                <div>
+                  <div style={{ fontSize: '13px', fontWeight: 700, color: '#2A2520', marginBottom: '2px' }}>{eje.titulo}</div>
+                  <div style={{ fontSize: '12px', color: '#6B6057', lineHeight: 1.5 }}>{eje.desc}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* EN 7 DÍAS */}
+          <div style={{ background: '#fff', borderRadius: '16px', padding: '20px', marginBottom: '32px', border: '0.5px solid rgba(42,37,32,0.1)' }}>
+            <div style={{ fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', color: '#9A8F84', fontWeight: 700, marginBottom: '14px' }}>En 7 días puedes tener</div>
+            {perfil.dias.map((dia, i) => (
+              <div key={i} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', marginBottom: i < perfil.dias.length - 1 ? '10px' : 0 }}>
+                <div style={{ fontSize: '13px', color: perfil.acento, fontWeight: 700, flexShrink: 0, marginTop: '1px' }}>✓</div>
+                <div style={{ fontSize: '13px', color: '#2A2520', lineHeight: 1.5 }}>{dia}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* CTA */}
+          <button onClick={() => router.push('/holaclara/auth')} style={{ width: '100%', padding: '16px', borderRadius: '12px', background: '#2A2520', color: '#FAFAF7', fontSize: '15px', fontFamily: "'Inter Tight', sans-serif", fontWeight: 700, border: 'none', cursor: 'pointer', marginBottom: '10px', letterSpacing: '0.3px' }}>
+            Empezar mi camino →
+          </button>
+          <button onClick={() => router.push('/holaclara/auth?modo=login')} style={{ width: '100%', padding: '13px', borderRadius: '12px', background: 'transparent', color: '#9A8F84', fontSize: '13px', fontFamily: "'Inter Tight', sans-serif", border: '0.5px solid rgba(42,37,32,0.15)', cursor: 'pointer' }}>
+            Ya tengo cuenta — entrar
+          </button>
+
+        </div>
       </div>
-    </div>
+    </>
   )
 }
