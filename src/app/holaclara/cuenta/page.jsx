@@ -104,6 +104,36 @@ export default function CuentaPage() {
             </div>
           </div>
 
+          {/* MEMORIA VISIBLE */}
+          {perfil && (
+            <div style={{ ...s.card, marginBottom: '12px' }}>
+              <div style={{ fontSize: '10px', letterSpacing: '1.5px', textTransform: 'uppercase', color: '#9A8F84', fontWeight: 700, marginBottom: '12px' }}>Lo que Clara recuerda de ti</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {perfil.perfil_test_entrada && (
+                  <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', padding: '10px 12px', background: '#F5EFE6', borderRadius: '10px' }}>
+                    <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#C9A96E', flexShrink: 0, marginTop: '5px' }} />
+                    <div style={{ fontSize: '13px', color: '#2A2520' }}>Tu perfil de entrada: <strong>{perfil.perfil_test_entrada.replace(/_/g, ' ')}</strong></div>
+                  </div>
+                )}
+                {perfil.fase_ciclo_actual && (
+                  <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', padding: '10px 12px', background: '#F5EFE6', borderRadius: '10px' }}>
+                    <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#C9A96E', flexShrink: 0, marginTop: '5px' }} />
+                    <div style={{ fontSize: '13px', color: '#2A2520' }}>Tu fase actual: <strong>{{mens:'Menstrual',fol:'Folicular',ov:'Ovulación',lut:'Lútea'}[perfil.fase_ciclo_actual] || perfil.fase_ciclo_actual}</strong></div>
+                  </div>
+                )}
+                {perfil.nombre && (
+                  <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', padding: '10px 12px', background: '#F5EFE6', borderRadius: '10px' }}>
+                    <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#C9A96E', flexShrink: 0, marginTop: '5px' }} />
+                    <div style={{ fontSize: '13px', color: '#2A2520' }}>Tu nombre: <strong>{perfil.nombre}</strong></div>
+                  </div>
+                )}
+                {!perfil.perfil_test_entrada && !perfil.fase_ciclo_actual && (
+                  <div style={{ fontSize: '13px', color: '#9A8F84', fontStyle: 'italic' }}>Clara todavía está conociéndote. Sigue conversando.</div>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* OPCIONES */}
           <div style={s.card}>
             <div style={s.row} onClick={() => router.push('/holaclara/planes')}>
