@@ -97,6 +97,27 @@ export default function LandingHolaClara() {
             ))}
           </div>
 
+          {/* TESTIMONIOS */}
+          <div style={{ marginBottom: '48px' }}>
+            <div style={{ fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', color: '#9A8F84', fontWeight: 700, marginBottom: '16px', textAlign: 'center' }}>Lo que dicen las que ya empezaron</div>
+            {[
+              { texto: '"La primera vez que Clara me preguntó algo, tuve que parar. No esperaba que fuera tan directo."', nombre: 'Valentina, 34', ciudad: 'Santiago' },
+              { texto: '"Llevaba meses queriendo hacer algo por mí. Clara me dio el empujón sin juzgarme."', nombre: 'Camila, 29', ciudad: 'México DF' },
+              { texto: '"No es una app más. Es como tener una coach disponible cuando la necesito."', nombre: 'Andrea, 38', ciudad: 'Buenos Aires' },
+            ].map((t, i) => (
+              <div key={i} style={{ background: '#fff', borderRadius: '16px', padding: '20px', marginBottom: '10px', border: '0.5px solid rgba(42,37,32,0.08)' }}>
+                <div style={{ fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontSize: '15px', color: '#2A2520', lineHeight: 1.7, marginBottom: '12px' }}>{t.texto}</div>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#F5EFE6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', color: '#C9A96E', fontWeight: 700 }}>{t.nombre[0]}</div>
+                  <div>
+                    <div style={{ fontSize: '12px', fontWeight: 700, color: '#2A2520' }}>{t.nombre}</div>
+                    <div style={{ fontSize: '11px', color: '#9A8F84' }}>{t.ciudad}</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
           {/* BETA */}
           <div style={{ background: '#F5EFE6', borderRadius: '14px', padding: '16px 20px', marginBottom: '32px', textAlign: 'center', border: '1px solid #E8D8BC' }}>
             <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', color: '#C9A96E', marginBottom: '6px' }}>Beta limitada</div>
