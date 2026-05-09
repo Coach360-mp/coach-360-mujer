@@ -63,7 +63,7 @@ export default function Auth() {
     setError(null)
     const { data, error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) { setError('Email o contraseña incorrectos'); setCargando(false); return }
-    router.push('/holaclara/chat')
+    router.push('/holaclara/onboarding')
   }
 
   async function loginGoogle() {
