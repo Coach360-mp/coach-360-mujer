@@ -113,23 +113,25 @@ export default function CicloPage() {
     setGuardando(true)
     const hoy = new Date().toISOString().split('T')[0]
 
-    try { await supabase.from('registro_ciclo').upsert({
-      usuario_id: usuario.id,
-      fase: faseSel,
-      sintomas: sintomasSel,
-      dia_ciclo: diaActual,
-      ciclo_irregular: cicloIrregular,
-      created_at: new Date().toISOString(),
-    }, { onConflict: 'usuario_id,created_at::date' })
+    try {
+      await supabase.from('registro_ciclo').upsert({
+        usuario_id: usuario.id,
+        fase: faseSel,
+        sintomas: sintomasSel,
+        dia_ciclo: diaActual,
+        ciclo_irregular: cicloIrregular,
+        created_at: new Date().toISOString(),
+      }, { onConflict: 'usuario_id,created_at::date' })
 
-    try { await supabase.from('perfiles').update({ fase_ciclo_actual: faseSel }).eq('id', usuario.id) } catch(e) { console.error('ciclo error:', e) }
+      await supabase.from('perfiles').update({ fase_ciclo_actual: faseSel }).eq('id', usuario.id)
 
-    if (fechaInput) {
-      await supabase.from('perfiles').update({ fecha_ultimo_periodo: fechaInput }).eq('id', usuario.id)
-      const { fase, dia } = calcularFase(fechaInput)
-      setFaseSel(fase)
-      setDiaActual(dia)
-    }
+      if (fechaInput) {
+        await supabase.from('perfiles').update({ fecha_ultimo_periodo: fechaInput }).eq('id', usuario.id)
+        const { fase, dia } = calcularFase(fechaInput)
+        setFaseSel(fase)
+        setDiaActual(dia)
+      }
+    } catch(e) { console.error('ciclo error:', e) }
 
     setGuardando(false)
     setGuardado(true)
