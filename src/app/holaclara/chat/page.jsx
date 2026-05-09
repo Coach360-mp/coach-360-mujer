@@ -189,9 +189,16 @@ export default function Chat() {
         )}
 
         {limitAlcanzado && (
-          <div style={{ background: '#FBF7F0', border: '0.5px solid #E8D8BC', borderRadius: '10px', padding: '14px', margin: '12px 0', fontSize: '13px', color: '#6B6057', lineHeight: 1.6 }}>
-            Llegamos al límite de este mes. Si quieres seguir, puedes subir tu plan desde{' '}
-            <span onClick={() => router.push('/holaclara/cuenta')} style={{ color: '#C9A96E', cursor: 'pointer', textDecoration: 'underline' }}>tu cuenta</span>.
+          <div style={{ background: '#2A2520', borderRadius: '16px', padding: '20px', margin: '12px 0' }}>
+            <div style={{ fontSize: '10px', letterSpacing: '1.5px', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', fontWeight: 700, marginBottom: '8px' }}>Llegaste al límite del plan Gratis</div>
+            <div style={{ fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontSize: '18px', color: '#FAFAF7', marginBottom: '8px', lineHeight: 1.3 }}>La conversación más importante es la que sigue.</div>
+            <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, marginBottom: '16px' }}>Con el plan Esencial tienes 400 mensajes al mes, acceso a pausas guiadas y programas multi-día.</div>
+            <button onClick={() => router.push('/holaclara/planes')} style={{ width: '100%', padding: '13px', borderRadius: '10px', background: '#C9A96E', color: '#2A2520', fontFamily: "'Inter Tight', sans-serif", fontSize: '13px', fontWeight: 700, border: 'none', cursor: 'pointer', marginBottom: '8px' }}>
+              Ver planes →
+            </button>
+            <button onClick={() => router.push('/holaclara/conocerme')} style={{ width: '100%', padding: '11px', borderRadius: '10px', background: 'transparent', color: 'rgba(255,255,255,0.4)', fontFamily: "'Inter Tight', sans-serif", fontSize: '12px', border: '0.5px solid rgba(255,255,255,0.15)', cursor: 'pointer' }}>
+              Mientras tanto, explorar rituales y journaling
+            </button>
           </div>
         )}
 
