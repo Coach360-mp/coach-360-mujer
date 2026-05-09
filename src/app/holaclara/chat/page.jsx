@@ -2,6 +2,8 @@
 import { useState, useEffect, useRef } from 'react'
 import TabBar from '../components/TabBar'
 import { useRouter } from 'next/navigation'
+import TourGuiado from '../components/TourGuiado'
+import { useTour } from '../components/useTour'
 import { createBrowserClient } from '@supabase/ssr'
 
 const supabase = createBrowserClient(
