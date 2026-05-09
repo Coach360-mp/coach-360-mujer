@@ -171,6 +171,12 @@ export default function TestDescansoPage() {
     <>
       <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;1,400;1,600&family=Inter+Tight:wght@400;700&family=Caveat:wght@500&display=swap" rel="stylesheet" />
       <div style={s.root}>
+        {/* IMAGEN HERO */}
+        <div style={{ width: '100%', height: '240px', overflow: 'hidden', position: 'relative' }}>
+          <img src="/images/test_descanso_portada.png" alt="Test de descanso" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 40%' }} />
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(250,250,247,1) 0%, rgba(250,250,247,0.2) 60%, rgba(250,250,247,0) 100%)' }} />
+          <button onClick={() => router.back()} style={{ position: 'absolute', top: '16px', left: '16px', background: 'rgba(255,255,255,0.8)', border: 'none', borderRadius: '20px', padding: '6px 14px', fontSize: '12px', fontWeight: 700, color: '#2A2520', cursor: 'pointer', fontFamily: 'inherit' }}>← volver</button>
+        </div>
         <div style={s.container}>
           <div style={{ fontSize: '9px', letterSpacing: '2px', textTransform: 'uppercase', color: '#9A8F84', fontWeight: 700, marginBottom: '8px' }}>Test · 6 minutos · Gratis</div>
           <div style={{ fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontSize: '30px', color: '#2A2520', marginBottom: '16px', lineHeight: 1.2 }}>¿Qué tipo de descanso necesitas?</div>
