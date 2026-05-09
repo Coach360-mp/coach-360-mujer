@@ -243,40 +243,54 @@ function MicButton({ onTranscript, style }) {
 
 function BreathingRitual({ ritual, onComplete }) {
   const fases = [
-    { label: 'inhala...', dur: 4 },
-    { label: 'mantén...', dur: 4 },
-    { label: 'exhala...', dur: 4 },
+    { label: 'inhala...', dur: 4, escala: 1.25 },
+    { label: 'mantén...', dur: 4, escala: 1.25 },
+    { label: 'exhala...', dur: 4, escala: 1.0 },
   ]
   const [activo, setActivo] = useState(false)
   const [faseIdx, setFaseIdx] = useState(0)
   const [ciclo, setCiclo] = useState(0)
+  const [cuenta, setCuenta] = useState(4)
   const intervalRef = useRef(null)
+  const cuentaRef = useRef(null)
 
   useEffect(() => {
     if (!activo) return
     let fi = 0
-    const avanzar = () => {
-      fi = (fi + 1) % 3
-      setFaseIdx(fi)
-      if (fi === 0) setCiclo(c => c + 1)
-    }
-    intervalRef.current = setInterval(avanzar, 4000)
-    return () => clearInterval(intervalRef.current)
+    let c = 4
+    setCuenta(4)
+
+    cuentaRef.current = setInterval(() => {
+      c--
+      if (c <= 0) {
+        fi = (fi + 1) % 3
+        setFaseIdx(fi)
+        if (fi === 0) setCiclo(prev => prev + 1)
+        c = 4
+      }
+      setCuenta(c)
+    }, 1000)
+
+    return () => clearInterval(cuentaRef.current)
   }, [activo])
 
   useEffect(() => {
-    if (ciclo >= 3) { clearInterval(intervalRef.current); setActivo(false); onComplete() }
+    if (ciclo >= 3) {
+      clearInterval(cuentaRef.current)
+      setActivo(false)
+      onComplete()
+    }
   }, [ciclo])
 
   return (
     <div style={{ textAlign: 'center', padding: '24px 0' }}>
-      <div style={{ width: '140px', height: '140px', borderRadius: '50%', background: 'rgba(201,169,110,0.12)', border: '2px solid #C9A96E', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px', transition: 'transform 4s ease-in-out', transform: activo && faseIdx === 0 ? 'scale(1.2)' : 'scale(1)' }}>
-        <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-          <circle cx="24" cy="24" r="16" stroke="#C9A96E" strokeWidth="1.5" opacity="0.4" />
-          <circle cx="24" cy="24" r="7" fill="#C9A96E" opacity="0.6" />
-        </svg>
+      <div style={{ width: '140px', height: '140px', borderRadius: '50%', background: 'rgba(201,169,110,0.12)', border: '2px solid #C9A96E', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px', transition: 'transform 4s ease-in-out', transform: activo ? `scale(${fases[faseIdx].escala})` : 'scale(1)' }}>
+        {activo
+          ? <span style={{ fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontSize: '40px', color: '#C9A96E', lineHeight: 1 }}>{cuenta}</span>
+          : <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="16" stroke="#C9A96E" strokeWidth="1.5" opacity="0.4" /><circle cx="24" cy="24" r="7" fill="#C9A96E" opacity="0.6" /></svg>
+        }
       </div>
-      <div style={{ fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontSize: '20px', color: '#2A2520', marginBottom: '6px' }}>
+      <div style={{ fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontSize: '22px', color: '#2A2520', marginBottom: '6px' }}>
         {activo ? fases[faseIdx].label : 'lista para comenzar'}
       </div>
       <div style={{ fontSize: '11px', color: '#C9A96E', fontWeight: 700, letterSpacing: '1px', marginBottom: '8px' }}>
