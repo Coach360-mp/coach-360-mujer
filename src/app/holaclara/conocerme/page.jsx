@@ -35,7 +35,7 @@ const SECCIONES = [
     titulo: 'Tests de autoconocimiento',
     desc: 'Descubre patrones que llevas años repitiendo. Cada test te da claridad concreta.',
     plan: 'free',
-    path: '/holaclara/tests/descanso',
+    path: '/holaclara/tests',
     color: '#EEEDFE',
     iconColor: '#534AB7',
     items: ['¿Qué tipo de descanso necesitas?', 'Tests de valores (próximo)', 'Test de estilo de apego (próximo)'],
