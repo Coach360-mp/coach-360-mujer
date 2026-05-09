@@ -31,6 +31,16 @@ const SECCIONES = [
     items: ['Volcado mental', '3 cosas hoy', 'Mi semana en 5 frases'],
   },
   {
+    id: 'tests',
+    titulo: 'Tests de autoconocimiento',
+    desc: 'Descubre patrones que llevas años repitiendo. Cada test te da claridad concreta.',
+    plan: 'free',
+    path: '/holaclara/tests/descanso',
+    color: '#EEEDFE',
+    iconColor: '#534AB7',
+    items: ['¿Qué tipo de descanso necesitas?', 'Tests de valores (próximo)', 'Test de estilo de apego (próximo)'],
+  },
+  {
     id: 'pausas',
     titulo: 'Pausas guiadas',
     desc: 'Audio con la voz de Clara para momentos difíciles.',
@@ -105,7 +115,8 @@ export default function ConocermePage() {
                   <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: sec.color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     {sec.id === 'rituales' && <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke={sec.iconColor} strokeWidth="1.5"/><circle cx="10" cy="10" r="3" fill={sec.iconColor} opacity="0.6"/></svg>}
                     {sec.id === 'journaling' && <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="4" y="3" width="12" height="14" rx="2" stroke={sec.iconColor} strokeWidth="1.5"/><line x1="7" y1="8" x2="13" y2="8" stroke={sec.iconColor} strokeWidth="1.2" strokeLinecap="round"/><line x1="7" y1="11" x2="11" y2="11" stroke={sec.iconColor} strokeWidth="1.2" strokeLinecap="round"/></svg>}
-                    {sec.id === 'pausas' && <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke={sec.iconColor} strokeWidth="1.5"/><path d="M8 7 L8 13 M12 7 L12 13" stroke={sec.iconColor} strokeWidth="1.5" strokeLinecap="round"/></svg>}
+                    {sec.id === 'tests' && <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke={sec.iconColor} strokeWidth="1.5" strokeDasharray="3 2"/><circle cx="10" cy="10" r="2.5" stroke={sec.iconColor} strokeWidth="1.5"/></svg>}
+        {sec.id === 'pausas' && <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke={sec.iconColor} strokeWidth="1.5"/><path d="M8 7 L8 13 M12 7 L12 13" stroke={sec.iconColor} strokeWidth="1.5" strokeLinecap="round"/></svg>}
                     {sec.id === 'programas' && <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 10 L7 14 L17 6" stroke={sec.iconColor} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
                   </div>
                   <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.5px', padding: '3px 10px', borderRadius: '20px', background: acceso ? '#F5EFE6' : 'rgba(42,37,32,0.06)', color: acceso ? '#C9A96E' : '#9A8F84' }}>
