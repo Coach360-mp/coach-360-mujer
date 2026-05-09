@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
 import TabBar from '../components/TabBar'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { createBrowserClient } from '@supabase/ssr'
 
 const supabase = createBrowserClient(
@@ -22,6 +22,7 @@ const PRIMER_MENSAJE = {
 
 export default function Chat() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [usuario, setUsuario] = useState(null)
   const [perfil, setPerfil] = useState(null)
   const [mensajes, setMensajes] = useState([])
@@ -60,6 +61,12 @@ export default function Chat() {
 
     const primerMsg = PRIMER_MENSAJE[p?.perfil_test_entrada] || PRIMER_MENSAJE.default
     setMensajes([{ rol: 'clara', texto: primerMsg }])
+
+    // Leer mensaje pre-cargado desde rituales/journaling
+    const msgParam = new URLSearchParams(window.location.search).get('msg')
+    if (msgParam) {
+      setInput(decodeURIComponent(msgParam))
+    }
   }
 
   async function enviar() {
