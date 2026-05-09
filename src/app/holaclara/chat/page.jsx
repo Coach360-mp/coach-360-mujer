@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
 import TabBar from '../components/TabBar'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { createBrowserClient } from '@supabase/ssr'
 
 const supabase = createBrowserClient(
@@ -22,7 +22,6 @@ const PRIMER_MENSAJE = {
 
 export default function Chat() {
   const router = useRouter()
-  const searchParams = useSearchParams()
   const [usuario, setUsuario] = useState(null)
   const [perfil, setPerfil] = useState(null)
   const [mensajes, setMensajes] = useState([])
