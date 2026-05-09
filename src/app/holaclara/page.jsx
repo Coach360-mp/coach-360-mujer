@@ -1,12 +1,6 @@
 'use client'
 import { useRouter } from 'next/navigation'
 
-// metadata removed - use client component
-  title: 'Hola Clara — Tu coach personal',
-  description: 'Coaching personal para conocerte, crecer y volver a ti. En español, sin agendar, sin culpa.',
-  themeColor: '#FAFAF7',
-  viewport: 'width=device-width, initial-scale=1, maximum-scale=1',
-}
 
 export default function LandingHolaClara() {
   const router = useRouter()
