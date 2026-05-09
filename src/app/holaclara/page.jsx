@@ -1,7 +1,7 @@
 'use client'
 import { useRouter } from 'next/navigation'
 
-export const metadata = {
+// metadata removed - use client component
   title: 'Hola Clara — Tu coach personal',
   description: 'Coaching personal para conocerte, crecer y volver a ti. En español, sin agendar, sin culpa.',
   themeColor: '#FAFAF7',
