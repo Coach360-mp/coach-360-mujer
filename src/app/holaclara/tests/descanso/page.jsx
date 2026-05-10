@@ -42,7 +42,20 @@ const PERFILES = {
     color: '#F5EFE6',
     acento: '#C9A96E',
     frase: 'Mi descanso pendiente es físico. No es flojera, es información.',
-    interpretacion: 'Tu cuerpo está agotado a un nivel que el sueño solo no resuelve. Llevas semanas o meses funcionando con la batería en rojo, y has aprendido a operar así.\n\nEl descanso físico tiene dos formas. Pasivo: dormir, recostarte, soltar el cuerpo. Activo: estiramientos, yoga restaurativa, masaje, caminar lento sin destino.\n\nProbablemente has intentado dormir más y no fue suficiente. Eso es porque tu cuerpo necesita también el descanso activo: liberar tensiones acumuladas, mover lo que está estancado.\n\nEsta semana, te invito a una cosa concreta: 20 minutos al día solo para tu cuerpo. No para entrenar. Para escucharlo.',
+    fortaleza: 'Resistencia y capacidad de seguir adelante',
+    debilidad: 'Ignorar las señales físicas del agotamiento',
+    interpretacion: 'Tu cuerpo está agotado a un nivel que el sueño solo no resuelve. Llevas semanas o meses funcionando con la batería en rojo, y has aprendido a operar así.\n\nEl descanso físico tiene dos formas. Pasivo: dormir, recostarte, soltar el cuerpo. Activo: estiramientos, yoga restaurativa, masaje, caminar lento sin destino.\n\nProbablemente has intentado dormir más y no fue suficiente. Eso es porque tu cuerpo necesita también el descanso activo: liberar tensiones acumuladas, mover lo que está estancado.',
+    partida: 'Esta semana, una cosa concreta: 20 minutos al día solo para tu cuerpo. No para entrenar. Para escucharlo.',
+    ejes: [
+      { titulo: 'Descanso pasivo de calidad', desc: 'Mejorar el sueño y los momentos de reposo real, sin pantallas ni estimulación' },
+      { titulo: 'Descanso activo', desc: 'Estiramientos, yoga restaurativa o caminar lento — mover lo que está estancado' },
+      { titulo: 'Escuchar señales corporales', desc: 'Aprender a reconocer el cansancio antes de que llegue al límite' },
+    ],
+    dias: [
+      'Identificar dónde carga tensión tu cuerpo (cuello, mandíbula, espalda)',
+      '20 minutos de movimiento suave — no para quemar calorías, para soltar',
+      'Una noche con ritual de cierre: sin pantallas 30 min antes de dormir',
+    ],
     invitacion: '¿Cuándo fue la última vez que hiciste algo solo para tu cuerpo, sin que sirviera para nada más?',
   },
   MEN: {
@@ -52,7 +65,20 @@ const PERFILES = {
     color: '#EEEDFE',
     acento: '#534AB7',
     frase: 'Mi descanso pendiente es mental. Mi cabeza piensa más rápido de lo que vivo.',
-    interpretacion: 'Tu mente está en modo análisis 24/7. Resuelves problemas mientras te bañas, planificas mientras manejas, repasas conversaciones cuando intentas dormir.\n\nEsto se llama fatiga cognitiva, y es invisible hasta que se vuelve insoportable. La gente cree que descansa la mente con Netflix o redes sociales, pero esos son estimulantes, no descansos.\n\nEl descanso mental real es: silencio, naturaleza, hacer algo manual sin pensar mucho, escribir lo que tienes en la cabeza para sacarlo.\n\nEsta semana, te invito a hacer 3 micro-pausas de 2 minutos al día sin pantalla. Solo eso.',
+    fortaleza: 'Capacidad analítica y resolución de problemas',
+    debilidad: 'Mente que no se apaga ni en el descanso',
+    interpretacion: 'Tu mente está en modo análisis 24/7. Resuelves problemas mientras te bañas, planificas mientras manejas, repasas conversaciones cuando intentas dormir.\n\nEsto se llama fatiga cognitiva, y es invisible hasta que se vuelve insoportable. La gente cree que descansa la mente con Netflix o redes sociales, pero esos son estimulantes, no descansos.\n\nEl descanso mental real es: silencio, naturaleza, hacer algo manual sin pensar mucho, escribir lo que tienes en la cabeza para sacarlo.',
+    partida: 'Esta semana: 3 micro-pausas de 2 minutos al día sin pantalla. Sin agenda, sin producir. Solo eso.',
+    ejes: [
+      { titulo: 'Vaciado mental', desc: 'Escribir lo que tienes en la cabeza para sacarlo — el papel aguanta lo que la mente no debería cargar' },
+      { titulo: 'Pausas sin estimulación', desc: 'Descanso real no es Netflix — es silencio, naturaleza o algo manual sin pensar' },
+      { titulo: 'Límites a la toma de decisiones', desc: 'Reducir la carga cognitiva diaria para llegar al final del día con más reserva' },
+    ],
+    dias: [
+      'Una pausa de 5 minutos sin pantalla en algún momento del día',
+      'Escribir todo lo que tienes en la cabeza antes de dormir — sacarlo del loop',
+      'Identificar una decisión que puedes delegar o eliminar esta semana',
+    ],
     invitacion: '¿Cuándo fue la última vez que tu mente estuvo realmente en silencio?',
   },
   EMO: {
@@ -62,7 +88,20 @@ const PERFILES = {
     color: '#FAECE7',
     acento: '#993C1D',
     frase: 'Mi descanso pendiente es emocional. Cuido tanto a otros que olvido cuidarme yo.',
-    interpretacion: 'Eres alguien que siente mucho, escucha mucho, contiene mucho. A los demás y a ti misma. Y eso pesa.\n\nEl descanso emocional es la capacidad de no estar disponible para las emociones de los demás. De decir "ahora no puedo con esto" sin culpa.\n\nProbablemente cargas conversaciones que no son tuyas, problemas de gente que no son tu responsabilidad. Tu sistema emocional está saturado.\n\nEsta semana, te invito a algo difícil pero clave: identificar UNA relación que estás cargando que no es tuya, y poner un límite suave.',
+    fortaleza: 'Alta capacidad empática y contención',
+    debilidad: 'Sistema emocional saturado de cargas ajenas',
+    interpretacion: 'Eres alguien que siente mucho, escucha mucho, contiene mucho. A los demás y a ti misma. Y eso pesa.\n\nEl descanso emocional es la capacidad de no estar disponible para las emociones de los demás. De decir "ahora no puedo con esto" sin culpa.\n\nProbablemente cargas conversaciones que no son tuyas, problemas de gente que no son tu responsabilidad. Tu sistema emocional está saturado.',
+    partida: 'Esta semana: identifica UNA relación que estás cargando que no es tuya, y pon un límite suave. Uno solo.',
+    ejes: [
+      { titulo: 'Soltar lo que no es tuyo', desc: 'Aprender a diferenciar tus emociones de las de los demás sin culpa' },
+      { titulo: 'Límites emocionales', desc: 'Decir "ahora no puedo" sin que se sienta como abandono o egoísmo' },
+      { titulo: 'Espacios sin rol', desc: 'Momentos donde no tienes que ser fuerte, disponible ni comprensiva' },
+    ],
+    dias: [
+      'Identificar qué emociones llevas hoy que no son tuyas',
+      'Una conversación donde dices lo que necesitas — no lo que el otro necesita',
+      'Un momento de la semana solo tuyo, sin estar disponible para nadie',
+    ],
     invitacion: '¿Qué emociones llevas hoy que no son tuyas?',
   },
   SEN: {
@@ -72,7 +111,20 @@ const PERFILES = {
     color: '#EAF5EE',
     acento: '#1D9E75',
     frase: 'Mi descanso pendiente es sensorial. El silencio me hace bien y no lo sabía.',
-    interpretacion: 'Vives sobreestimulada y ya ni te das cuenta. Pantallas, notificaciones, luces, ruido de fondo. Tu sistema nervioso recibe miles de inputs al día y casi nunca tiene silencio real.\n\nDescanso sensorial es: cerrar los ojos sin pantalla, estar en un lugar silencioso, bajar la luz al final del día, alejarse del celular por horas.\n\nEsta semana, te invito a una cosa concreta: 30 minutos al día sin estímulos digitales. Puede ser cocinando en silencio, caminando sin auriculares, o sentada mirando por la ventana.',
+    fortaleza: 'Sensibilidad y capacidad de percepción',
+    debilidad: 'Sistema nervioso sobreestimulado sin saberlo',
+    interpretacion: 'Vives sobreestimulada y ya ni te das cuenta. Pantallas, notificaciones, luces, ruido de fondo. Tu sistema nervioso recibe miles de inputs al día y casi nunca tiene silencio real.\n\nDescanso sensorial es: cerrar los ojos sin pantalla, estar en un lugar silencioso, bajar la luz al final del día, alejarse del celular por horas.\n\nLa buena noticia: es de los descansos más rápidos de activar. El cuerpo responde casi de inmediato al silencio.',
+    partida: 'Esta semana: 30 minutos al día sin estímulos digitales. Cocinar en silencio, caminar sin auriculares, mirar por la ventana.',
+    ejes: [
+      { titulo: 'Silencio real cada día', desc: 'Al menos 20-30 min sin pantallas, música ni notificaciones — el sistema nervioso necesita ese reset' },
+      { titulo: 'Entorno sensorial consciente', desc: 'Luz suave, menos ruido, espacios ordenados — el entorno impacta el sistema nervioso más de lo que crees' },
+      { titulo: 'Detox digital progresivo', desc: 'Empezar a reducir la carga de inputs — no todo de golpe, sino por capas' },
+    ],
+    dias: [
+      'Una mañana sin revisar el celular por la primera hora del día',
+      '30 minutos en silencio real — sin música, sin podcast, sin pantalla',
+      'Bajar la luz de tu entorno una hora antes de dormir y notar la diferencia',
+    ],
     invitacion: '¿Cuándo fue la última vez que estuviste en silencio real — sin pantallas, sin música, sin ruido?',
   },
   SOC: {
@@ -82,7 +134,20 @@ const PERFILES = {
     color: '#F5EFE6',
     acento: '#C9A96E',
     frase: 'Mi descanso pendiente es social. Hay personas que me cansan y necesito nombrarlo.',
-    interpretacion: 'Tu energía social está agotada porque cargas relaciones que no te llenan. Probablemente tienes vínculos con personas que demandan más de lo que dan.\n\nEl descanso social tiene dos caras: pasar más tiempo sola para recuperarte, y rodearte de personas que te energizan en lugar de drenarte.\n\nNo es egoísmo identificar quién te da y quién te quita. Es supervivencia emocional.\n\nEsta semana, te invito a hacer una lista mental: ¿con quién te sientes más viva después de verla? ¿Con quién te sientes más vacía?',
+    fortaleza: 'Capacidad de conexión y presencia con otros',
+    debilidad: 'Energía social agotada por relaciones que drenan',
+    interpretacion: 'Tu energía social está agotada porque cargas relaciones que no te llenan. Probablemente tienes vínculos con personas que demandan más de lo que dan.\n\nEl descanso social tiene dos caras: pasar más tiempo sola para recuperarte, y rodearte de personas que te energizan en lugar de drenarte.\n\nNo es egoísmo identificar quién te da y quién te quita. Es supervivencia emocional.',
+    partida: 'Esta semana: haz una lista mental — ¿con quién te sientes más viva después de verla? ¿Con quién más vacía? Eso es información.',
+    ejes: [
+      { titulo: 'Tiempo genuinamente sola', desc: 'No soledad por obligación — soledad elegida para recuperar energía propia' },
+      { titulo: 'Mapear relaciones por energía', desc: 'Identificar quién suma y quién resta, sin juicio — solo como información' },
+      { titulo: 'Límites sociales sin culpa', desc: 'Decir que no a planes que drenan, sin necesitar justificarlo demasiado' },
+    ],
+    dias: [
+      'Identificar con quién de tu entorno sales más cansada de lo que llegaste',
+      'Una tarde o mañana sola — sin agenda, sin compromisos, sin estar disponible',
+      'Decir que no a algo social que no te apetece esta semana — y no explicar demasiado',
+    ],
     invitacion: '¿Hay alguien en tu vida con quien salgas y termines más cansada de lo que llegaste?',
   },
   CRE: {
@@ -92,7 +157,20 @@ const PERFILES = {
     color: '#EEEDFE',
     acento: '#534AB7',
     frase: 'Mi descanso pendiente es creativo. Hace tiempo que no hago algo solo por placer.',
-    interpretacion: 'Tu cabeza está ocupada todo el día resolviendo. Tareas, problemas, decisiones. Pero ¿cuándo fue la última vez que hiciste algo creativo solo por gusto, sin que sirviera para nada?\n\nEl descanso creativo no es hacer manualidades obligadas. Es contacto con belleza, con asombro, con producción que no tiene propósito útil.\n\nEsta semana, te invito a hacer UNA cosa creativa sin propósito útil. 15 minutos. Lo que sea.',
+    fortaleza: 'Capacidad de resolución y pensamiento estratégico',
+    debilidad: 'Ausencia de creatividad sin propósito productivo',
+    interpretacion: 'Tu cabeza está ocupada todo el día resolviendo. Tareas, problemas, decisiones. Pero ¿cuándo fue la última vez que hiciste algo creativo solo por gusto, sin que sirviera para nada?\n\nEl descanso creativo no es hacer manualidades obligadas. Es contacto con belleza, con asombro, con producción que no tiene propósito útil.\n\nTu cerebro necesita este tipo de experiencia para regenerarse — no como un lujo, sino como una necesidad cognitiva real.',
+    partida: 'Esta semana: UNA cosa creativa sin propósito útil. 15 minutos. Dibujar, cocinar algo nuevo, escribir sin destino, escuchar música de verdad.',
+    ejes: [
+      { titulo: 'Crear sin propósito útil', desc: 'Hacer algo creativo que no sirva para nada — eso es exactamente el punto' },
+      { titulo: 'Consumir belleza activamente', desc: 'Arte, música, naturaleza — no de fondo, sino como protagonista de un momento' },
+      { titulo: 'Recuperar el juego', desc: 'Hacer algo como lo hacías de niña — por puro gusto, sin que nadie evalúe' },
+    ],
+    dias: [
+      'Recordar qué hacías de niña solo porque te gustaba, sin que nadie te lo pidiera',
+      '15 minutos haciendo algo creativo sin pensar en si quedó bien',
+      'Consumir algo bello de forma activa — un cuadro, una canción, un atardecer — sin el celular',
+    ],
     invitacion: '¿Qué hacías de niña solo porque te gustaba, sin que nadie te lo pidiera?',
   },
   ESP: {
@@ -102,7 +180,20 @@ const PERFILES = {
     color: '#F5EFE6',
     acento: '#C9A96E',
     frase: 'Mi descanso pendiente es espiritual. Hago mucho y conecto con poco.',
-    interpretacion: 'Estás cansada de un cansancio que nadie nombra: el de no saber para qué haces lo que haces. Tu vida funciona, hay logros, hay actividad, pero falta sentido.\n\nEl descanso espiritual no es religión. Es conectarte con algo más grande que tú: la naturaleza, una causa, tu propósito.\n\nNo es depresión. Es el llamado a profundizar.\n\nEsta semana, te invito a quedarte con UNA pregunta: ¿qué quiero que importe en mi vida los próximos 5 años?',
+    fortaleza: 'Productividad y capacidad de acción',
+    debilidad: 'Falta de conexión con el sentido de lo que haces',
+    interpretacion: 'Estás cansada de un cansancio que nadie nombra: el de no saber para qué haces lo que haces. Tu vida funciona, hay logros, hay actividad, pero falta sentido.\n\nEl descanso espiritual no es religión. Es conectarte con algo más grande que tú: la naturaleza, una causa, tu propósito, tus valores más profundos.\n\nNo es depresión. Es el llamado a profundizar.',
+    partida: 'Esta semana, quédate con UNA pregunta: ¿qué quiero que importe en mi vida los próximos 5 años? No la respondas. Solo vívela.',
+    ejes: [
+      { titulo: 'Conectar con el por qué', desc: 'Encontrar el hilo de sentido que conecta lo que haces con lo que te importa' },
+      { titulo: 'Momentos de conexión profunda', desc: 'Naturaleza, silencio, práctica contemplativa — lo que te conecte con algo más grande' },
+      { titulo: 'Claridad de propósito', desc: 'No como destino fijo, sino como brújula que orienta las decisiones cotidianas' },
+    ],
+    dias: [
+      'Escribir tres cosas que haces y que sí se sienten significativas — aunque sean pequeñas',
+      'Un momento en la naturaleza, sin celular, sin agenda — solo estar',
+      'Una conversación con Clara sobre qué quieres que importe en tu vida',
+    ],
     invitacion: '¿Hay algo que haces en tu vida que se siente significativo de verdad — no solo importante?',
   },
 }
@@ -253,19 +344,36 @@ export default function TestDescansoPage() {
   if (fase === 'resultado' && resultado) {
     const perfilPrincipal = PERFILES[resultado.principal]
     const top3Perfiles = resultado.top3.map(t => PERFILES[t])
-    const fortaleza = PERFILES[resultado.fortaleza]
+    const fortalezaPerfil = PERFILES[resultado.fortaleza]
 
     return (
       <>
         <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;1,400;1,600&family=Inter+Tight:wght@400;700&family=Caveat:wght@500&display=swap" rel="stylesheet" />
         <div style={s.root}>
           <div style={s.container}>
-            <div style={{ fontSize: '9px', letterSpacing: '2px', textTransform: 'uppercase', color: '#9A8F84', fontWeight: 700, marginBottom: '8px' }}>Tu resultado</div>
-            <div style={{ fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontSize: '28px', color: '#2A2520', marginBottom: '20px', lineHeight: 1.2 }}>{perfilPrincipal.titulo}</div>
+
+            {/* PERFIL PRINCIPAL */}
+            <div style={{ background: perfilPrincipal.color, borderRadius: '20px', padding: '24px', marginBottom: '16px', borderLeft: `4px solid ${perfilPrincipal.acento}` }}>
+              <div style={{ fontSize: '9px', letterSpacing: '2px', textTransform: 'uppercase', color: perfilPrincipal.acento, fontWeight: 700, marginBottom: '8px' }}>Tu descanso principal</div>
+              <div style={{ fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontSize: '26px', color: '#2A2520', marginBottom: '10px', lineHeight: 1.2 }}>{perfilPrincipal.tipo}</div>
+              <div style={{ fontSize: '15px', color: '#2A2520', lineHeight: 1.7 }}>{perfilPrincipal.frase}</div>
+            </div>
+
+            {/* FORTALEZA / A TRABAJAR */}
+            <div style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
+              <div style={{ flex: 1, background: '#EAF5EE', borderRadius: '14px', padding: '14px' }}>
+                <div style={{ fontSize: '9px', letterSpacing: '1px', textTransform: 'uppercase', color: '#1D9E75', fontWeight: 700, marginBottom: '6px' }}>Tu fortaleza</div>
+                <div style={{ fontSize: '13px', color: '#2A2520', lineHeight: 1.4 }}>{fortalezaPerfil.tipo}</div>
+              </div>
+              <div style={{ flex: 1, background: '#FAECE7', borderRadius: '14px', padding: '14px' }}>
+                <div style={{ fontSize: '9px', letterSpacing: '1px', textTransform: 'uppercase', color: '#993C1D', fontWeight: 700, marginBottom: '6px' }}>A trabajar</div>
+                <div style={{ fontSize: '13px', color: '#2A2520', lineHeight: 1.4 }}>{perfilPrincipal.debilidad}</div>
+              </div>
+            </div>
 
             {/* TOP 3 DESCANSOS */}
-            <div style={{ marginBottom: '20px' }}>
-              <div style={{ fontSize: '10px', letterSpacing: '1.5px', textTransform: 'uppercase', color: '#9A8F84', fontWeight: 700, marginBottom: '10px' }}>Tus 3 descansos pendientes</div>
+            <div style={{ marginBottom: '16px' }}>
+              <div style={{ fontSize: '9px', letterSpacing: '2px', textTransform: 'uppercase', color: '#9A8F84', fontWeight: 700, marginBottom: '10px' }}>Tus 3 descansos pendientes</div>
               {top3Perfiles.map((p, i) => (
                 <div key={i} style={{ display: 'flex', gap: '10px', alignItems: 'center', padding: '12px 14px', background: i === 0 ? p.color : '#fff', borderRadius: '12px', marginBottom: '8px', border: i === 0 ? `2px solid ${p.acento}` : '0.5px solid rgba(42,37,32,0.1)' }}>
                   <div style={{ fontSize: '13px', color: p.acento, fontWeight: 700, minWidth: '20px' }}>{i + 1}</div>
@@ -275,22 +383,42 @@ export default function TestDescansoPage() {
               ))}
             </div>
 
-            {/* FORTALEZA */}
-            <div style={{ background: '#2A2520', borderRadius: '14px', padding: '14px 16px', marginBottom: '20px' }}>
-              <div style={{ fontSize: '10px', letterSpacing: '1.5px', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', fontWeight: 700, marginBottom: '4px' }}>Tu fortaleza</div>
-              <div style={{ fontSize: '15px', color: '#C9A96E', fontWeight: 700 }}>{fortaleza.tipo}</div>
+            {/* LO QUE ESTO REVELA */}
+            <div style={{ background: '#2A2520', borderRadius: '16px', padding: '20px', marginBottom: '16px' }}>
+              <div style={{ fontSize: '9px', letterSpacing: '2px', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', fontWeight: 700, marginBottom: '10px' }}>Lo que esto revela</div>
+              {perfilPrincipal.interpretacion.split('\n\n').map((p, i) => (
+                <div key={i} style={{ fontSize: '14px', color: 'rgba(255,255,255,0.8)', lineHeight: 1.7, marginBottom: i < 1 ? '12px' : 0 }}>{p}</div>
+              ))}
+              <div style={{ marginTop: '14px', paddingTop: '14px', borderTop: '1px solid rgba(255,255,255,0.1)', fontSize: '13px', color: '#C9A96E', lineHeight: 1.6, fontStyle: 'italic' }}>{perfilPrincipal.partida}</div>
             </div>
 
-            {/* INTERPRETACIÓN */}
-            <div style={{ background: perfilPrincipal.color, borderRadius: '16px', padding: '20px', marginBottom: '20px', borderLeft: `3px solid ${perfilPrincipal.acento}` }}>
-              <div style={{ fontSize: '10px', letterSpacing: '1.5px', textTransform: 'uppercase', color: perfilPrincipal.acento, fontWeight: 700, marginBottom: '10px' }}>Qué significa</div>
-              {perfilPrincipal.interpretacion.split('\n\n').map((p, i) => (
-                <div key={i} style={{ fontSize: '14px', color: '#2A2520', lineHeight: 1.7, marginBottom: i < 2 ? '12px' : 0 }}>{p}</div>
+            {/* LO QUE PUEDES DESARROLLAR */}
+            <div style={{ marginBottom: '16px' }}>
+              <div style={{ fontSize: '9px', letterSpacing: '2px', textTransform: 'uppercase', color: '#9A8F84', fontWeight: 700, marginBottom: '12px' }}>Lo que puedes desarrollar</div>
+              {perfilPrincipal.ejes.map((eje, i) => (
+                <div key={i} style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', marginBottom: '10px' }}>
+                  <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: perfilPrincipal.acento, flexShrink: 0, marginTop: '6px' }} />
+                  <div>
+                    <div style={{ fontSize: '13px', fontWeight: 700, color: '#2A2520', marginBottom: '2px' }}>{eje.titulo}</div>
+                    <div style={{ fontSize: '12px', color: '#6B6057', lineHeight: 1.5 }}>{eje.desc}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* EN 7 DÍAS */}
+            <div style={{ background: '#fff', borderRadius: '16px', padding: '20px', marginBottom: '16px', border: '0.5px solid rgba(42,37,32,0.08)' }}>
+              <div style={{ fontSize: '9px', letterSpacing: '2px', textTransform: 'uppercase', color: '#9A8F84', fontWeight: 700, marginBottom: '12px' }}>En 7 días puedes tener</div>
+              {perfilPrincipal.dias.map((dia, i) => (
+                <div key={i} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', marginBottom: i < perfilPrincipal.dias.length - 1 ? '10px' : 0 }}>
+                  <div style={{ fontSize: '12px', color: perfilPrincipal.acento, fontWeight: 700, flexShrink: 0 }}>✓</div>
+                  <div style={{ fontSize: '13px', color: '#2A2520', lineHeight: 1.5 }}>{dia}</div>
+                </div>
               ))}
             </div>
 
             {/* PREGUNTA CLARA */}
-            <div style={{ background: '#fff', borderRadius: '14px', padding: '16px', marginBottom: '24px', border: '0.5px solid rgba(42,37,32,0.1)' }}>
+            <div style={{ background: '#fff', borderRadius: '14px', padding: '16px', marginBottom: '24px', border: '0.5px solid rgba(42,37,32,0.08)' }}>
               <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
                 <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#C9A96E', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontSize: '12px', color: '#fff' }}>c</div>
                 <div style={{ fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontSize: '15px', color: '#2A2520', lineHeight: 1.6 }}>{perfilPrincipal.invitacion}</div>

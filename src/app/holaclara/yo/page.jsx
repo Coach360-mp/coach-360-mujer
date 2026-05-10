@@ -74,12 +74,13 @@ export default function YoPage() {
 
     const hoy = new Date().toISOString().split('T')[0]
 
-    const [{ data: p }, { data: h }, { data: c }, { data: rituales }, { data: journal }] = await Promise.all([
+    const [{ data: p }, { data: h }, { data: c }, { data: rituales }, { data: journal }, { data: habitosHist }] = await Promise.all([
       supabase.from('perfiles').select('*').eq('id', user.id).single(),
       supabase.from('habitos_usuario').select('*').eq('user_id', user.id).eq('activo', true),
       supabase.from('habitos_completados').select('habito_id').eq('user_id', user.id).eq('fecha', hoy),
       supabase.from('rituales_completados').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(20),
       supabase.from('journaling_entradas').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(20),
+      supabase.from('habitos_completados').select('*').eq('user_id', user.id).not('nombre', 'is', null).order('created_at', { ascending: false }).limit(20),
     ])
 
     setPerfil({ ...p, email: user.email })
@@ -89,9 +90,9 @@ export default function YoPage() {
     // Calcular puntos totales
     const ptsRituales = (rituales?.length || 0) * 5
     const ptsJournal = (journal?.length || 0) * 10
-    const ptsHabitos = (c?.length || 0) * 3
+    const ptsHabitosTotal = (habitosHist?.length || 0) * 3
     const ptsTest = p?.perfil_test_entrada ? 20 : 0
-    const totalPts = ptsRituales + ptsJournal + ptsHabitos + ptsTest
+    const totalPts = ptsRituales + ptsJournal + ptsHabitosTotal + ptsTest
     setPuntos(totalPts)
 
     // Construir historial unificado
@@ -107,6 +108,12 @@ export default function YoPage() {
         nombre: j.plantilla_id.replace(/_/g, ' '),
         pts: 10,
         fecha: j.created_at,
+      })),
+      ...(habitosHist || []).filter(h => h.nombre).map(h => ({
+        tipo: 'habito',
+        nombre: h.nombre,
+        pts: 3,
+        fecha: h.created_at || (h.fecha + 'T12:00:00'),
       })),
     ].sort((a, b) => new Date(b.fecha) - new Date(a.fecha)).slice(0, 15)
 
@@ -252,7 +259,7 @@ export default function YoPage() {
           {actividad.length === 0 && (
             <div style={{ textAlign: 'center', padding: '32px 0', opacity: 0.4 }}>
               <p style={{ fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontSize: '16px', marginBottom: '8px' }}>Tu historia empieza aquí</p>
-              <p style={{ fontSize: '13px' }}>Completa rituales y journaling para ver tu actividad</p>
+              <p style={{ fontSize: '13px' }}>Completa hábitos, rituales y journaling para ver tu actividad</p>
             </div>
           )}
         </div>

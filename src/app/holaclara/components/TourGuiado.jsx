@@ -142,10 +142,14 @@ export default function TourGuiado({ onComplete }) {
     setPasoIdx(i => i + 1)
   }
 
-  if (!visible || pathname === '/holaclara/onboarding') return null
+  // No mostrar en onboarding ni cuando viene de un test/ritual (tiene msg param)
+  const tieneMsg = typeof window !== 'undefined' && window.location.search.includes('msg=')
+  if (!visible || pathname === '/holaclara/onboarding' || tieneMsg) return null
 
   // Solo mostrar si estamos en la ruta correcta del paso
-  if (paso.ruta && !pathname?.includes(paso.ruta.split('/').pop())) return null
+  // pathname no incluye query params, comparar con startsWith o includes del segmento
+  const rutaBase = paso.ruta?.split('/').pop() || ''
+  if (paso.ruta && rutaBase && !pathname?.includes(rutaBase)) return null
 
   const tooltipStyle = paso.posicion === 'bottom'
     ? { bottom: '160px', left: '20px', right: '20px' }

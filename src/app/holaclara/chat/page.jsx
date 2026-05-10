@@ -22,6 +22,26 @@ const PRIMER_MENSAJE = {
   default: '¿Qué te trajo aquí hoy?'
 }
 
+// Mensajes de bienvenida cuando Clara recibe contexto de un test
+const BIENVENIDA_TEST = {
+  descanso: 'Leí tu resultado. Hay algo en lo que describes que me dice más de lo que parece. Antes de ir a la pregunta — ¿cómo estás ahora mismo, mientras lees esto?',
+  autocuidado: 'Gracias por hacer el test. Lo que te dices cuando nadie escucha importa más de lo que crees. ¿Hay algo del resultado que te resonó especialmente?',
+  apego: 'Entender cómo amamos es de las cosas más valientes que podemos hacer. Vi tu resultado. ¿Qué parte te resultó más incómoda de reconocer?',
+  valores: 'Hay algo poderoso en mirar la brecha entre lo que decimos que importa y cómo realmente vivimos. ¿Qué parte del resultado te movió más?',
+  default: 'Llegaste desde el test. Eso dice algo — que algo en ti quiso saber más. ¿Qué fue lo que más te quedó resonando del resultado?'
+}
+
+function detectarTest(msg) {
+  if (!msg) return null
+  const m = msg.toLowerCase()
+  if (m.includes('test de descanso') || m.includes('tipo de descanso')) return 'descanso'
+  if (m.includes('test de cómo me hablo') || m.includes('autocuidado')) return 'autocuidado'
+  if (m.includes('test de estilo de apego') || m.includes('apego')) return 'apego'
+  if (m.includes('test de valores') || m.includes('valores')) return 'valores'
+  if (m.includes('test') || m.includes('resultado')) return 'default'
+  return null
+}
+
 export default function Chat() {
   const router = useRouter()
   const { mostrarTour, completarTour } = useTour()
@@ -32,6 +52,7 @@ export default function Chat() {
   const [cargando, setCargando] = useState(false)
   const [limitAlcanzado, setLimitAlcanzado] = useState(false)
   const [grabando, setGrabando] = useState(false)
+  const [autoEnviar, setAutoEnviar] = useState(false)
   const recognitionRef = useRef(null)
   const bottomRef = useRef(null)
 
@@ -42,6 +63,13 @@ export default function Chat() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [mensajes])
+
+  useEffect(() => {
+    if (autoEnviar && input.trim() && !cargando) {
+      setAutoEnviar(false)
+      enviarMensaje(input.trim())
+    }
+  }, [autoEnviar, input])
 
   async function inicializar() {
     const { data: { session } } = await supabase.auth.getSession()
@@ -61,19 +89,35 @@ export default function Chat() {
       if (p.mensajes_usados_mes >= limite) setLimitAlcanzado(true)
     }
 
-    const primerMsg = PRIMER_MENSAJE[p?.perfil_test_entrada] || PRIMER_MENSAJE.default
-    setMensajes([{ rol: 'clara', texto: primerMsg }])
-
-    // Leer mensaje pre-cargado desde rituales/journaling
+    // Leer mensaje pre-cargado desde rituales/journaling/tests
     const msgParam = new URLSearchParams(window.location.search).get('msg')
-    if (msgParam) {
-      setInput(decodeURIComponent(msgParam))
+    const msgDecodificado = msgParam ? decodeURIComponent(msgParam) : null
+
+    // Detectar si viene de un test
+    const tipoTest = detectarTest(msgDecodificado)
+
+    if (tipoTest) {
+      // Viene de un test: Clara abre con bienvenida contextual
+      const bienvenida = BIENVENIDA_TEST[tipoTest] || BIENVENIDA_TEST.default
+      setMensajes([{ rol: 'clara', texto: bienvenida }])
+      // Enviar el mensaje del test automáticamente después de un breve delay
+      // para que se vea como si la usuaria lo hubiera escrito
+      setTimeout(() => {
+        setInput(msgDecodificado)
+        setAutoEnviar(true)
+      }, 800)
+    } else {
+      // Flujo normal: primer mensaje basado en perfil
+      const primerMsg = PRIMER_MENSAJE[p?.perfil_test_entrada] || PRIMER_MENSAJE.default
+      setMensajes([{ rol: 'clara', texto: primerMsg }])
+      if (msgDecodificado) {
+        setInput(msgDecodificado)
+      }
     }
   }
 
-  async function enviar() {
-    if (!input.trim() || cargando || limitAlcanzado) return
-    const texto = input.trim()
+  async function enviarMensaje(texto) {
+    if (!texto || cargando || limitAlcanzado) return
     setInput('')
     setMensajes(prev => [...prev, { rol: 'usuaria', texto }])
     setCargando(true)
@@ -104,6 +148,11 @@ export default function Chat() {
       setMensajes(prev => [...prev, { rol: 'clara', texto: 'Algo salió mal. ¿Lo intentamos de nuevo?' }])
     }
     setCargando(false)
+  }
+
+  async function enviar() {
+    if (!input.trim() || cargando || limitAlcanzado) return
+    await enviarMensaje(input.trim())
   }
 
   function toggleMic() {
@@ -260,6 +309,7 @@ export default function Chat() {
         }
       `}</style>
       <TabBar />
+      {mostrarTour && <TourGuiado onComplete={completarTour} />}
     </div>
   )
 }

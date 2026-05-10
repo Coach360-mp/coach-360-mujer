@@ -3,24 +3,29 @@ import { useState, useEffect } from 'react'
 
 export function useTour() {
   const [mostrarTour, setMostrarTour] = useState(false)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    const tourCompletado = localStorage.getItem('hc_tour_completado')
-    if (!tourCompletado) {
-      // Pequeño delay para que la app cargue primero
-      setTimeout(() => setMostrarTour(true), 1500)
+    setMounted(true)
+    try {
+      const tourCompletado = localStorage.getItem('hc_tour_completado')
+      if (!tourCompletado) {
+        setTimeout(() => setMostrarTour(true), 1800)
+      }
+    } catch (e) {
+      // localStorage no disponible
     }
   }, [])
 
   const completarTour = () => {
-    localStorage.setItem('hc_tour_completado', 'true')
+    try { localStorage.setItem('hc_tour_completado', 'true') } catch (e) {}
     setMostrarTour(false)
   }
 
   const resetTour = () => {
-    localStorage.removeItem('hc_tour_completado')
+    try { localStorage.removeItem('hc_tour_completado') } catch (e) {}
     setMostrarTour(true)
   }
 
-  return { mostrarTour, completarTour, resetTour }
+  return { mostrarTour: mounted && mostrarTour, completarTour, resetTour }
 }
