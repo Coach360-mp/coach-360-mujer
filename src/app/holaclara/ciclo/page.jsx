@@ -100,7 +100,7 @@ export default function CicloPage() {
 
     const hoy = new Date().toISOString().split('T')[0]
     const { data: registro } = await supabase
-      .from('registro_ciclo').select('*').eq('usuario_id', user.id).eq('created_at::date', hoy).maybeSingle()
+      .from('registro_ciclo').select('*').eq('usuario_id', user.id).eq('fecha_inicio_periodo', hoy).maybeSingle()
 
     if (registro?.sintomas?.length) setSintomasSel(registro.sintomas)
     if (registro?.ciclo_irregular) setCicloIrregular(true)
@@ -114,14 +114,16 @@ export default function CicloPage() {
     const hoy = new Date().toISOString().split('T')[0]
 
     try {
+      const hoyFecha = new Date().toISOString().split('T')[0]
       await supabase.from('registro_ciclo').upsert({
         usuario_id: usuario.id,
+        fecha_inicio_periodo: hoyFecha,
         fase: faseSel,
         sintomas: sintomasSel,
         dia_ciclo: diaActual,
         ciclo_irregular: cicloIrregular,
         created_at: new Date().toISOString(),
-      }, { onConflict: 'usuario_id,created_at::date' })
+      }, { onConflict: 'usuario_id,fecha_inicio_periodo' })
 
       await supabase.from('perfiles').update({ fase_ciclo_actual: faseSel }).eq('id', usuario.id)
 
@@ -277,6 +279,15 @@ export default function CicloPage() {
             <button style={s.guardarBtn} onClick={guardarRegistro}>
               {guardado ? '✓ Guardado' : guardando ? 'Guardando...' : 'Guardar registro de hoy'}
             </button>
+
+            {guardado && (
+              <button onClick={() => {
+                const msg = encodeURIComponent(`Clara, estoy en ${fase.name} (día ${diaActual} de mi ciclo). Hoy me siento: ${sintomasSel.join(', ') || 'sin síntomas registrados'}. ${fase.clara}`)
+                router.push(`/holaclara/chat?msg=${msg}`)
+              }} style={{ width: '100%', padding: '13px', borderRadius: '12px', background: 'transparent', color: '#C9A96E', fontFamily: "'Inter Tight', sans-serif", fontSize: '13px', fontWeight: 700, border: '1px solid #C9A96E', cursor: 'pointer', marginBottom: '8px' }}>
+                Hablar con Clara sobre cómo estoy →
+              </button>
+            )}
 
             <div style={s.irregular}>
               <button style={s.irregularBtn} onClick={() => setCicloIrregular(!cicloIrregular)}>
