@@ -3,32 +3,39 @@ import { useRouter } from 'next/navigation'
 
 export default function PagoFallido() {
   const router = useRouter()
-
-  const s = {
-    root: { minHeight: '100vh', background: '#FAFAF7', fontFamily: "'Inter Tight', sans-serif", color: '#2A2520', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' },
-    card: { maxWidth: '360px', width: '100%', textAlign: 'center' },
-    circulo: { width: '72px', height: '72px', borderRadius: '50%', background: '#FEF0EE', border: '2px solid #E57373', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' },
-    titulo: { fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontSize: '26px', marginBottom: '8px', lineHeight: 1.2 },
-    sub: { fontSize: '14px', opacity: 0.5, marginBottom: '32px', lineHeight: 1.6 },
-    btnPrimario: { width: '100%', padding: '14px', borderRadius: '12px', background: '#2A2520', color: '#FAFAF7', fontFamily: "'Inter Tight', sans-serif", fontSize: '14px', fontWeight: 700, border: 'none', cursor: 'pointer', marginBottom: '10px' },
-    btnSecundario: { width: '100%', padding: '14px', borderRadius: '12px', background: 'transparent', color: '#2A2520', fontFamily: "'Inter Tight', sans-serif", fontSize: '14px', fontWeight: 700, border: '1px solid rgba(42,37,32,0.2)', cursor: 'pointer' },
-  }
-
   return (
     <>
-      <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@1,400&family=Inter+Tight:wght@400;700&display=swap" rel="stylesheet" />
-      <div style={s.root}>
-        <div style={s.card}>
-          <div style={s.circulo}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <line x1="5" y1="5" x2="19" y2="19" stroke="#E57373" strokeWidth="2.5" strokeLinecap="round" />
-              <line x1="19" y1="5" x2="5" y2="19" stroke="#E57373" strokeWidth="2.5" strokeLinecap="round" />
+      <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;1,400&family=Inter+Tight:wght@400;700&family=Caveat:wght@500&display=swap" rel="stylesheet" />
+      <div style={{ minHeight: '100vh', background: '#FAFAF7', fontFamily: "'Inter Tight', sans-serif", color: '#2A2520', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 24px' }}>
+        <div style={{ maxWidth: '380px', width: '100%', textAlign: 'center' }}>
+
+          <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: '#FAECE7', border: '2px solid #993C1D', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+              <line x1="6" y1="6" x2="22" y2="22" stroke="#993C1D" strokeWidth="2.5" strokeLinecap="round" />
+              <line x1="22" y1="6" x2="6" y2="22" stroke="#993C1D" strokeWidth="2.5" strokeLinecap="round" />
             </svg>
           </div>
-          <div style={s.titulo}>El pago no se completó.</div>
-          <div style={s.sub}>Puede ser un problema con tu tarjeta o con la conexión. No se realizó ningún cobro.</div>
-          <button style={s.btnPrimario} onClick={() => router.push('/holaclara/planes')}>Intentar de nuevo</button>
-          <button style={s.btnSecundario} onClick={() => router.push('/holaclara/chat')}>Volver al chat</button>
+
+          <div style={{ fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontSize: '26px', color: '#2A2520', marginBottom: '12px', lineHeight: 1.2 }}>
+            El pago no pudo procesarse.
+          </div>
+          <div style={{ fontFamily: "'Caveat', cursive", fontSize: '16px', color: '#9A8F84', marginBottom: '24px' }}>
+            no te preocupes, no se cobró nada
+          </div>
+
+          <div style={{ fontSize: '14px', color: '#6B6057', lineHeight: 1.7, marginBottom: '32px' }}>
+            Puede ser un problema temporal con tu banco o tarjeta. Puedes intentarlo de nuevo o escribirnos a{' '}
+            <a href="mailto:hola@holaclara.app" style={{ color: '#C9A96E', textDecoration: 'none' }}>hola@holaclara.app</a>.
+          </div>
+
+          <button onClick={() => router.push('/holaclara/planes')}
+            style={{ width: '100%', padding: '15px', borderRadius: '12px', background: '#2A2520', color: '#FAFAF7', fontFamily: "'Inter Tight', sans-serif", fontSize: '14px', fontWeight: 700, border: 'none', cursor: 'pointer', marginBottom: '10px' }}>
+            Intentar de nuevo
+          </button>
+          <button onClick={() => router.push('/holaclara/chat')}
+            style={{ width: '100%', padding: '13px', borderRadius: '12px', background: 'transparent', color: '#9A8F84', fontFamily: "'Inter Tight', sans-serif", fontSize: '13px', border: '0.5px solid rgba(42,37,32,0.15)', cursor: 'pointer' }}>
+            Volver al chat
+          </button>
         </div>
       </div>
     </>
