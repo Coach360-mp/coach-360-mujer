@@ -97,12 +97,8 @@ export default function YoPage() {
     setHabitos(h || [])
     setCompletadosHoy((c || []).map(x => x.habito_id))
 
-    // Calcular puntos totales
-    const ptsRituales = (rituales?.length || 0) * 5
-    const ptsJournal = (journal?.length || 0) * 10
-    const ptsHabitosTotal = (habitosHist?.length || 0) * 3
-    const ptsTest = p?.perfil_test_entrada ? 20 : 0
-    const totalPts = ptsRituales + ptsJournal + ptsHabitosTotal + ptsTest
+    // Usar puntos_totales desde perfiles (fuente de verdad)
+    const totalPts = p?.puntos_totales || 0
     setPuntos(totalPts)
 
     // Construir historial unificado
