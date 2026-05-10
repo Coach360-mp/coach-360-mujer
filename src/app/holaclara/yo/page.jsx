@@ -9,6 +9,14 @@ const supabase = createBrowserClient(
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsbGVreXJiZWhrYXlybm5uanB3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyNTg4MzAsImV4cCI6MjA5MDgzNDgzMH0.CyDyp3ztZf6Tr9QVJWFV3Qo2o0PsNiejIAp-t_Va1pE'
 )
 
+const TEST_META = {
+  'descanso': { nombre: 'Tipo de descanso', color: '#F5EFE6', acento: '#C9A96E', path: '/holaclara/tests/descanso' },
+  'tipo-de-descanso': { nombre: 'Tipo de descanso', color: '#F5EFE6', acento: '#C9A96E', path: '/holaclara/tests/descanso' },
+  'autocuidado': { nombre: 'Cómo me hablo', color: '#FAECE7', acento: '#993C1D', path: '/holaclara/tests/autocuidado' },
+  'apego': { nombre: 'Estilo de apego', color: '#EEEDFE', acento: '#534AB7', path: '/holaclara/tests/apego' },
+  'valores': { nombre: 'Mis valores reales', color: '#EAF5EE', acento: '#1D9E75', path: '/holaclara/tests/valores' },
+}
+
 const NIVELES = [
   { nivel: 1, nombre: 'Semilla', ptsMin: 0, ptsMax: 100, desc: 'Todo comienza aquí. Estás llegando.', img: '/images/nivel_semilla.png' },
   { nivel: 2, nombre: 'Brote', ptsMin: 100, ptsMax: 300, desc: 'Estás creciendo. Cada conversación cuenta.', img: '/images/nivel_brote.png' },
@@ -64,6 +72,7 @@ export default function YoPage() {
   const [completadosHoy, setCompletadosHoy] = useState([])
   const [puntos, setPuntos] = useState(0)
   const [actividad, setActividad] = useState([])
+  const [tests, setTests] = useState([])
   const [cargando, setCargando] = useState(true)
 
   useEffect(() => { inicializar() }, [])
@@ -74,13 +83,14 @@ export default function YoPage() {
 
     const hoy = new Date().toISOString().split('T')[0]
 
-    const [{ data: p }, { data: h }, { data: c }, { data: rituales }, { data: journal }, { data: habitosHist }] = await Promise.all([
+    const [{ data: p }, { data: h }, { data: c }, { data: rituales }, { data: journal }, { data: habitosHist }, { data: testsHist }] = await Promise.all([
       supabase.from('perfiles').select('*').eq('id', user.id).single(),
       supabase.from('habitos_usuario').select('*').eq('user_id', user.id).eq('activo', true),
       supabase.from('habitos_completados').select('habito_id').eq('user_id', user.id).eq('fecha', hoy),
       supabase.from('rituales_completados').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(20),
       supabase.from('journaling_entradas').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(20),
       supabase.from('habitos_completados').select('*').eq('user_id', user.id).not('nombre', 'is', null).order('created_at', { ascending: false }).limit(20),
+      supabase.from('tests_resultados_usuaria').select('test_slug, resultado_slug, completed_at').eq('user_id', user.id).order('completed_at', { ascending: false }),
     ])
 
     setPerfil({ ...p, email: user.email })
@@ -118,6 +128,7 @@ export default function YoPage() {
     ].sort((a, b) => new Date(b.fecha) - new Date(a.fecha)).slice(0, 15)
 
     setActividad(items)
+    setTests(testsHist || [])
     setCargando(false)
   }
 
@@ -261,6 +272,40 @@ export default function YoPage() {
               <p style={{ fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontSize: '16px', marginBottom: '8px' }}>Tu historia empieza aquí</p>
               <p style={{ fontSize: '13px' }}>Completa hábitos, rituales y journaling para ver tu actividad</p>
             </div>
+          )}
+
+          {/* TESTS COMPLETADOS */}
+          {tests.length > 0 && (
+            <>
+              <div style={{ fontSize: '9px', letterSpacing: '2px', textTransform: 'uppercase', color: '#9A8F84', fontWeight: 700, marginBottom: '12px', marginTop: '20px' }}>
+                Tests completados
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {tests.map((t, i) => {
+                  const meta = TEST_META[t.test_slug] || { nombre: t.test_slug, color: '#F5EFE6', acento: '#C9A96E', path: '/holaclara/tests' }
+                  const fecha = t.completed_at ? new Date(t.completed_at).toLocaleDateString('es-CL', { day: 'numeric', month: 'short' }) : ''
+                  return (
+                    <div key={i} onClick={() => router.push(meta.path)}
+                      style={{ background: '#fff', border: '0.5px solid rgba(42,37,32,0.1)', borderRadius: '14px', padding: '14px 16px', display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', borderLeft: `3px solid ${meta.acento}` }}>
+                      <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: meta.color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                          <circle cx="8" cy="8" r="5" stroke={meta.acento} strokeWidth="1.2" strokeDasharray="3 2"/>
+                          <circle cx="8" cy="8" r="2" stroke={meta.acento} strokeWidth="1.2"/>
+                        </svg>
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: '13px', fontWeight: 700, color: '#2A2520', marginBottom: '2px' }}>{meta.nombre}</div>
+                        <div style={{ fontSize: '11px', color: '#9A8F84', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.resultado_slug}</div>
+                      </div>
+                      <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                        <div style={{ fontSize: '10px', color: '#9A8F84' }}>{fecha}</div>
+                        <div style={{ fontSize: '10px', color: meta.acento, fontWeight: 700, marginTop: '2px' }}>Ver →</div>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </>
           )}
         </div>
 
