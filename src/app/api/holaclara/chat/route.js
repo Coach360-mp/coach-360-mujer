@@ -154,6 +154,16 @@ export async function POST(req) {
         mensajes_usados_mes: mensajesActuales + 1,
         fecha_reset_mensajes: hoyStr,
       }).eq('id', userId)
+
+      // Sumar puntos por conversación (solo cada 5 mensajes para no inflar)
+      if ((mensajesActuales + 1) % 5 === 0) {
+        await supabase.rpc('sumar_puntos', {
+          p_user_id: userId,
+          p_accion: 'chat',
+          p_puntos: 5,
+          p_descripcion: 'Conversación con Clara',
+        }).catch(() => {})
+      }
     }
 
     return Response.json({ respuesta, limiteAlcanzado: false })
