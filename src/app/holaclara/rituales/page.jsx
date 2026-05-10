@@ -75,7 +75,9 @@ const CIERRES = {
 const RITUALES = [
   {
     id: 'respiraciones',
-    nombre: '3 respiraciones',
+    nombre: 'Vuelve a tu cuerpo',
+    promesa: 'Para cuando todo va demasiado rápido',
+    tipo_legible: 'Respiración consciente',
     tipo: 'breathing',
     duracion: '3 min',
     categoria: 'espiritu',
@@ -85,7 +87,9 @@ const RITUALES = [
   },
   {
     id: 'checkin',
-    nombre: 'Check-in 1 minuto',
+    nombre: '¿Cómo estoy ahora mismo?',
+    promesa: 'Un minuto para notarte antes de seguir',
+    tipo_legible: 'Check-in emocional',
     tipo: 'checkin',
     duracion: '1 min',
     categoria: 'mente',
@@ -96,7 +100,9 @@ const RITUALES = [
   },
   {
     id: 'pausa_mediodia',
-    nombre: 'Pausa de mediodía',
+    nombre: 'Para antes de seguir',
+    promesa: 'Tres minutos para ti, sin hacer nada más',
+    tipo_legible: 'Pausa activa',
     tipo: 'timer',
     duracion: '3 min',
     categoria: 'cuerpo',
@@ -112,7 +118,9 @@ const RITUALES = [
   },
   {
     id: 'gratitud',
-    nombre: '3 cosas por las que estoy',
+    nombre: 'Hoy agradezco',
+    promesa: 'Lo pequeño también cuenta',
+    tipo_legible: 'Práctica de gratitud',
     tipo: 'gratitude',
     duracion: '3 min',
     categoria: 'corazon',
@@ -123,6 +131,8 @@ const RITUALES = [
   {
     id: 'soltar',
     nombre: 'Lo que quiero soltar hoy',
+    promesa: 'Escribir para no cargarlo más',
+    tipo_legible: 'Escritura libre',
     tipo: 'textprompt',
     duracion: '5 min',
     categoria: 'corazon',
@@ -133,7 +143,9 @@ const RITUALES = [
   },
   {
     id: 'grounding',
-    nombre: '5-4-3-2-1 sensorial',
+    nombre: 'Aterriza aquí',
+    promesa: 'Cuando la ansiedad sube, los sentidos bajan',
+    tipo_legible: 'Anclaje sensorial',
     tipo: 'grounding',
     duracion: '5 min',
     categoria: 'cuerpo',
@@ -149,7 +161,9 @@ const RITUALES = [
   },
   {
     id: 'manana',
-    nombre: 'Antes de comer',
+    nombre: 'Un momento antes',
+    promesa: 'Comer con presencia cambia cómo digiere todo',
+    tipo_legible: 'Pausa consciente',
     tipo: 'checkin',
     duracion: '1 min',
     categoria: 'cuerpo',
@@ -160,7 +174,9 @@ const RITUALES = [
   },
   {
     id: 'cierre',
-    nombre: 'Cierre de día rápido',
+    nombre: '¿Cómo me fue hoy?',
+    promesa: 'Cerrar el día antes de que el día te cierre a ti',
+    tipo_legible: 'Cierre de día',
     tipo: 'textprompt',
     duracion: '3 min',
     categoria: 'mente',
@@ -172,6 +188,8 @@ const RITUALES = [
   {
     id: 'termostato',
     nombre: 'Termostato emocional',
+    promesa: 'Nombrar lo que sientes es ya la mitad del trabajo',
+    tipo_legible: 'Check-in emocional',
     tipo: 'checkin',
     duracion: '1 min',
     categoria: 'corazon',
@@ -183,6 +201,8 @@ const RITUALES = [
   {
     id: 'recordar',
     nombre: 'Recordar quién soy',
+    promesa: 'Para los días en que te perdiste un poco',
+    tipo_legible: 'Reflexión profunda',
     tipo: 'textprompt',
     duracion: '3 min',
     categoria: 'espiritu',
@@ -575,8 +595,10 @@ export default function RitualesPage() {
                     <div key={ritual.id} onClick={() => { setRitualActivo(ritual); ritualRef.current = ritual }} style={{ background: '#fff', border: '0.5px solid rgba(42,37,32,0.15)', borderRadius: '16px', padding: '14px 16px', display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}>
                       <RitualIcon ritual={ritual} />
                       <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: '13px', fontWeight: 700, color: '#2A2520', marginBottom: '2px' }}>{ritual.nombre}</div>
-                        <div style={{ fontSize: '10px', color: '#6B6057' }}>{ritual.tipo.charAt(0).toUpperCase() + ritual.tipo.slice(1)} · {ritual.duracion}</div>
+                        <div style={{ fontSize: '8px', letterSpacing: '1.5px', textTransform: 'uppercase', color: ritual.iconColor, fontWeight: 700, marginBottom: '3px', opacity: 0.8 }}>{ritual.tipo_legible || ritual.tipo}</div>
+                        <div style={{ fontSize: '14px', fontWeight: 700, color: '#2A2520', marginBottom: '3px', lineHeight: 1.2 }}>{ritual.nombre}</div>
+                        <div style={{ fontSize: '11px', color: '#9A8F84', lineHeight: 1.4, marginBottom: '4px' }}>{ritual.promesa}</div>
+                        <div style={{ fontSize: '10px', color: '#C4BDB5', fontWeight: 600 }}>{ritual.duracion} · con Clara</div>
                       </div>
                       <div style={{ fontSize: '18px', color: '#9A8F84', fontWeight: 700 }}>›</div>
                     </div>
