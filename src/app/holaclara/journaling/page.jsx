@@ -12,7 +12,9 @@ const supabase = createBrowserClient(
 const PLANTILLAS = [
   {
     id: 'volcado_mental',
-    nombre: 'Volcado mental',
+    nombre: 'Saca todo lo que traes',
+    promesa: 'Sin orden, sin filtro. La cabeza necesita vaciarse.',
+    tipo_legible: 'Escritura libre',
     desc: 'Todo lo que está en tu cabeza, sin orden ni filtro.',
     duracion: '5-10 min',
     iconBg: '#F5EFE6',
@@ -20,7 +22,9 @@ const PLANTILLAS = [
   },
   {
     id: 'tres_cosas_hoy',
-    nombre: '3 cosas hoy',
+    nombre: 'El día en tres momentos',
+    promesa: 'Qué pasó, qué sentiste, qué te llevas.',
+    tipo_legible: 'Reflexión diaria',
     desc: 'Qué pasó, qué sentiste, qué aprendiste.',
     duracion: '5 min',
     iconBg: '#E1F5EE',
@@ -28,7 +32,9 @@ const PLANTILLAS = [
   },
   {
     id: 'semana_5_frases',
-    nombre: 'Mi semana en 5 frases',
+    nombre: 'Cierra la semana',
+    promesa: 'Cinco frases para soltar lo que fue y abrir lo que viene.',
+    tipo_legible: 'Cierre semanal',
     desc: 'Cierre semanal. Cinco frases para soltar la semana.',
     duracion: '5 min',
     iconBg: '#EEEDFE',
@@ -298,9 +304,10 @@ export default function JournalingPage() {
                     <div key={p.id} onClick={() => setPlantillaActiva(p)} style={{ background: '#fff', border: '0.5px solid rgba(42,37,32,0.15)', borderRadius: '16px', padding: '16px', display: 'flex', gap: '12px', alignItems: 'flex-start', cursor: 'pointer' }}>
                       <PlantillaIcon plantilla={p} />
                       <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: '14px', fontWeight: 700, color: '#2A2520', marginBottom: '3px' }}>{p.nombre}</div>
-                        <div style={{ fontSize: '12px', color: '#6B6057', lineHeight: 1.4, marginBottom: '4px' }}>{p.desc}</div>
-                        <div style={{ fontSize: '10px', color: '#C9A96E', fontWeight: 700 }}>{p.duracion} · Free</div>
+                        <div style={{ fontSize: '8px', letterSpacing: '1.5px', textTransform: 'uppercase', color: p.iconColor, fontWeight: 700, marginBottom: '3px', opacity: 0.8 }}>{p.tipo_legible}</div>
+                        <div style={{ fontSize: '14px', fontWeight: 700, color: '#2A2520', marginBottom: '3px', lineHeight: 1.2 }}>{p.nombre}</div>
+                        <div style={{ fontSize: '11px', color: '#9A8F84', lineHeight: 1.4, marginBottom: '4px' }}>{p.promesa}</div>
+                        <div style={{ fontSize: '10px', color: '#C4BDB5', fontWeight: 600 }}>{p.duracion} · con Clara</div>
                       </div>
                       <div style={{ fontSize: '18px', color: '#9A8F84', fontWeight: 700, paddingTop: '2px' }}>›</div>
                     </div>
