@@ -1,7 +1,7 @@
 'use client'
 import TabBar from '../components/TabBar'
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { createBrowserClient } from '@supabase/ssr'
 
 const supabase = createBrowserClient(
@@ -71,6 +71,8 @@ function calcularFase(fechaUltimoPeriodo) {
 
 export default function CicloPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const desdeOnboarding = searchParams?.get('desde') === 'onboarding'
   const [usuario, setUsuario] = useState(null)
   const [cargando, setCargando] = useState(true)
   const [faseSel, setFaseSel] = useState('ov')
@@ -276,11 +278,16 @@ export default function CicloPage() {
                 )}
               </div>
             )}
-            <button style={s.guardarBtn} onClick={guardarRegistro}>
-              {guardado ? '✓ Guardado' : guardando ? 'Guardando...' : 'Guardar registro de hoy'}
+            <button style={s.guardarBtn} onClick={async () => {
+              await guardarRegistro()
+              if (desdeOnboarding) {
+                setTimeout(() => router.push('/holaclara/onboarding?paso=4'), 800)
+              }
+            }}>
+              {guardado ? (desdeOnboarding ? 'Listo, volviendo...' : '✓ Guardado') : guardando ? 'Guardando...' : 'Guardar registro de hoy'}
             </button>
 
-            {guardado && (
+            {guardado && !desdeOnboarding && (
               <button onClick={() => {
                 const msg = encodeURIComponent(`Clara, estoy en ${fase.name} (día ${diaActual} de mi ciclo). Hoy me siento: ${sintomasSel.join(', ') || 'sin síntomas registrados'}. ${fase.clara}`)
                 router.push(`/holaclara/chat?msg=${msg}`)

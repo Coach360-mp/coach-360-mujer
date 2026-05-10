@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { createBrowserClient } from '@supabase/ssr'
 
 const supabase = createBrowserClient(
@@ -44,6 +44,7 @@ const HABITOS_DEFAULT = [
 
 export default function OnboardingPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [paso, setPaso] = useState(1)
   const [usuario, setUsuario] = useState(null)
   const [perfil, setPerfil] = useState(null)
@@ -52,6 +53,10 @@ export default function OnboardingPage() {
   const [cicloOpc, setCicloOpc] = useState(null)
 
   useEffect(() => {
+    // Si viene con ?paso=4 desde el ciclo, saltar directo al paso 4
+    const pasoParam = searchParams?.get('paso')
+    if (pasoParam === '4') setPaso(4)
+
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (!user) { router.push('/holaclara/auth'); return }
       setUsuario(user)
@@ -62,7 +67,7 @@ export default function OnboardingPage() {
       }
       // Si ya completó onboarding, ir al chat
       const { data: ob } = await supabase.from('onboarding_progreso').select('completado').eq('user_id', user.id).single()
-      if (ob?.completado) router.push('/holaclara/chat')
+      if (ob?.completado && !pasoParam) router.push('/holaclara/chat')
     })
   }, [])
 

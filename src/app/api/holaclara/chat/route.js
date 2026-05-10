@@ -66,7 +66,12 @@ export async function POST(req) {
 
     if (p) {
       const limite = LIMITES[p.plan_actual] || 30
-      if (p.mensajes_usados_mes >= limite) {
+      // Resetear si es nuevo mes antes de verificar límite
+      const hoyStr = new Date().toISOString().split('T')[0]
+      const mesActual = hoyStr.slice(0, 7)
+      const mesReset = (p.fecha_reset_mensajes || '').slice(0, 7)
+      const mensajesEfectivos = mesActual !== mesReset ? 0 : (p.mensajes_usados_mes || 0)
+      if (mensajesEfectivos >= limite) {
         return Response.json({ respuesta: '', limiteAlcanzado: true })
       }
     }
@@ -82,7 +87,7 @@ export async function POST(req) {
         supabase.from('rituales_completados').select('ritual_id, tipo, datos').eq('user_id', userId).eq('fecha', hoy).limit(5),
         supabase.from('journaling_entradas').select('plantilla_id, datos').eq('user_id', userId).eq('fecha', hoy).limit(3),
         supabase.from('habitos_usuario').select('nombre, dimension').eq('user_id', userId).eq('activo', true),
-        supabase.from('registro_ciclo').select('fase, sintomas').eq('usuario_id', userId).eq('fecha', hoy).maybeSingle(),
+        supabase.from('registro_ciclo').select('fase, sintomas').eq('usuario_id', userId).eq('fecha_inicio_periodo', hoy).maybeSingle(),
         supabase.from('perfiles').select('fase_ciclo_actual, perfil_test_entrada').eq('id', userId).single(),
       ])
 
@@ -139,9 +144,15 @@ export async function POST(req) {
     const respuesta = response.content[0].text
 
     if (userId && p) {
+      // Resetear contador si es un nuevo mes
+      const hoyStr = new Date().toISOString().split('T')[0]
+      const mesActual = hoyStr.slice(0, 7) // YYYY-MM
+      const mesReset = (p.fecha_reset_mensajes || '').slice(0, 7)
+      const mensajesActuales = mesActual !== mesReset ? 0 : (p.mensajes_usados_mes || 0)
+
       await supabase.from('perfiles').update({
-        mensajes_usados_mes: (p.mensajes_usados_mes || 0) + 1,
-        fecha_reset_mensajes: new Date().toISOString().split('T')[0]
+        mensajes_usados_mes: mensajesActuales + 1,
+        fecha_reset_mensajes: hoyStr,
       }).eq('id', userId)
     }
 
