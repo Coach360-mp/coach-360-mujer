@@ -136,7 +136,7 @@ export async function POST(req) {
       max_tokens: 300,
       system: SYSTEM_PROMPT + perfilCtx + actividadCtx,
       messages: [
-        ...historial.slice(-10),
+        ...historial.slice(-20),
         { role: 'user', content: mensaje }
       ]
     })

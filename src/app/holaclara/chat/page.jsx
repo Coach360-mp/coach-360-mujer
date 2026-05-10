@@ -93,21 +93,33 @@ export default function Chat() {
     const msgParam = new URLSearchParams(window.location.search).get('msg')
     const msgDecodificado = msgParam ? decodeURIComponent(msgParam) : null
 
+    // Cargar historial previo de Supabase (últimos 20 mensajes)
+    const { data: historialPrevio } = await supabase
+      .from('chat_historial')
+      .select('rol, texto, created_at')
+      .eq('user_id', session.user.id)
+      .order('created_at', { ascending: false })
+      .limit(20)
+
+    const mensajesPrevios = historialPrevio
+      ? historialPrevio.reverse().map(m => ({ rol: m.rol, texto: m.texto }))
+      : []
+
     // Detectar si viene de un test
     const tipoTest = detectarTest(msgDecodificado)
 
     if (tipoTest) {
-      // Viene de un test: Clara abre con bienvenida contextual
       const bienvenida = BIENVENIDA_TEST[tipoTest] || BIENVENIDA_TEST.default
       setMensajes([{ rol: 'clara', texto: bienvenida }])
-      // Enviar el mensaje del test automáticamente después de un breve delay
-      // para que se vea como si la usuaria lo hubiera escrito
       setTimeout(() => {
         setInput(msgDecodificado)
         setAutoEnviar(true)
       }, 800)
+    } else if (mensajesPrevios.length > 0) {
+      // Tiene historial — mostrar con mensaje de continuación
+      setMensajes(mensajesPrevios)
     } else {
-      // Flujo normal: primer mensaje basado en perfil
+      // Primera vez — primer mensaje según perfil
       const primerMsg = PRIMER_MENSAJE[p?.perfil_test_entrada] || PRIMER_MENSAJE.default
       setMensajes([{ rol: 'clara', texto: primerMsg }])
       if (msgDecodificado) {
@@ -121,6 +133,13 @@ export default function Chat() {
     setInput('')
     setMensajes(prev => [...prev, { rol: 'usuaria', texto }])
     setCargando(true)
+
+    // Guardar mensaje usuaria en historial
+    if (usuario?.id) {
+      supabase.from('chat_historial').insert({
+        user_id: usuario.id, rol: 'usuaria', texto,
+      }).then(() => {}).catch(() => {})
+    }
 
     try {
       const historial = mensajes.map(m => ({
@@ -141,6 +160,13 @@ export default function Chat() {
 
       const data = await res.json()
       setMensajes(prev => [...prev, { rol: 'clara', texto: data.respuesta }])
+
+      // Guardar respuesta de Clara en historial
+      if (usuario?.id && data.respuesta) {
+        supabase.from('chat_historial').insert({
+          user_id: usuario.id, rol: 'clara', texto: data.respuesta,
+        }).then(() => {}).catch(() => {})
+      }
 
       if (data.limiteAlcanzado) setLimitAlcanzado(true)
 
