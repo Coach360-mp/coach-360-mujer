@@ -227,7 +227,7 @@ export default function PlanesPage() {
             </div>
 
             <div style={s.garantia}>
-              <p>Garantía de <span style={{ color: '#C9A96E' }}>7 días</span> · si no es para ti, te devolvemos todo.<br />Cancela desde tu cuenta, sin llamadas.</p>
+              <p><span style={{ color: '#C9A96E' }}>7 días para saber si es para ti.</span><br />Si no cambia nada, te devolvemos todo sin preguntas.<br />Escríbenos a hola@holaclara.app</p>
             </div>
           </div>
         </div>

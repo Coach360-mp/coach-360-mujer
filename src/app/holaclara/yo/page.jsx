@@ -166,6 +166,9 @@ export default function YoPage() {
             <div style={s.goldLine} />
           </div>
           <div style={{ fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', opacity: 0.35, fontWeight: 700 }}>Yo</div>
+          <button onClick={() => router.push('/holaclara/cuenta')} style={{ padding: '8px 14px', borderRadius: '20px', border: '1px solid rgba(42,37,32,0.2)', background: 'transparent', fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit', color: '#2A2520' }}>
+            Mi cuenta
+          </button>
         </nav>
 
         <div style={s.body}>

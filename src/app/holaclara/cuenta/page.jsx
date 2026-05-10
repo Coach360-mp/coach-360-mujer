@@ -1,6 +1,6 @@
 'use client'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 import TabBar from '../components/TabBar'
 
@@ -10,37 +10,52 @@ const supabase = createBrowserClient(
 )
 
 const PLAN_NOMBRES = { free: 'Gratis', esencial: 'Esencial', profundo: 'Profundo' }
-const PLAN_MSGS = { free: 30, esencial: 400, profundo: 1000 }
+const PLAN_COLORES = { free: '#9A8F84', esencial: '#C9A96E', profundo: '#534AB7' }
+
+function formatFecha(dateStr) {
+  if (!dateStr) return null
+  return new Date(dateStr).toLocaleDateString('es-CL', { day: 'numeric', month: 'long', year: 'numeric' })
+}
 
 export default function CuentaPage() {
   const router = useRouter()
   const [perfil, setPerfil] = useState(null)
+  const [email, setEmail] = useState('')
+  const [nombre, setNombre] = useState('')
+  const [editando, setEditando] = useState(false)
+  const [guardando, setGuardando] = useState(false)
+  const [guardado, setGuardado] = useState(false)
   const [cargando, setCargando] = useState(true)
 
-  useEffect(() => {
-    supabase.auth.getUser().then(async ({ data: { user } }) => {
-      if (!user) { router.push('/holaclara/auth'); return }
-      const { data: p } = await supabase.from('perfiles').select('*').eq('id', user.id).single()
-      setPerfil({ ...p, email: user.email })
-      setCargando(false)
-    })
-  }, [])
+  useEffect(() => { inicializar() }, [])
 
-  const cerrarSesion = async () => {
-    await supabase.auth.signOut()
-    router.push('/holaclara')
+  async function inicializar() {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) { router.push('/holaclara/auth'); return }
+    setEmail(user.email)
+
+    const { data: p } = await supabase.from('perfiles').select('*').eq('id', user.id).single()
+    if (p) {
+      setPerfil(p)
+      setNombre(p.nombre || '')
+    }
+    setCargando(false)
   }
 
-  const s = {
-    root: { minHeight: '100vh', background: '#FAFAF7', fontFamily: "'Inter Tight', sans-serif", color: '#2A2520' },
-    nav: { padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '0.5px solid rgba(42,37,32,0.08)' },
-    logoText: { fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontSize: '20px', lineHeight: 1 },
-    goldLine: { height: '1px', background: '#C9A96E', margin: '2px 0' },
-    body: { padding: '24px 20px' },
-    card: { background: '#fff', border: '0.5px solid rgba(42,37,32,0.12)', borderRadius: '18px', padding: '20px', marginBottom: '12px' },
-    row: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: '0.5px solid rgba(42,37,32,0.06)', cursor: 'pointer' },
-    rowLabel: { fontSize: '14px', color: '#2A2520', fontWeight: 500 },
-    rowValue: { fontSize: '13px', color: '#9A8F84' },
+  async function guardarNombre() {
+    if (!perfil || !nombre.trim()) return
+    setGuardando(true)
+    await supabase.from('perfiles').update({ nombre: nombre.trim() }).eq('id', perfil.id)
+    setPerfil(prev => ({ ...prev, nombre: nombre.trim() }))
+    setGuardando(false)
+    setGuardado(true)
+    setEditando(false)
+    setTimeout(() => setGuardado(false), 2000)
+  }
+
+  async function cerrarSesion() {
+    await supabase.auth.signOut()
+    router.push('/holaclara')
   }
 
   if (cargando) return (
@@ -50,120 +65,123 @@ export default function CuentaPage() {
   )
 
   const planActual = perfil?.plan_actual || 'free'
-  const msgsUsados = perfil?.mensajes_usados_mes || 0
-  const msgsTotal = PLAN_MSGS[planActual]
+  const planColor = PLAN_COLORES[planActual] || '#9A8F84'
+  const planNombre = PLAN_NOMBRES[planActual] || planActual
+  const fechaFin = formatFecha(perfil?.fecha_fin_plan)
+  const fechaInicio = formatFecha(perfil?.fecha_inicio_plan)
 
   return (
     <>
       <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;1,400;1,600&family=Inter+Tight:wght@400;700&family=Caveat:wght@500&display=swap" rel="stylesheet" />
-      <div style={s.root}>
-        <nav style={s.nav}>
-          <div>
-            <div style={s.logoText}>Clara</div>
-            <div style={s.goldLine} />
-          </div>
-          <div style={{ fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', opacity: 0.35, fontWeight: 700 }}>Cuenta</div>
-        </nav>
+      <div style={{ minHeight: '100vh', background: '#FAFAF7', fontFamily: "'Inter Tight', sans-serif", color: '#2A2520' }}>
+        <div style={{ maxWidth: '420px', margin: '0 auto' }}>
 
-        <div style={s.body}>
-
-          {/* AVATAR */}
-          <div style={{ textAlign: 'center', marginBottom: '28px' }}>
-            <div style={{ width: '72px', height: '72px', borderRadius: '50%', background: '#F5EFE6', border: '2px solid #C9A96E', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px', fontSize: '28px', fontFamily: "'Fraunces', serif", fontStyle: 'italic', color: '#C9A96E' }}>
-              {perfil?.nombre ? perfil.nombre[0].toUpperCase() : '?'}
+          {/* NAV */}
+          <nav style={{ padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '0.5px solid rgba(42,37,32,0.08)' }}>
+            <div>
+              <div style={{ fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontSize: '20px', lineHeight: 1 }}>Clara</div>
+              <div style={{ height: '1px', background: '#C9A96E', margin: '2px 0' }} />
             </div>
-            <div style={{ fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontSize: '22px', color: '#2A2520', marginBottom: '2px' }}>
-              {perfil?.nombre || 'Sin nombre'}
-            </div>
-            <div style={{ fontSize: '12px', color: '#9A8F84' }}>{perfil?.email}</div>
-          </div>
+            <div style={{ fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', opacity: 0.35, fontWeight: 700 }}>Mi cuenta</div>
+            <button onClick={() => router.back()} style={{ padding: '8px 16px', borderRadius: '20px', border: '1px solid rgba(42,37,32,0.2)', background: 'transparent', fontSize: '12px', cursor: 'pointer', fontFamily: 'inherit', color: '#2A2520' }}>
+              ← volver
+            </button>
+          </nav>
 
-          {/* PLAN ACTUAL */}
-          <div style={s.card}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-              <div>
-                <div style={{ fontSize: '10px', letterSpacing: '1.5px', textTransform: 'uppercase', color: '#9A8F84', fontWeight: 700, marginBottom: '4px' }}>Tu plan</div>
-                <div style={{ fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontSize: '20px', color: '#2A2520' }}>
-                  {PLAN_NOMBRES[planActual]}
-                </div>
+          <div style={{ padding: '24px 20px 100px' }}>
+
+            {/* AVATAR + NOMBRE */}
+            <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+              <div style={{ width: '72px', height: '72px', borderRadius: '50%', background: '#F5EFE6', border: '2px solid #C9A96E', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px', fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontSize: '28px', color: '#C9A96E' }}>
+                {(nombre || email || '?')[0].toUpperCase()}
               </div>
-              {planActual === 'free' && (
-                <button onClick={() => router.push('/holaclara/planes')} style={{ padding: '8px 16px', borderRadius: '20px', background: '#2A2520', color: '#FAFAF7', fontFamily: "'Inter Tight', sans-serif", fontSize: '12px', fontWeight: 700, border: 'none', cursor: 'pointer' }}>
-                  Mejorar →
-                </button>
+              {!editando ? (
+                <div>
+                  <div style={{ fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontSize: '22px', color: '#2A2520', marginBottom: '4px' }}>
+                    {nombre || 'Sin nombre'}
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#9A8F84', marginBottom: '8px' }}>{email}</div>
+                  <button onClick={() => setEditando(true)} style={{ background: 'transparent', border: 'none', fontSize: '12px', color: '#C9A96E', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', textDecoration: 'underline' }}>
+                    Editar nombre
+                  </button>
+                </div>
+              ) : (
+                <div style={{ maxWidth: '280px', margin: '0 auto' }}>
+                  <input value={nombre} onChange={e => setNombre(e.target.value)}
+                    placeholder="Tu nombre"
+                    style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid #C9A96E', background: '#fff', fontFamily: "'Inter Tight', sans-serif", fontSize: '14px', color: '#2A2520', outline: 'none', boxSizing: 'border-box', marginBottom: '8px', textAlign: 'center' }} />
+                  <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                    <button onClick={guardarNombre} style={{ padding: '8px 20px', borderRadius: '10px', background: '#2A2520', color: '#FAFAF7', fontFamily: "'Inter Tight', sans-serif", fontSize: '12px', fontWeight: 700, border: 'none', cursor: 'pointer' }}>
+                      {guardando ? 'Guardando...' : 'Guardar'}
+                    </button>
+                    <button onClick={() => { setEditando(false); setNombre(perfil?.nombre || '') }} style={{ padding: '8px 16px', borderRadius: '10px', background: 'transparent', color: '#9A8F84', fontFamily: "'Inter Tight', sans-serif", fontSize: '12px', border: '0.5px solid rgba(42,37,32,0.15)', cursor: 'pointer' }}>
+                      Cancelar
+                    </button>
+                  </div>
+                </div>
               )}
             </div>
-            <div style={{ marginBottom: '8px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                <span style={{ fontSize: '11px', color: '#6B6057' }}>Mensajes este mes</span>
-                <span style={{ fontSize: '11px', fontWeight: 700, color: msgsUsados >= msgsTotal ? '#E57373' : '#2A2520' }}>{msgsUsados} / {msgsTotal}</span>
+
+            {/* PLAN ACTUAL */}
+            <div style={{ background: '#fff', borderRadius: '18px', padding: '20px', marginBottom: '12px', border: '0.5px solid rgba(42,37,32,0.1)', borderLeft: `3px solid ${planColor}` }}>
+              <div style={{ fontSize: '9px', letterSpacing: '2px', textTransform: 'uppercase', color: '#9A8F84', fontWeight: 700, marginBottom: '12px' }}>Tu plan</div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                <div style={{ fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontSize: '22px', color: '#2A2520' }}>{planNombre}</div>
+                <div style={{ background: planColor, color: '#fff', fontSize: '10px', fontWeight: 700, padding: '4px 12px', borderRadius: '20px', letterSpacing: '0.5px' }}>
+                  {planActual === 'free' ? 'Gratis' : 'Activo'}
+                </div>
               </div>
-              <div style={{ height: '4px', borderRadius: '2px', background: 'rgba(42,37,32,0.1)', overflow: 'hidden' }}>
-                <div style={{ height: '100%', borderRadius: '2px', background: msgsUsados >= msgsTotal ? '#E57373' : '#C9A96E', width: `${Math.min((msgsUsados / msgsTotal) * 100, 100)}%`, transition: 'width 0.3s' }} />
+
+              {planActual !== 'free' && fechaInicio && (
+                <div style={{ fontSize: '12px', color: '#9A8F84', marginBottom: '4px' }}>
+                  Activo desde: <span style={{ color: '#2A2520', fontWeight: 700 }}>{fechaInicio}</span>
+                </div>
+              )}
+              {planActual !== 'free' && fechaFin && (
+                <div style={{ fontSize: '12px', color: '#9A8F84', marginBottom: '16px' }}>
+                  Acceso hasta: <span style={{ color: '#2A2520', fontWeight: 700 }}>{fechaFin}</span>
+                </div>
+              )}
+
+              {planActual === 'free' ? (
+                <button onClick={() => router.push('/holaclara/planes')}
+                  style={{ width: '100%', padding: '12px', borderRadius: '10px', background: '#2A2520', color: '#FAFAF7', fontFamily: "'Inter Tight', sans-serif", fontSize: '13px', fontWeight: 700, border: 'none', cursor: 'pointer' }}>
+                  Ver planes →
+                </button>
+              ) : (
+                <div>
+                  <button onClick={() => router.push('/holaclara/planes')}
+                    style={{ width: '100%', padding: '12px', borderRadius: '10px', background: 'transparent', color: '#2A2520', fontFamily: "'Inter Tight', sans-serif", fontSize: '13px', fontWeight: 700, border: '1px solid rgba(42,37,32,0.2)', cursor: 'pointer', marginBottom: '8px' }}>
+                    Renovar plan
+                  </button>
+                  <div style={{ textAlign: 'center', fontSize: '11px', color: '#9A8F84', lineHeight: 1.6 }}>
+                    ¿Quieres cancelar o tienes dudas?{' '}
+                    <a href="mailto:hola@holaclara.app" style={{ color: '#C9A96E', textDecoration: 'none', fontWeight: 700 }}>
+                      Escríbenos
+                    </a>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* GARANTÍA */}
+            {planActual !== 'free' && (
+              <div style={{ background: '#F5EFE6', borderRadius: '14px', padding: '14px 16px', marginBottom: '12px', borderLeft: '3px solid #C9A96E' }}>
+                <div style={{ fontSize: '12px', color: '#2A2520', lineHeight: 1.6 }}>
+                  <span style={{ fontWeight: 700, color: '#C9A96E' }}>7 días para saber si es para ti.</span> Si no cambia nada, te devolvemos todo sin preguntas. Escríbenos a{' '}
+                  <a href="mailto:hola@holaclara.app" style={{ color: '#C9A96E', textDecoration: 'none' }}>hola@holaclara.app</a>
+                </div>
               </div>
-            </div>
-          </div>
+            )}
 
-          {/* MEMORIA VISIBLE */}
-          {perfil && (
-            <div style={{ ...s.card, marginBottom: '12px' }}>
-              <div style={{ fontSize: '10px', letterSpacing: '1.5px', textTransform: 'uppercase', color: '#9A8F84', fontWeight: 700, marginBottom: '12px' }}>Lo que Clara recuerda de ti</div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {perfil.perfil_test_entrada && (
-                  <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', padding: '10px 12px', background: '#F5EFE6', borderRadius: '10px' }}>
-                    <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#C9A96E', flexShrink: 0, marginTop: '5px' }} />
-                    <div style={{ fontSize: '13px', color: '#2A2520' }}>Tu perfil de entrada: <strong>{perfil.perfil_test_entrada.replace(/_/g, ' ')}</strong></div>
-                  </div>
-                )}
-                {perfil.fase_ciclo_actual && (
-                  <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', padding: '10px 12px', background: '#F5EFE6', borderRadius: '10px' }}>
-                    <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#C9A96E', flexShrink: 0, marginTop: '5px' }} />
-                    <div style={{ fontSize: '13px', color: '#2A2520' }}>Tu fase actual: <strong>{{mens:'Menstrual',fol:'Folicular',ov:'Ovulación',lut:'Lútea'}[perfil.fase_ciclo_actual] || perfil.fase_ciclo_actual}</strong></div>
-                  </div>
-                )}
-                {perfil.nombre && (
-                  <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', padding: '10px 12px', background: '#F5EFE6', borderRadius: '10px' }}>
-                    <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#C9A96E', flexShrink: 0, marginTop: '5px' }} />
-                    <div style={{ fontSize: '13px', color: '#2A2520' }}>Tu nombre: <strong>{perfil.nombre}</strong></div>
-                  </div>
-                )}
-                {!perfil.perfil_test_entrada && !perfil.fase_ciclo_actual && (
-                  <div style={{ fontSize: '13px', color: '#9A8F84', fontStyle: 'italic' }}>Clara todavía está conociéndote. Sigue conversando.</div>
-                )}
-              </div>
-            </div>
-          )}
+            {/* CERRAR SESIÓN */}
+            <button onClick={cerrarSesion}
+              style={{ width: '100%', padding: '13px', borderRadius: '12px', background: 'transparent', color: '#9A8F84', fontFamily: "'Inter Tight', sans-serif", fontSize: '13px', border: '0.5px solid rgba(42,37,32,0.15)', cursor: 'pointer', marginTop: '8px' }}>
+              Cerrar sesión
+            </button>
 
-          {/* OPCIONES */}
-          <div style={s.card}>
-            <div style={s.row} onClick={() => router.push('/holaclara/planes')}>
-              <span style={s.rowLabel}>Ver planes</span>
-              <span style={s.rowValue}>›</span>
-            </div>
-            <div style={s.row} onClick={() => router.push('/holaclara/habitos')}>
-              <span style={s.rowLabel}>Mis hábitos</span>
-              <span style={s.rowValue}>›</span>
-            </div>
-            <div style={s.row} onClick={() => router.push('/holaclara/ciclo')}>
-              <span style={s.rowLabel}>Mi ciclo</span>
-              <span style={s.rowValue}>›</span>
-            </div>
-            <div style={{ ...s.row, borderBottom: 'none' }} onClick={() => window.open('mailto:hola@holaclara.app')}>
-              <span style={s.rowLabel}>Contacto</span>
-              <span style={s.rowValue}>hola@holaclara.app</span>
-            </div>
-          </div>
-
-          {/* CERRAR SESIÓN */}
-          <button onClick={cerrarSesion} style={{ width: '100%', padding: '13px', borderRadius: '12px', background: 'transparent', color: '#9A8F84', fontFamily: "'Inter Tight', sans-serif", fontSize: '13px', fontWeight: 700, border: '1px solid rgba(42,37,32,0.12)', cursor: 'pointer', marginTop: '8px' }}>
-            Cerrar sesión
-          </button>
-
-          <div style={{ textAlign: 'center', marginTop: '20px', fontSize: '10px', color: '#C4BDB5' }}>
-            Hola Clara · MPR Studio SpA · v1.0
           </div>
         </div>
-
         <TabBar />
       </div>
     </>

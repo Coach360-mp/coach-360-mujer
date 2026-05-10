@@ -1,20 +1,8 @@
 {
   "crons": [
     {
-      "path": "/api/cron/rachas",
-      "schedule": "0 12 * * *"
-    },
-    {
-      "path": "/api/cron/reactivacion",
-      "schedule": "0 13 * * *"
-    },
-    {
-      "path": "/api/cron/engagement",
-      "schedule": "0 14 * * *"
-    },
-    {
-      "path": "/api/cron/notificaciones",
-      "schedule": "0 12 * * *"
+      "path": "/api/holaclara/cron-vencimientos",
+      "schedule": "0 6 * * *"
     }
   ]
 }
