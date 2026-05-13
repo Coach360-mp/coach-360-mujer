@@ -13,12 +13,12 @@ const SECCIONES = [
   {
     id: 'rituales',
     titulo: 'Rituales cortos',
-    desc: 'Micro-momentos para volver a ti. 1 a 5 minutos.',
+    desc: 'Micro-momentos para volver a ti. De 1 a 5 minutos.',
     plan: 'free',
     path: '/holaclara/rituales',
     color: '#F5EFE6',
     iconColor: '#C9A96E',
-    items: ['3 respiraciones', 'Check-in 1 minuto', '5-4-3-2-1 sensorial', '+ 7 rituales más'],
+    items: ['Vuelve a tu cuerpo', 'Aterriza aqui', 'Hoy agradezco', '+ 7 rituales mas'],
   },
   {
     id: 'journaling',
@@ -28,37 +28,50 @@ const SECCIONES = [
     path: '/holaclara/journaling',
     color: '#E1F5EE',
     iconColor: '#1D9E75',
-    items: ['Volcado mental', '3 cosas hoy', 'Mi semana en 5 frases'],
+    items: ['Saca todo lo que traes', 'El dia en tres momentos', 'Cierra la semana'],
   },
   {
     id: 'tests',
     titulo: 'Tests de autoconocimiento',
-    desc: 'Descubre patrones que llevas años repitiendo. Cada test te da claridad concreta.',
+    desc: 'Descubre patrones que llevas años repitiendo. Claridad concreta en 5 minutos.',
     plan: 'free',
     path: '/holaclara/tests',
     color: '#EEEDFE',
     iconColor: '#534AB7',
-    items: ['¿Qué tipo de descanso necesitas?', 'Tests de valores (próximo)', 'Test de estilo de apego (próximo)'],
+    items: ['Que tipo de descanso necesitas?', 'Como te hablas a ti misma?', 'Tu estilo de apego', 'Estas viviendo lo que importa?'],
+  },
+  {
+    id: 'encuentros',
+    titulo: 'Encuentros',
+    desc: 'Actividades y espacios para mujeres LATAM, online y presencial.',
+    plan: 'free',
+    path: '/holaclara/encuentros',
+    color: '#EAF5EE',
+    iconColor: '#1D9E75',
+    proximamente: true,
+    items: ['Circulos de mujeres', 'Talleres online', 'Grupos de lectura', 'Retiros y experiencias'],
   },
   {
     id: 'pausas',
     titulo: 'Pausas guiadas',
-    desc: 'Audio con la voz de Clara para momentos difíciles.',
+    desc: 'Audio con la voz de Clara para los momentos que mas lo necesitas.',
     plan: 'esencial',
-    path: '/holaclara/pausas',
+    path: null,
+    proximamente: true,
     color: '#EEEDFE',
     iconColor: '#534AB7',
-    items: ['Cuando no puedo parar de pensar', 'Antes de dormir, soltar el día', 'Pausa de mediodía', '+ 7 pausas más'],
+    items: ['Cuando no puedo parar de pensar', 'Antes de dormir, soltar el dia', 'Para la ansiedad del domingo', '+ mas pausas'],
   },
   {
     id: 'programas',
-    titulo: 'Programas multi-día',
-    desc: 'Acompañamiento profundo durante 3 a 7 días.',
+    titulo: 'Programas multi-dia',
+    desc: 'Acompañamiento profundo durante 3 a 7 dias con Clara.',
     plan: 'esencial',
-    path: '/holaclara/programas',
+    path: null,
+    proximamente: true,
     color: '#FAECE7',
     iconColor: '#993C1D',
-    items: ['3 días para soltar la culpa', '7 días para volver a ti', '5 días para reconectar con tu cuerpo'],
+    items: ['3 dias para soltar la culpa', '7 dias para volver a ti', '5 dias para reconectar con tu cuerpo'],
   },
 ]
 
@@ -107,7 +120,11 @@ export default function ConocermePage() {
           {SECCIONES.map(sec => {
             const acceso = tieneAcceso(sec.plan)
             return (
-              <div key={sec.id} onClick={() => acceso ? router.push(sec.path) : router.push('/holaclara/planes')}
+              <div key={sec.id} onClick={() => {
+                if (sec.proximamente) return
+                if (!acceso) { router.push('/holaclara/planes'); return }
+                if (sec.path) router.push(sec.path)
+              }}
                 style={{ background: '#fff', border: '0.5px solid rgba(42,37,32,0.12)', borderRadius: '18px', padding: '20px', marginBottom: '12px', cursor: 'pointer', opacity: 1, position: 'relative', overflow: 'hidden' }}>
 
                 {/* Badge plan */}
@@ -119,8 +136,8 @@ export default function ConocermePage() {
         {sec.id === 'pausas' && <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke={sec.iconColor} strokeWidth="1.5"/><path d="M8 7 L8 13 M12 7 L12 13" stroke={sec.iconColor} strokeWidth="1.5" strokeLinecap="round"/></svg>}
                     {sec.id === 'programas' && <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 10 L7 14 L17 6" stroke={sec.iconColor} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
                   </div>
-                  <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.5px', padding: '3px 10px', borderRadius: '20px', background: acceso ? '#F5EFE6' : 'rgba(42,37,32,0.06)', color: acceso ? '#C9A96E' : '#9A8F84' }}>
-                    {acceso ? PLAN_LABEL[sec.plan] : `🔒 ${PLAN_LABEL[sec.plan]}`}
+                  <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.5px', padding: '3px 10px', borderRadius: '20px', background: sec.proximamente ? 'rgba(42,37,32,0.06)' : acceso ? '#F5EFE6' : 'rgba(42,37,32,0.06)', color: sec.proximamente ? '#9A8F84' : acceso ? '#C9A96E' : '#9A8F84' }}>
+                    {sec.proximamente ? 'Proximamente' : acceso ? PLAN_LABEL[sec.plan] : `Bloqueado ${PLAN_LABEL[sec.plan]}`}
                   </div>
                 </div>
 
