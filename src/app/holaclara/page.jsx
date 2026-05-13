@@ -134,6 +134,12 @@ export default function LandingHolaClara() {
 
           <div style={{ textAlign: 'center', marginTop: '32px', marginBottom: '20px', fontSize: '11px', color: '#C4BDB5' }}>
             Hola Clara · MPR Studio SpA · Chile
+            <br />
+            <span style={{ display: 'inline-flex', gap: '12px', marginTop: '6px' }}>
+              <span onClick={() => router.push('/holaclara/terminos')} style={{ cursor: 'pointer', textDecoration: 'underline' }}>Términos</span>
+              <span onClick={() => router.push('/holaclara/privacidad')} style={{ cursor: 'pointer', textDecoration: 'underline' }}>Privacidad</span>
+              <a href="mailto:hola@holaclara.app" style={{ color: '#C4BDB5', textDecoration: 'underline' }}>Contacto</a>
+            </span>
           </div>
         </div>
       </div>
