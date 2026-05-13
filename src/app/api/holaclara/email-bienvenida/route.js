@@ -4,7 +4,7 @@ const resend = new Resend(process.env.RESEND_API_KEY)
 
 export async function POST(req) {
   try {
-    const { email, nombre, perfil } = await req.json()
+    const { email, nombre, perfil, html_override, subject_override } = await req.json()
 
     if (!email) return Response.json({ error: 'Falta email' }, { status: 400 })
 
@@ -96,8 +96,8 @@ export async function POST(req) {
     const { data, error } = await resend.emails.send({
       from: 'Clara <hola@holaclara.app>',
       to: email,
-      subject: 'Ya estás adentro, ' + nombreMostrar + '.',
-      html,
+      subject: subject_override || ('Ya estas adentro, ' + nombreMostrar + '.'),
+      html: html_override || html,
     })
 
     if (error) {
