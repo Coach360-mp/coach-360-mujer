@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
 import TabBar from '../components/TabBar'
+import PWAInstallBanner from '../components/PWAInstallBanner'
 import { useRouter } from 'next/navigation'
 import TourGuiado from '../components/TourGuiado'
 import { useTour } from '../components/useTour'
